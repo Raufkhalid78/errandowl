@@ -130,7 +130,7 @@ export default async function ServicesPage() {
                               {svc.description}
                             </p>
                             <span className="text-sm font-semibold text-owl-violet">
-                              Starting at Rs {(svc.starting_price || 0).toLocaleString()}
+                              {t('startingAt', { amount: (svc.starting_price || 0).toLocaleString() })}
                             </span>
                           </Link>
                         ))}
@@ -141,7 +141,7 @@ export default async function ServicesPage() {
                           href={`/search?category=${cat.id}`}
                           className="text-owl-violet hover:underline"
                         >
-                          Browse taskers for {cat.name} →
+                          {t('browseTaskersFor', { name: cat.name })}
                         </Link>
                       </div>
                     )}

@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock, MapPin, Star, MessageCircle } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 
 const statusColors: Record<string, string> = {
   pending: "bg-owl-amber/10 text-owl-amber border-owl-amber/20",
@@ -53,13 +55,23 @@ const mockBookings = [
   },
 ];
 
+async function updateBookingStatus(bookingId: string, status: string) {
+  "use server";
+  const supabase = await createClient();
+  await supabase.from("bookings").update({ status }).eq("id", bookingId);
+  revalidatePath("/dashboard/bookings");
+}
+
 export default async function BookingsPage() {
   const supabase = await createClient();
+  const t = await getTranslations("DashboardBookings");
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("auth_id", user.id).single();
+  // Fetch profile to get real profile.id and role
+  const { data: profile } = await supabase.from("profiles").select("id, role").eq("auth_id", user.id).single();
+  const profileId = profile?.id;
   const role = profile?.role || "client";
 
   // Fetch bookings
@@ -67,12 +79,10 @@ export default async function BookingsPage() {
   let bookings: any[] = [];
 
   if (isTasker) {
-    const { data } = await supabase.from("bookings").select("*").eq("tasker_id", user.id).order("created_at", { ascending: false });
+    const { data } = await supabase.from("bookings").select("*").eq("tasker_id", profileId).order("created_at", { ascending: false });
     bookings = data && data.length > 0 ? data : mockBookings;
   } else {
-    const { data: profileData } = await supabase.from("profiles").select("id").eq("auth_id", user.id).single();
-    const clientId = profileData?.id || user.id;
-    const { data } = await supabase.from("bookings").select("*").eq("client_id", clientId).order("created_at", { ascending: false });
+    const { data } = await supabase.from("bookings").select("*").eq("client_id", profileId).order("created_at", { ascending: false });
     bookings = data && data.length > 0 ? data : mockBookings;
   }
 
@@ -84,16 +94,18 @@ export default async function BookingsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">My Bookings</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
           <p className="text-muted-foreground">
-            {isTasker ? "Manage your accepted jobs and track earnings." : "Track your service requests and upcoming tasks."}
+            {isTasker ? t("taskerDesc") : t("clientDesc")}
           </p>
         </div>
         {!isTasker && (
           <Button
-            render={<Link href="/dashboard/services">Book New Task</Link>}
+            render={<Link href="/dashboard/services" />}
             className="bg-owl-violet hover:bg-owl-violet-dark text-white"
-          />
+          >
+            {t("bookNewTask")}
+          </Button>
         )}
       </div>
 
@@ -102,7 +114,7 @@ export default async function BookingsPage() {
         <div>
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-owl-violet animate-pulse" />
-            Active ({active.length})
+            {t("active")} ({active.length})
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {active.map((booking) => (
@@ -116,7 +128,7 @@ export default async function BookingsPage() {
       {past.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold mb-4 text-muted-foreground">
-            Past Bookings ({past.length})
+            {t("pastBookings")} ({past.length})
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {past.map((booking) => (
@@ -129,53 +141,52 @@ export default async function BookingsPage() {
       {bookings.length === 0 && (
         <div className="text-center py-16 border border-dashed rounded-2xl">
           <div className="text-4xl mb-4">📋</div>
-          <h3 className="font-medium mb-2">No bookings yet</h3>
+          <h3 className="font-medium mb-2">{t("noBookingsYet")}</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            {isTasker
-              ? "Browse open jobs to start earning."
-              : "Browse services to book your first task."}
+            {isTasker ? t("browseTaskerDesc") : t("browseClientDesc")}
           </p>
           <Button
-            render={
-              <Link href={isTasker ? "/dashboard/jobs" : "/dashboard/services"}>
-                {isTasker ? "Browse Jobs" : "Browse Services"}
-              </Link>
-            }
+            render={<Link href={isTasker ? "/dashboard/jobs" : "/dashboard/services"} />}
             className="bg-owl-violet hover:bg-owl-violet-dark text-white"
-          />
+          >
+            {isTasker ? t("browseJobs") : t("browseServices")}
+          </Button>
         </div>
       )}
     </div>
   );
 }
 
-function BookingCard({ booking, isTasker }: { booking: any; isTasker: boolean }) {
+async function BookingCard({ booking, isTasker }: { booking: any; isTasker: boolean }) {
+  const t = await getTranslations("DashboardBookings");
   const status = booking.status || "pending";
   return (
     <Card className="hover-lift transition-all">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-base">
-            {booking.service_name || "Service Task"}
+          <CardTitle className="text-base truncate pr-2">
+            {booking.service_name || t("serviceTask")}
           </CardTitle>
-          <span className={`text-xs px-2 py-1 rounded-full border capitalize ${statusColors[status] || statusColors.pending}`}>
+          <span className={`text-xs px-2 py-1 rounded-full border shrink-0 capitalize ${statusColors[status] || statusColors.pending}`}>
             {status.replace("_", " ")}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {isTasker ? `Client: ${booking.client_name || "Client"}` : `Tasker: ${booking.tasker_name || "Pending"}`}
+        <p className="text-sm text-muted-foreground truncate">
+          {isTasker 
+            ? t("client", { name: booking.client_name || "Client" }) 
+            : t("tasker", { name: booking.tasker_name || "Pending" })}
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4" />
-          {booking.date || "TBD"}
-          <Clock className="h-4 w-4 ml-2" />
-          {booking.time || "TBD"}
+          <Calendar className="h-4 w-4 shrink-0" />
+          <span className="truncate">{booking.date || "TBD"}</span>
+          <Clock className="h-4 w-4 ml-2 shrink-0" />
+          <span className="truncate">{booking.time || "TBD"}</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <MapPin className="h-4 w-4" />
-          {booking.location || "Location TBD"}
+          <MapPin className="h-4 w-4 shrink-0" />
+          <span className="truncate">{booking.location || t("locationTbd")}</span>
         </div>
         <div className="flex items-center justify-between pt-3 border-t border-border/50">
           <span className="font-semibold text-owl-violet">
@@ -189,19 +200,42 @@ function BookingCard({ booking, isTasker }: { booking: any; isTasker: boolean })
         {/* Actions */}
         <div className="flex gap-2 pt-2">
           {status === "completed" && !isTasker && (
-            <Button size="sm" variant="outline" className="flex-1 text-xs">
-              <Star className="h-3 w-3 mr-1" /> Leave Review
+            <Button size="sm" variant="outline" className="flex-1 text-xs" render={<Link href={`/tasker/${booking.tasker_id}#reviews`} />}>
+              <Star className="h-3 w-3 mr-1" /> {t("review")}
             </Button>
           )}
-          {["pending", "confirmed"].includes(status) && (
-            <Button size="sm" variant="outline" className="flex-1 text-xs">
-              <MessageCircle className="h-3 w-3 mr-1" /> Message
+          {["pending", "confirmed", "in_progress"].includes(status) && (
+            <Button size="sm" variant="outline" className="flex-1 text-xs" render={<Link href={`/dashboard/messages?booking=${booking.id}`} />}>
+              <MessageCircle className="h-3 w-3 mr-1" /> {t("message")}
             </Button>
           )}
           {status === "pending" && isTasker && (
-            <Button size="sm" className="flex-1 text-xs bg-owl-emerald hover:bg-owl-emerald/90 text-white">
-              Accept
-            </Button>
+            <form action={updateBookingStatus.bind(null, booking.id, "confirmed")} className="flex-1">
+              <Button type="submit" size="sm" className="w-full text-xs bg-owl-emerald hover:bg-owl-emerald/90 text-white">
+                {t("accept")}
+              </Button>
+            </form>
+          )}
+          {status === "pending" && isTasker && (
+            <form action={updateBookingStatus.bind(null, booking.id, "cancelled")} className="flex-none">
+              <Button type="submit" size="sm" variant="outline" className="text-xs text-destructive hover:bg-destructive/10">
+                {t("reject")}
+              </Button>
+            </form>
+          )}
+          {status === "confirmed" && isTasker && (
+            <form action={updateBookingStatus.bind(null, booking.id, "in_progress")} className="flex-1">
+              <Button type="submit" size="sm" className="w-full text-xs bg-blue-500 hover:bg-blue-600 text-white">
+                {t("startJob")}
+              </Button>
+            </form>
+          )}
+          {status === "in_progress" && isTasker && (
+            <form action={updateBookingStatus.bind(null, booking.id, "completed")} className="flex-1">
+              <Button type="submit" size="sm" className="w-full text-xs bg-owl-violet hover:bg-owl-violet-dark text-white">
+                {t("complete")}
+              </Button>
+            </form>
           )}
         </div>
       </CardContent>

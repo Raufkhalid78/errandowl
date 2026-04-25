@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, Calendar, DollarSign, TrendingUp, Activity } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
+  const t = await getTranslations("AdminDashboard");
 
   // Fetch stats
   const { count: usersCount } = await supabase.from("profiles").select("*", { count: "exact", head: true });
@@ -14,10 +16,10 @@ export default async function AdminDashboard() {
   const totalRevenue = payments?.reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0;
 
   const stats = [
-    { label: "Total Users", value: (usersCount || 0).toLocaleString(), icon: Users, color: "bg-owl-violet/10 text-owl-violet", change: "+12%" },
-    { label: "Active Taskers", value: (taskersCount || 0).toLocaleString(), icon: UserCheck, color: "bg-owl-emerald/10 text-owl-emerald", change: "+8%" },
-    { label: "Total Bookings", value: (bookingsCount || 0).toLocaleString(), icon: Calendar, color: "bg-blue-500/10 text-blue-500", change: "+23%" },
-    { label: "Total Revenue", value: `Rs ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "bg-owl-amber/10 text-owl-amber", change: "+18%" },
+    { label: t("totalUsers"), value: (usersCount || 0).toLocaleString(), icon: Users, color: "bg-owl-violet/10 text-owl-violet", change: "+12%" },
+    { label: t("activeTaskers"), value: (taskersCount || 0).toLocaleString(), icon: UserCheck, color: "bg-owl-emerald/10 text-owl-emerald", change: "+8%" },
+    { label: t("totalBookings"), value: (bookingsCount || 0).toLocaleString(), icon: Calendar, color: "bg-blue-500/10 text-blue-500", change: "+23%" },
+    { label: t("totalRevenue"), value: `Rs ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "bg-owl-amber/10 text-owl-amber", change: "+18%" },
   ];
 
   // Recent bookings
@@ -37,8 +39,8 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Platform overview and analytics.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Stats Grid */}
@@ -71,7 +73,7 @@ export default async function AdminDashboard() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Calendar className="h-4 w-4 text-owl-violet" />
-              Recent Bookings
+              {t("recentBookings")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -84,7 +86,7 @@ export default async function AdminDashboard() {
                 <div key={b.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                   <div>
                     <p className="text-sm font-medium">{b.service_name || "Service"}</p>
-                    <p className="text-xs text-muted-foreground">Client: {b.client_name || "N/A"}</p>
+                    <p className="text-xs text-muted-foreground">{t("client")} {b.client_name || "N/A"}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">Rs {(b.total_cost || 0).toLocaleString()}</p>
@@ -106,7 +108,7 @@ export default async function AdminDashboard() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="h-4 w-4 text-owl-emerald" />
-              Recent Users
+              {t("recentUsers")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -142,7 +144,7 @@ export default async function AdminDashboard() {
       <Card>
         <CardContent className="p-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Activity className="h-4 w-4 text-owl-emerald animate-pulse" />
-          Platform is running smoothly. All systems operational.
+          {t("systemStatus")}
         </CardContent>
       </Card>
     </div>

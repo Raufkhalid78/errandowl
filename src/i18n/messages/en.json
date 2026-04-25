@@ -133,8 +133,14 @@
       "cat-9": "Delivery",
       "cat-9-desc": "Groceries, packages, furniture, documents.",
       "cat-10": "Personal Assistant",
-      "cat-10-desc": "Organization, running errands, event help."
-    }
+      "cat-10-desc": "Organization, running errands, event help.",
+      "cat-11": "Home Repairs",
+      "cat-11-desc": "General handyman and repair services.",
+      "cat-12": "Heavy Lifting",
+      "cat-12-desc": "Move heavy items and rearrange furniture."
+    },
+    "browseTaskersFor": "Browse taskers for {name} →",
+    "startingAt": "Starting at Rs {amount}"
   },
   "BecomeTasker": {
     "badge": "Join Our Community",
@@ -156,7 +162,10 @@
     "req2": "Valid Pakistani CNIC",
     "req3": "Smartphone with internet access",
     "req4": "Pass a background check",
-    "req5": "Active bank account, EasyPaisa, or JazzCash"
+    "req5": "Active bank account, EasyPaisa, or JazzCash",
+    "freeToJoin": "✓ Free to join",
+    "keep85": "✓ Keep 85% earnings",
+    "noCommitments": "✓ No commitments"
   },
   "Auth": {
     "login": {
@@ -165,8 +174,10 @@
       "email": "Email",
       "emailPlaceholder": "name@example.com",
       "password": "Password",
+      "forgotPassword": "Forgot Password?",
       "submit": "Sign In",
-      "success": "Successfully logged in!"
+      "success": "Successfully logged in!",
+      "error": "Failed to log in. Please check your credentials."
     },
     "signup": {
       "title": "Create an account",
@@ -180,7 +191,8 @@
       "roleClient": "Hire a Tasker",
       "roleTasker": "Become a Tasker",
       "submit": "Create Account",
-      "success": "Check your email to verify your account"
+      "success": "Check your email to verify your account",
+      "error": "Failed to create account. Please try again."
     }
   },
   "About": {
@@ -195,7 +207,20 @@
     "hq": "ErrandOwl Pakistan Headquarters",
     "address": "Office 402, 4th Floor, Arfa Software Technology Park, Ferozepur Road, Lahore, Pakistan",
     "phone": "Phone:",
-    "email": "Email:"
+    "email": "Email:",
+    "stat_happy_customers": "Happy Customers",
+    "stat_trusted_taskers": "Trusted Taskers",
+    "stat_tasks_completed": "Tasks Completed",
+    "stat_avg_rating": "Average Rating",
+    "value_trust_title": "Trust & Safety",
+    "value_trust_desc": "Every tasker is background-checked and CNIC-verified. Your safety is our top priority.",
+    "value_speed_title": "Speed & Reliability",
+    "value_speed_desc": "Same-day availability for most services in major Pakistani cities.",
+    "value_price_title": "Fair Pricing",
+    "value_price_desc": "Transparent pricing with no hidden fees. You agree on the price before booking.",
+    "value_community_title": "Community Impact",
+    "value_community_desc": "We're empowering local workers to build sustainable careers and serve their communities.",
+    "titlePlain": "About ErrandOwl Pakistan"
   },
   "HowItWorks": {
     "title": "How <h>ErrandOwl</h> Works",
@@ -234,7 +259,11 @@
     },
     "ctaTitle": "Ready to get started?",
     "ctaDesc": "Join thousands of satisfied customers across Pakistan.",
-    "ctaButton": "Post a Task Now"
+    "ctaButton": "Post a Task Now",
+    "forClients": "For Clients",
+    "forClientsSub": "Book help in just a few steps",
+    "browseBtn": "Browse Services →",
+    "titlePlain": "How ErrandOwl Works"
   },
   "Ticker": {
     "liveActivity": "Live Activity"
@@ -248,7 +277,9 @@
     "search": "Search",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "metaDescription": "Connect with trusted professionals in Pakistan for home services. Same-day availability in Karachi, Lahore, and Islamabad.",
+    "metaKeywords": "tasker, errands, pakistan, home services, cleaning, plumbing, electrician"
   },
   "Nav": {
     "services": "Services",
@@ -349,7 +380,15 @@
       "topRated": "Top Rated",
       "mostReviews": "Most Reviews",
       "priceLow": "Price: Low → High",
-      "priceHigh": "Price: High → Low"
+      "priceHigh": "Price: High → Low",
+      "karachi": "Karachi",
+      "lahore": "Lahore",
+      "islamabad": "Islamabad",
+      "rawalpindi": "Rawalpindi",
+      "faisalabad": "Faisalabad",
+      "multan": "Multan",
+      "peshawar": "Peshawar",
+      "quetta": "Quetta"
     },
     "results": "{count} tasker found",
     "results_plural": "{count} taskers found",
@@ -357,7 +396,8 @@
     "noResultsSub": "Try adjusting your filters or search terms",
     "viewList": "List",
     "viewMap": "Map",
-    "tasksCompleted": "{count} tasks completed"
+    "tasksCompleted": "{count} tasks completed",
+    "clearFilters": "Clear Filters"
   },
   "Reviews": {
     "leaveReview": "Leave a Review",
@@ -476,11 +516,271 @@
     "subtitle": "Communicate with your taskers and clients in real-time.",
     "conversations": "Conversations",
     "noConversations": "No active conversations",
+    "bookingPrefix": "Booking",
     "selectConversation": "Select a conversation to start messaging",
-    "bookingPrefix": "Booking"
+    "chatTitle": "Booking Chat",
+    "bookingIdLabel": "Booking ID: {id}",
+    "startConversation": "Start the conversation...",
+    "placeholder": "Type your message..."
   },
   "Tasker": {
     "rate": "Rate",
     "rating": "Rating"
+  },
+  "DashboardBookings": {
+    "title": "My Bookings",
+    "taskerDesc": "Manage your accepted jobs and track earnings.",
+    "clientDesc": "Track your service requests and upcoming tasks.",
+    "bookNewTask": "Book New Task",
+    "active": "Active",
+    "pastBookings": "Past Bookings",
+    "noBookingsYet": "No bookings yet",
+    "browseTaskerDesc": "Browse open jobs to start earning.",
+    "browseClientDesc": "Browse services to book your first task.",
+    "browseJobs": "Browse Jobs",
+    "browseServices": "Browse Services",
+    "serviceTask": "Service Task",
+    "client": "Client: {name}",
+    "tasker": "Tasker: {name}",
+    "locationTbd": "Location TBD",
+    "review": "Review",
+    "message": "Message",
+    "accept": "Accept",
+    "reject": "Reject",
+    "startJob": "Start Job",
+    "complete": "Complete"
+  },
+  "DashboardOverview": {
+    "totalEarnings": "Total Earnings",
+    "lifetimeEarnings": "Lifetime earnings on platform",
+    "jobsCompleted": "Jobs Completed",
+    "totalTasksFinished": "Total tasks finished successfully",
+    "activeBookings": "Active Bookings",
+    "tasksInProgress": "Tasks currently in progress",
+    "totalSpent": "Total Spent",
+    "lifetimeSpending": "Lifetime spending on platform"
+  },
+  "DashboardServices": {
+    "title": "Services",
+    "description": "Browse categories and book a tasker for your needs."
+  },
+  "DashboardJobs": {
+    "title": "Open Jobs",
+    "description": "Browse available tasks requested by clients and submit your offers.",
+    "noJobsTitle": "No Open Jobs",
+    "noJobsDesc": "There are currently no open jobs available in your area. Check back later!",
+    "pending": "Pending",
+    "timeAndHours": "{date} at {time} • Est. {hours} hrs",
+    "requestedBy": "Requested by {name}",
+    "acceptJob": "Accept Job / Bid"
+  },
+  "DashboardSettings": {
+    "title": "Settings",
+    "description": "Manage your account preferences and profile.",
+    "tabs": {
+      "account": "Account",
+      "notifications": "Notifications",
+      "security": "Security",
+      "appearance": "Appearance",
+      "tasker": "Tasker Profile"
+    },
+    "account": {
+      "title": "Account Details",
+      "description": "Update your personal information.",
+      "fullName": "Full Name",
+      "phone": "Phone Number",
+      "location": "Location / City",
+      "bio": "Bio",
+      "save": "Save Changes"
+    },
+    "tasker": {
+      "title": "Service Settings",
+      "description": "Configure your rates, skills, and categories.",
+      "hourlyRate": "Hourly Rate (Rs)",
+      "skills": "Skills (Comma separated)",
+      "skillsPlaceholder": "e.g. Carpentry, Plumbing, Delivery",
+      "categories": "Service Categories",
+      "availability": "Availability",
+      "save": "Save Service Settings",
+      "portfolioTitle": "Portfolio Gallery",
+      "portfolioDesc": "Upload images of your past work to attract clients.",
+      "uploadTitle": "Upload Portfolio Images",
+      "uploadDesc": "JPG, PNG up to 5MB"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Manage your alerts and emails.",
+      "email": "Email notifications",
+      "emailDesc": "Receive booking updates via email",
+      "push": "Push notifications",
+      "pushDesc": "Browser push notifications",
+      "marketing": "Marketing emails",
+      "marketingDesc": "Tips, promotions, and news",
+      "update": "Update Preferences"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize the look and feel.",
+      "dark": "Dark mode",
+      "darkDesc": "Toggle between light and dark theme",
+      "toggle": "Toggle"
+    },
+    "security": {
+      "title": "Danger Zone",
+      "description": "Irreversible actions.",
+      "delete": "Delete account",
+      "deleteDesc": "Permanently delete your account and data",
+      "deleteBtn": "Delete"
+    },
+    "success": "Profile updated successfully",
+    "error": "Failed to update profile"
+  },
+  "DashboardBookPage": {
+    "bookTasker": "Book {name}",
+    "postJob": "Post a Job",
+    "bookTaskerDesc": "Fill out the details below to request this tasker directly.",
+    "postJobDesc": "Fill out the details below to post an open job for available taskers."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "unread_count": "You have {count} unread notifications",
+    "all_caught_up": "You're all caught up!",
+    "mark_all_read": "Mark all as read",
+    "no_notifications": "No Notifications Yet",
+    "no_notifications_desc": "When you receive messages, booking updates, or account alerts, they will appear here."
+  },
+  "OnboardingWizard": {
+    "title": "Complete your profile",
+    "step_desc": "Step {step} of {totalSteps}: {stepName}",
+    "step_1": "Basic Information",
+    "step_2": "Verification Documents",
+    "step_3": "Tasker Details",
+    "phone_label": "Phone Number *",
+    "phone_placeholder": "+92 300 1234567",
+    "city_label": "City *",
+    "city_placeholder": "e.g. Lahore, Karachi",
+    "bio_label": "About You (Optional)",
+    "bio_placeholder": "Tell clients a bit about yourself and your skills...",
+    "cnic_notice": "To maintain a safe community, all taskers must provide a valid CNIC for identity verification. Your documents are securely encrypted.",
+    "cnic_front_label": "CNIC Front Side *",
+    "cnic_back_label": "CNIC Back Side *",
+    "cnic_click_change": "Click to change",
+    "upload_front": "Upload Front of CNIC",
+    "upload_back": "Upload Back of CNIC",
+    "upload_format": "JPG, PNG up to 5MB",
+    "hourly_rate_label": "Hourly Rate (Rs) *",
+    "skills_label": "Skills (Comma separated) *",
+    "skills_placeholder": "e.g. Plumbing, Carpentry, Painting",
+    "categories_label": "Service Categories *",
+    "availability_label": "Availability",
+    "back_btn": "Back",
+    "complete_btn": "Complete Profile",
+    "continue_btn": "Continue",
+    "error_required": "Please fill in required fields",
+    "error_cnic": "Please upload both sides of your CNIC",
+    "error_category": "Please select at least one service category",
+    "success_msg": "Profile completed successfully!",
+    "error_msg": "An error occurred"
+  },
+  "Profile": {
+    "title": "Profile",
+    "description": "This is how others will see you on the site.",
+    "email_label": "Email",
+    "email_footer": "Your email cannot be changed here.",
+    "name_label": "Full Name",
+    "name_placeholder": "Ali Khan",
+    "phone_label": "Phone Number",
+    "phone_placeholder": "+92 300 1234567",
+    "location_label": "Location (City)",
+    "location_placeholder": "Lahore, Punjab",
+    "bio_label": "Bio",
+    "bio_placeholder": "Tell us a bit about yourself...",
+    "error_auth": "You must be logged in to update your profile.",
+    "success_msg": "Profile updated successfully!",
+    "submit_btn": "Update Profile"
+  },
+  "Checkout": {
+    "title": "Checkout",
+    "description": "Complete your payment securely with PayFast.",
+    "summary_title": "Order Summary",
+    "booking_id": "Booking ID: {id}",
+    "total_due": "Total Amount Due",
+    "pay_btn": "Pay with PayFast",
+    "error_init": "Failed to initialize payment",
+    "error_url": "No payment URL returned"
+  },
+  "UserNav": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "Help": {
+    "title": "Help <h>Center</h>",
+    "subtitle": "Find answers to your questions",
+    "forClients": "For Clients",
+    "forTaskers": "For Taskers",
+    "accountSecurity": "Account & Security",
+    "stillNeedHelp": "Still need help?",
+    "supportDesc": "Our support team is here to assist you.",
+    "emailBtn": "Email Support",
+    "callBtn": "Call: +92 300 1234 567",
+    "faqs": {
+      "clientQ1": "How do I book a task?",
+      "clientA1": "Browse services or search for taskers, select one that fits your needs, fill in the details (date, time, location, description), and submit your booking request.",
+      "clientQ2": "How much does it cost?",
+      "clientA2": "Each tasker sets their own hourly rate. A 10% service fee is added to cover platform costs and insurance. You can compare rates before booking.",
+      "clientQ3": "What if I am not satisfied?",
+      "clientA3": "We have a Happiness Pledge. Contact our support team within 48 hours and we will work to make it right, including re-doing the task or providing a refund.",
+      "clientQ4": "How do payments work?",
+      "clientA4": "Payments are processed securely via PayFast. We support JazzCash, EasyPaisa, and bank transfers. You are only charged when the task is completed.",
+      "clientQ5": "Can I cancel a booking?",
+      "clientA5": "Yes, you can cancel a booking up to 2 hours before the scheduled time at no charge. Late cancellations may incur a small fee.",
+      "taskerQ1": "How do I become a tasker?",
+      "taskerA1": "Click 'Become a Tasker', create an account, complete the CNIC verification, and set up your profile with skills and rates.",
+      "taskerQ2": "How much can I earn?",
+      "taskerA2": "You keep 85% of every task. Earnings depend on your hourly rate, number of tasks, and reviews. Top taskers earn Rs 50,000+ per month.",
+      "taskerQ3": "When do I get paid?",
+      "taskerA3": "Payments are released within 24 hours of task completion and deposited to your registered account via PayFast.",
+      "taskerQ4": "How do reviews work?",
+      "taskerA4": "Clients rate your work after completion. Higher ratings lead to more visibility and bookings.",
+      "accountQ1": "How do I reset my password?",
+      "accountA1": "Click 'Forgot Password' on the login page. Enter your email and we will send you a reset link.",
+      "accountQ2": "Is my data secure?",
+      "accountA2": "Yes. We use industry-standard encryption and follow best practices for data security. See our Privacy Policy for details.",
+      "accountQ3": "How do I delete my account?",
+      "accountA3": "Contact our support team at support@errandowl.com.pk and we will process your account deletion within 48 hours."
+    },
+    "titlePlain": "Help Center"
+  },
+  "ForgotPassword": {
+    "title": "Reset Your Password",
+    "subtitle": "Enter your email and we'll send you a reset link.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "name@example.com",
+    "submitBtn": "Send Reset Link",
+    "backToLogin": "← Back to Login"
+  },
+  "Payment": {
+    "title": "Secure Checkout",
+    "subtitle": "Complete your payment to confirm the booking.",
+    "bookingRef": "Booking Reference",
+    "serviceFee": "Service Fee",
+    "totalAmount": "Total Amount",
+    "demoNoticeTitle": "Demo Mode:",
+    "demoNoticeText": "PayFast integration is pending. Clicking pay below will simulate a successful transaction and redirect you.",
+    "payBtn": "Pay via PayFast",
+    "cancelBtn": "Cancel and Return"
+  },
+  "AdminDashboard": {
+    "title": "Admin Dashboard",
+    "subtitle": "Platform overview and analytics.",
+    "totalUsers": "Total Users",
+    "activeTaskers": "Active Taskers",
+    "totalBookings": "Total Bookings",
+    "totalRevenue": "Total Revenue",
+    "recentBookings": "Recent Bookings",
+    "recentUsers": "Recent Users",
+    "client": "Client:",
+    "systemStatus": "Platform is running smoothly. All systems operational."
   }
 }

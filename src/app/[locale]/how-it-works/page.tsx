@@ -62,9 +62,9 @@ export default function HowItWorksPage() {
         {/* For Clients */}
         <section className="py-16">
           <div className="container mx-auto px-4 md:px-6 max-w-3xl">
-            <h2 className="text-2xl font-bold mb-2 text-center">For Clients</h2>
+            <h2 className="text-2xl font-bold mb-2 text-center">{t("forClients")}</h2>
             <p className="text-muted-foreground text-center mb-10">
-              Book help in just a few steps
+              {t("forClientsSub")}
             </p>
             <div className="space-y-6">
               {clientSteps(t).map((step, i) => (
@@ -91,7 +91,7 @@ export default function HowItWorksPage() {
                 href="/services"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-owl-violet text-white font-medium hover:bg-owl-violet-dark transition-colors"
               >
-                Browse Services →
+                {t("browseBtn")}
               </Link>
             </div>
           </div>

@@ -1,17 +1,21 @@
 import { Metadata } from "next"
 import { Link } from "@/i18n/routing"
+import { getTranslations } from "next-intl/server"
+import { LoginForm } from "@/components/auth/login-form"
 
-export const metadata: Metadata = {
-  title: "Login - ErrandOwl",
-  description: "Login to your ErrandOwl account.",
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Auth.login" });
+  return {
+    title: t("title") + " - ErrandOwl",
+    description: t("subtitle"),
+  };
 }
 
-import { LoginForm } from "@/components/auth/login-form"
-import { useTranslations } from "next-intl"
-
-export default function LoginPage() {
-  const t = useTranslations("Auth.login")
-  const te = useTranslations("AuthExtra")
+export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Auth.login" });
+  const te = await getTranslations({ locale, namespace: "AuthExtra" });
 
   return (
     <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">

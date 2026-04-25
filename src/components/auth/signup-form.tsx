@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -44,8 +44,8 @@ export function SignupForm({
     })
 
     if (signUpError) {
-      setError(signUpError.message)
-      toast.error(signUpError.message)
+      setError(t("error"))
+      toast.error(t("error"))
       setIsLoading(false)
       return
     }

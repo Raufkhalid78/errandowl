@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link } from "@/i18n/routing"
+import { getTranslations } from "next-intl/server"
 
 export default async function ServicesPage() {
   const supabase = await createClient()
+  const t = await getTranslations("DashboardServices")
 
   // Fetch categories
   const { data: categoriesData } = await supabase
@@ -24,9 +26,9 @@ export default async function ServicesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Services</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
         <p className="text-muted-foreground">
-          Browse categories and book a tasker for your needs.
+          {t("description")}
         </p>
       </div>
 

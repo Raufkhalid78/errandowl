@@ -4,14 +4,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { createClient } from "@/lib/supabase/server"
+import { getTranslations } from "next-intl/server"
 
-export function TaskerOverview() {
+export async function TaskerOverview({ userId, profileId }: { userId: string, profileId: string }) {
+  const supabase = await createClient()
+  const t = await getTranslations("DashboardOverview")
+
+  // Fetch tasker profile stats
+  const { data: taskerProfile } = await supabase
+    .from("tasker_profiles")
+    .select("completed_tasks")
+    .eq("profile_id", profileId)
+    .single()
+
+  // Fetch earnings
+  const { data: bookings } = await supabase
+    .from("bookings")
+    .select("total_cost")
+    .eq("tasker_id", profileId)
+    .eq("payment_status", "paid")
+
+  const totalEarnings = bookings?.reduce((sum, b) => sum + (b.total_cost || 0), 0) || 0
+  const jobsCompleted = taskerProfile?.completed_tasks || 0
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
+      <Card className="glass">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Total Earnings
+            {t("totalEarnings")}
           </CardTitle>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -21,22 +43,22 @@ export function TaskerOverview() {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            className="h-4 w-4 text-muted-foreground"
+            className="h-4 w-4 text-owl-emerald"
           >
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">Rs. 45,231</div>
+          <div className="text-2xl font-bold text-owl-emerald">Rs {totalEarnings.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
-            +20.1% from last month
+            {t("lifetimeEarnings")}
           </p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="glass">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Jobs Completed
+            {t("jobsCompleted")}
           </CardTitle>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -46,7 +68,7 @@ export function TaskerOverview() {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            className="h-4 w-4 text-muted-foreground"
+            className="h-4 w-4 text-owl-violet"
           >
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />
@@ -54,13 +76,12 @@ export function TaskerOverview() {
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+23</div>
+          <div className="text-2xl font-bold">{jobsCompleted}</div>
           <p className="text-xs text-muted-foreground">
-            +180.1% from last month
+            {t("totalTasksFinished")}
           </p>
         </CardContent>
       </Card>
-      {/* Additional tasker metrics could go here */}
     </div>
   )
 }

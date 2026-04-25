@@ -29,25 +29,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       default: `${t('title')} — ${t('tagline')}`,
       template: `%s | ${t('title')}`,
     },
-    description:
-      "Connect with trusted, vetted professionals in Pakistan for cleaning, repairs, delivery, furniture assembly and more. Same-day availability in Karachi, Lahore, Islamabad.",
-    keywords: [
-      "tasker",
-      "errand",
-      "pakistan",
-      "home services",
-      "cleaning",
-      "plumbing",
-      "electrician",
-      "karachi",
-      "lahore",
-      "islamabad",
-    ],
+    description: t("metaDescription"),
+    keywords: t("metaKeywords").split(", "),
     metadataBase: new URL("https://errandowl.com.pk"),
     openGraph: {
       title: `${t('title')} — ${t('tagline')}`,
-      description:
-        "Your trusted marketplace for everyday tasks. Connect with skilled taskers across Pakistan.",
+      description: t("metaDescription"),
       siteName: t('title'),
       locale: locale === 'ur' ? 'ur_PK' : 'en_PK',
       type: "website",

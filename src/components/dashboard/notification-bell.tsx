@@ -10,7 +10,10 @@ interface NotificationBellProps {
   userId: string;
 }
 
+import { useTranslations } from "next-intl";
+
 export function NotificationBell({ userId }: NotificationBellProps) {
+  const t = useTranslations("Notifications");
   const [unreadCount, setUnreadCount] = useState(0);
   const supabase = createClient();
   const router = useRouter();
@@ -77,7 +80,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-owl-violet"></span>
         </span>
       )}
-      <span className="sr-only">Notifications</span>
+      <span className="sr-only">{t("title")}</span>
     </Link>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, ArrowRight, Star, Shield, Clock, MapPin } from "lucide-react";
@@ -65,6 +65,7 @@ function AnimatedCounter({
 export function HeroSection() {
   const t = useTranslations("Hero");
   const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
 
   const popularSearches = [
     { label: t("popularSearches.homeCleaning"), href: "/search?category=cat-2" },
@@ -156,7 +157,7 @@ export function HeroSection() {
                 className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/40 px-4 py-3 text-base"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && searchQuery) {
-                    window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+                    router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
                   }
                 }}
               />
@@ -164,7 +165,7 @@ export function HeroSection() {
                 className="bg-owl-violet hover:bg-owl-violet-dark text-white px-6 py-3 h-12 rounded-xl shadow-lg shadow-owl-violet/30 hover:shadow-owl-violet/50 transition-all"
                 onClick={() => {
                   if (searchQuery) {
-                    window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+                    router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
                   }
                 }}
               >

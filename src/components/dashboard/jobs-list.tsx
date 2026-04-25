@@ -5,36 +5,50 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "next-intl"
+import { motion } from "framer-motion"
 
 export function JobsList({ jobs }: { jobs: any[] }) {
+  const t = useTranslations("DashboardJobs")
+
   if (!jobs || jobs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg bg-muted/20">
-        <h3 className="text-lg font-medium">No Open Jobs</h3>
-        <p className="text-sm text-muted-foreground mt-2">
-          There are currently no open jobs available in your area. Check back later!
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-2xl bg-muted/20"
+      >
+        <div className="text-5xl mb-4 opacity-50">📋</div>
+        <h3 className="text-lg font-medium">{t("noJobsTitle")}</h3>
+        <p className="text-sm text-muted-foreground mt-2 max-w-sm">
+          {t("noJobsDesc")}
         </p>
-      </div>
+      </motion.div>
     )
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <motion.div 
+      variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
+      initial="hidden" animate="show"
+      className="grid gap-4 sm:grid-cols-2"
+    >
       {jobs.map((job) => {
         const initials = job.profiles?.name
           ? job.profiles.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()
           : "U"
 
         return (
-          <Card key={job.id} className="flex flex-col">
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }} key={job.id}>
+            <Card className="flex flex-col h-full hover-lift transition-all">
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
               <div className="flex flex-col space-y-1">
                 <CardTitle className="text-base">{job.location}</CardTitle>
                 <CardDescription className="text-xs">
-                  {job.date} at {job.time} • Est. {job.estimated_hours} hrs
+                  {t("timeAndHours", { date: job.date, time: job.time, hours: job.estimated_hours })}
                 </CardDescription>
               </div>
-              <Badge variant="secondary">Pending</Badge>
+              <Badge variant="secondary">{t("pending")}</Badge>
             </CardHeader>
             <CardContent className="flex-1">
               <p className="text-sm line-clamp-3 mt-2">{job.description}</p>
@@ -44,15 +58,18 @@ export function JobsList({ jobs }: { jobs: any[] }) {
                   <AvatarImage src={job.profiles?.avatar} alt={job.profiles?.name} />
                   <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
                 </Avatar>
-                <span className="text-xs text-muted-foreground">Requested by {job.profiles?.name || "Client"}</span>
+                <span className="text-xs text-muted-foreground">
+                  {t("requestedBy", { name: job.profiles?.name || "Client" })}
+                </span>
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">Accept Job / Bid</Button>
+              <Button className="w-full">{t("acceptJob")}</Button>
             </CardFooter>
-          </Card>
+            </Card>
+          </motion.div>
         )
       })}
-    </div>
+    </motion.div>
   )
 }

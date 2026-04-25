@@ -1,16 +1,22 @@
 import { Metadata } from "next"
 import { Link } from "@/i18n/routing"
-export const metadata: Metadata = {
-  title: "Sign Up - ErrandOwl",
-  description: "Create an account on ErrandOwl.",
+import { getTranslations } from "next-intl/server"
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Auth.signup" });
+  return {
+    title: t("title") + " - ErrandOwl",
+    description: t("subtitle"),
+  };
 }
 
 import { SignupForm } from "@/components/auth/signup-form"
-import { useTranslations } from "next-intl"
 
-export default function SignupPage() {
-  const t = useTranslations("Auth.signup")
-  const te = useTranslations("AuthExtra")
+export default async function SignupPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Auth.signup" });
+  const te = await getTranslations({ locale, namespace: "AuthExtra" });
 
   return (
     <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">

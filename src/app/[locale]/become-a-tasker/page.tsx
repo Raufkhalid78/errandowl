@@ -1,10 +1,17 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Become a Tasker", description: "Earn money on your own schedule. Join ErrandOwl Pakistan as a tasker today." };
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "BecomeTasker" });
+  return {
+    title: t("badge") + " - ErrandOwl",
+    description: "Earn money on your own schedule. Join ErrandOwl Pakistan as a tasker today.",
+  };
+}
 
 const benefits = (t: any) => [
   { icon: "🕐", title: t("benefits.b1"), desc: t("benefits.b1Desc") },
@@ -12,9 +19,10 @@ const benefits = (t: any) => [
   { icon: "📈", title: t("benefits.b3"), desc: t("benefits.b3Desc") },
 ];
 
-export default function BecomeATaskerPage() {
-  const t = useTranslations("BecomeTasker");
-  const th = useTranslations("HowItWorks");
+export default async function BecomeATaskerPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "BecomeTasker" });
+  const th = await getTranslations({ locale, namespace: "HowItWorks" });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -35,9 +43,9 @@ export default function BecomeATaskerPage() {
               {t("ctaButton")} →
             </Link>
             <div className="flex justify-center gap-8 mt-10 text-white/60 text-sm">
-              <span>✓ Free to join</span>
-              <span>✓ Keep 85% earnings</span>
-              <span>✓ No commitments</span>
+              <span>{t("freeToJoin")}</span>
+              <span>{t("keep85")}</span>
+              <span>{t("noCommitments")}</span>
             </div>
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />

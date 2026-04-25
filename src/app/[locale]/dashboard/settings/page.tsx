@@ -4,14 +4,25 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "@/i18n/routing";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell, Shield, Palette, Lock, Wallet, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Bell, Shield, Palette, Lock, Wallet, Loader2, User, Briefcase, UploadCloud, CheckCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const supabase = createClient();
   const router = useRouter();
+  const t = useTranslations("DashboardSettings");
+  
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [taskerProfile, setTaskerProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
+  const [activeTab, setActiveTab] = useState("account");
 
   useEffect(() => {
     async function fetchData() {
@@ -26,183 +37,312 @@ export default function SettingsPage() {
         .from("profiles")
         .select("*")
         .eq("auth_id", user.id)
-        .maybeSingle();
+        .single();
       
       setProfile(profile);
+
+      if (profile?.role === "tasker") {
+        const { data: tp } = await supabase
+          .from("tasker_profiles")
+          .select("*")
+          .eq("profile_id", profile.id)
+          .single();
+        
+        if (tp) setTaskerProfile({
+          ...tp,
+          skills: tp.skills ? tp.skills.join(", ") : "",
+          availability_days: tp.availability_days || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+          categories: tp.categories || [],
+        });
+      }
+      
       setLoading(false);
     }
     fetchData();
   }, [supabase, router]);
 
+  const allCategories = [
+    { id: "cat-1", name: "Furniture Assembly" },
+    { id: "cat-2", name: "Home Cleaning" },
+    { id: "cat-3", name: "Moving Help" },
+    { id: "cat-4", name: "Mounting" },
+    { id: "cat-5", name: "Plumbing" },
+    { id: "cat-6", name: "Electrical" },
+    { id: "cat-9", name: "Delivery" },
+  ];
+  const allDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const handleSaveTasker = async () => {
+    setSaving(true);
+    try {
+      const skillsArray = taskerProfile.skills.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+      
+      const { error } = await supabase.from("tasker_profiles").update({
+        hourly_rate: taskerProfile.hourly_rate,
+        skills: skillsArray,
+        categories: taskerProfile.categories,
+        availability_days: taskerProfile.availability_days
+      }).eq("profile_id", profile.id);
+
+      if (error) throw error;
+      toast.success(t("success"));
+    } catch (err: any) {
+      toast.error(err.message || t("error"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleCategory = (id: string) => {
+    setTaskerProfile((prev: any) => ({
+      ...prev,
+      categories: prev.categories.includes(id) 
+        ? prev.categories.filter((c: string) => c !== id)
+        : [...prev.categories, id]
+    }));
+  };
+
+  const toggleDay = (day: string) => {
+    setTaskerProfile((prev: any) => ({
+      ...prev,
+      availability_days: prev.availability_days.includes(day) 
+        ? prev.availability_days.filter((d: string) => d !== day)
+        : [...prev.availability_days, day]
+    }));
+  };
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-owl-violet" />
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="h-8 w-8 animate-spin text-owl-violet" /></div>;
+  }
+
+  const tabs = [
+    { id: "account", label: t("tabs.account"), icon: User },
+    { id: "notifications", label: t("tabs.notifications"), icon: Bell },
+    { id: "security", label: t("tabs.security"), icon: Shield },
+    { id: "appearance", label: t("tabs.appearance"), icon: Palette },
+  ];
+  if (profile?.role === "tasker" || profile?.role === "admin") {
+    tabs.push({ id: "tasker", label: t("tabs.tasker"), icon: Briefcase });
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-        <p className="text-muted-foreground">Manage your account preferences and security.</p>
+        <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
+        <p className="text-muted-foreground">{t("description")}</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Notifications */}
-        <Card className="hover-lift transition-all">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-owl-violet/10 flex items-center justify-center"><Bell className="h-5 w-5 text-owl-violet" /></div>
-              <div>
-                <CardTitle className="text-base">Notifications</CardTitle>
-                <CardDescription className="text-xs">Manage notification preferences</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[
-              { label: "Email notifications", desc: "Receive booking updates via email", defaultChecked: true },
-              { label: "Push notifications", desc: "Browser push notifications for new messages", defaultChecked: true },
-              { label: "Marketing emails", desc: "Receive tips, promotions, and news", defaultChecked: false },
-            ].map((item) => (
-              <label key={item.label} className="flex items-center justify-between cursor-pointer group">
-                <div>
-                  <p className="text-sm font-medium">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </div>
-                <input type="checkbox" defaultChecked={item.defaultChecked} className="w-4 h-4 accent-owl-violet" />
-              </label>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Security */}
-        <Card className="hover-lift transition-all">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-owl-emerald/10 flex items-center justify-center"><Shield className="h-5 w-5 text-owl-emerald" /></div>
-              <div>
-                <CardTitle className="text-base">Security</CardTitle>
-                <CardDescription className="text-xs">Manage password and authentication</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Change password</p>
-                <p className="text-xs text-muted-foreground">Update your account password</p>
-              </div>
-              <button className="text-sm text-owl-violet hover:underline">Change</button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Two-factor authentication</p>
-                <p className="text-xs text-muted-foreground">Add an extra layer of security</p>
-              </div>
-              <input type="checkbox" className="w-4 h-4 accent-owl-violet" />
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Active sessions</p>
-                <p className="text-xs text-muted-foreground">Manage your logged-in devices</p>
-              </div>
-              <button className="text-sm text-owl-violet hover:underline">View</button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Appearance */}
-        <Card className="hover-lift transition-all">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-owl-amber/10 flex items-center justify-center"><Palette className="h-5 w-5 text-owl-amber" /></div>
-              <div>
-                <CardTitle className="text-base">Appearance</CardTitle>
-                <CardDescription className="text-xs">Customize the look and feel</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Dark mode</p>
-                <p className="text-xs text-muted-foreground">Toggle between light and dark theme</p>
-              </div>
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar Tabs */}
+        <div className="w-full md:w-64 flex flex-col gap-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
               <button
-                className="px-3 py-1.5 text-xs rounded-lg bg-muted hover:bg-owl-violet hover:text-white transition-colors"
-                onClick={() => {
-                  // Client side toggle would go here
-                }}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  activeTab === tab.id 
+                    ? "bg-owl-violet text-white" 
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
               >
-                Toggle
+                <Icon className="h-4 w-4" />
+                {tab.label}
               </button>
-            </div>
-          </CardContent>
-        </Card>
+            );
+          })}
+        </div>
 
-        {/* Payout Settings (Taskers Only) */}
-        {profile?.role === "tasker" && (
-          <Card className="hover-lift transition-all border-owl-emerald/20">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-owl-emerald/10 flex items-center justify-center">
-                  <Wallet className="h-5 w-5 text-owl-emerald" />
+        {/* Content Area */}
+        <div className="flex-1 space-y-6">
+          {/* Account Tab */}
+          {activeTab === "account" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("account.title")}</CardTitle>
+                <CardDescription>{t("account.description")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>{t("account.fullName")}</Label>
+                  <Input defaultValue={profile?.name || ""} />
                 </div>
-                <div>
-                  <CardTitle className="text-base text-owl-emerald">Payout Information</CardTitle>
-                  <CardDescription className="text-xs">Manage where you receive your earnings</CardDescription>
+                <div className="space-y-2">
+                  <Label>{t("account.phone")}</Label>
+                  <Input defaultValue={profile?.phone || ""} />
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Payout Method</label>
-                <select className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm">
-                  <option value="bank">Bank Transfer (IBAN)</option>
-                  <option value="jazzcash">JazzCash</option>
-                  <option value="easypaisa">EasyPaisa</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Account Details</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g., PK35 IBAN... or 03001234567" 
-                  className="w-full h-10 px-3 rounded-lg border border-input bg-background text-sm"
-                  defaultValue={profile?.payout_method || ""}
-                />
-              </div>
-              <button className="w-full h-10 mt-2 bg-owl-emerald hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors">
-                Save Payout Details
-              </button>
-            </CardContent>
-          </Card>
-        )}
+                <div className="space-y-2">
+                  <Label>{t("account.location")}</Label>
+                  <Input defaultValue={profile?.location || ""} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("account.bio")}</Label>
+                  <textarea 
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    defaultValue={profile?.bio || ""}
+                  />
+                </div>
+                <Button>{t("account.save")}</Button>
+              </CardContent>
+            </Card>
+          )}
 
-        {/* Danger Zone */}
-        <Card className="hover-lift transition-all border-destructive/20">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center"><Lock className="h-5 w-5 text-destructive" /></div>
-              <div>
-                <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>
-                <CardDescription className="text-xs">Irreversible actions</CardDescription>
-              </div>
+          {/* Tasker Profile Tab */}
+          {activeTab === "tasker" && taskerProfile && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("tasker.title")}</CardTitle>
+                  <CardDescription>{t("tasker.description")}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>{t("tasker.hourlyRate")}</Label>
+                    <Input 
+                      type="number" 
+                      value={taskerProfile.hourly_rate} 
+                      onChange={e => setTaskerProfile({...taskerProfile, hourly_rate: Number(e.target.value)})}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>{t("tasker.skills")}</Label>
+                    <Input 
+                      value={taskerProfile.skills} 
+                      onChange={e => setTaskerProfile({...taskerProfile, skills: e.target.value})}
+                      placeholder={t("tasker.skillsPlaceholder")}
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>{t("tasker.categories")}</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {allCategories.map(cat => (
+                        <label key={cat.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer hover:bg-muted/50">
+                          <input
+                            type="checkbox"
+                            checked={taskerProfile.categories.includes(cat.id)}
+                            onChange={() => toggleCategory(cat.id)}
+                            className="rounded border-gray-300 text-owl-violet focus:ring-owl-violet"
+                          />
+                          <span className="text-sm">{cat.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>{t("tasker.availability")}</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {allDays.map(day => (
+                        <button
+                          key={day}
+                          onClick={() => toggleDay(day)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                            taskerProfile.availability_days.includes(day)
+                              ? "bg-owl-violet text-white"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button onClick={handleSaveTasker} disabled={saving}>
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {t("tasker.save")}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Portfolio Upload */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("tasker.portfolioTitle")}</CardTitle>
+                  <CardDescription>{t("tasker.portfolioDesc")}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="border-2 border-dashed rounded-xl p-8 text-center hover:bg-muted/50 transition-colors">
+                    <input type="file" id="portfolio" className="hidden" accept="image/*" multiple />
+                    <Label htmlFor="portfolio" className="cursor-pointer flex flex-col items-center gap-3">
+                      <UploadCloud className="h-10 w-10 text-muted-foreground" />
+                      <span className="font-medium">{t("tasker.uploadTitle")}</span>
+                      <span className="text-xs text-muted-foreground">{t("tasker.uploadDesc")}</span>
+                    </Label>
+                  </div>
+                  {/* Grid to show existing images would go here */}
+                </CardContent>
+              </Card>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Delete account</p>
-                <p className="text-xs text-muted-foreground">Permanently delete your account and data</p>
-              </div>
-              <button className="text-sm text-destructive hover:underline">Delete</button>
-            </div>
-          </CardContent>
-        </Card>
+          )}
+
+          {/* Notifications Tab */}
+          {activeTab === "notifications" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("notifications.title")}</CardTitle>
+                <CardDescription>{t("notifications.description")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  { label: t("notifications.email"), desc: t("notifications.emailDesc"), defaultChecked: profile?.notify_email ?? true },
+                  { label: t("notifications.push"), desc: t("notifications.pushDesc"), defaultChecked: profile?.notify_push ?? true },
+                  { label: t("notifications.marketing"), desc: t("notifications.marketingDesc"), defaultChecked: profile?.notify_marketing ?? false },
+                ].map((item) => (
+                  <label key={item.label} className="flex items-center justify-between cursor-pointer">
+                    <div>
+                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    </div>
+                    <input type="checkbox" defaultChecked={item.defaultChecked} className="w-4 h-4 accent-owl-violet" />
+                  </label>
+                ))}
+                <Button variant="outline" className="mt-4">{t("notifications.update")}</Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Appearance Tab */}
+          {activeTab === "appearance" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("appearance.title")}</CardTitle>
+                <CardDescription>{t("appearance.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-medium">{t("appearance.dark")}</p>
+                    <p className="text-xs text-muted-foreground">{t("appearance.darkDesc")}</p>
+                  </div>
+                  <Button variant="outline" size="sm">{t("appearance.toggle")}</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Security Tab */}
+          {activeTab === "security" && (
+            <Card className="border-destructive/20">
+              <CardHeader>
+                <CardTitle className="text-destructive">{t("security.title")}</CardTitle>
+                <CardDescription>{t("security.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">{t("security.delete")}</p>
+                    <p className="text-xs text-muted-foreground">{t("security.deleteDesc")}</p>
+                  </div>
+                  <Button variant="destructive" size="sm">{t("security.deleteBtn")}</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

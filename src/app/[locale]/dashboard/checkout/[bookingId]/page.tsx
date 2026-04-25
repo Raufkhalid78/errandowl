@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { CheckoutForm } from "@/components/checkout/checkout-form"
+import { getTranslations } from "next-intl/server"
 
 export default async function CheckoutPage({
   params,
@@ -8,6 +9,7 @@ export default async function CheckoutPage({
   params: Promise<{ bookingId: string }>
 }) {
   const supabase = await createClient()
+  const t = await getTranslations("Checkout")
 
   const {
     data: { user },
@@ -32,9 +34,9 @@ export default async function CheckoutPage({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Checkout</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
         <p className="text-muted-foreground">
-          Complete your payment securely with PayFast.
+          {t("description")}
         </p>
       </div>
 

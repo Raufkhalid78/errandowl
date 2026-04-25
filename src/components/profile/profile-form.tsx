@@ -8,12 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 
+import { useTranslations } from "next-intl"
+
 export function ProfileForm({
   initialProfile,
   userEmail,
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & { initialProfile: any; userEmail?: string }) {
+  const t = useTranslations("Profile")
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [success, setSuccess] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -36,7 +39,7 @@ export function ProfileForm({
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-        setError("You must be logged in to update your profile.")
+        setError(t("error_auth"))
         setIsLoading(false)
         return
     }
@@ -71,20 +74,20 @@ export function ProfileForm({
       <form onSubmit={onSubmit}>
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email_label")}</Label>
             <Input
               id="email"
               type="email"
               disabled={true}
               defaultValue={userEmail}
             />
-            <p className="text-[0.8rem] text-muted-foreground">Your email cannot be changed here.</p>
+            <p className="text-[0.8rem] text-muted-foreground">{t("email_footer")}</p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name">{t("name_label")}</Label>
             <Input
               id="name"
-              placeholder="Ali Khan"
+              placeholder={t("name_placeholder")}
               type="text"
               defaultValue={initialProfile?.name || ""}
               disabled={isLoading}
@@ -92,37 +95,37 @@ export function ProfileForm({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">{t("phone_label")}</Label>
             <Input
               id="phone"
-              placeholder="+92 300 1234567"
+              placeholder={t("phone_placeholder")}
               type="tel"
               defaultValue={initialProfile?.phone || ""}
               disabled={isLoading}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="location">Location (City)</Label>
+            <Label htmlFor="location">{t("location_label")}</Label>
             <Input
               id="location"
-              placeholder="Lahore, Punjab"
+              placeholder={t("location_placeholder")}
               type="text"
               defaultValue={initialProfile?.location || ""}
               disabled={isLoading}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="bio">Bio</Label>
+            <Label htmlFor="bio">{t("bio_label")}</Label>
             <textarea
               id="bio"
               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Tell us a bit about yourself..."
+              placeholder={t("bio_placeholder")}
               defaultValue={initialProfile?.bio || ""}
               disabled={isLoading}
             />
           </div>
           {error && <div className="text-sm text-red-500 font-medium">{error}</div>}
-          {success && <div className="text-sm text-green-500 font-medium">Profile updated successfully!</div>}
+          {success && <div className="text-sm text-green-500 font-medium">{t("success_msg")}</div>}
           <Button type="submit" disabled={isLoading}>
             {isLoading && (
               <svg
@@ -146,7 +149,7 @@ export function ProfileForm({
                 ></path>
               </svg>
             )}
-            Update Profile
+            {t("submit_btn")}
           </Button>
         </div>
       </form>

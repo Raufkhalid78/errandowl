@@ -22,7 +22,10 @@ interface ChatInterfaceProps {
   bookingId: string;
 }
 
+import { useTranslations } from "next-intl"
+
 export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
+  const t = useTranslations("Messages")
   const [messages, setMessages] = React.useState<Message[]>([])
   const [newMessage, setNewMessage] = React.useState("")
   const [isSending, setIsSending] = React.useState(false)
@@ -122,15 +125,17 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
   return (
     <div className="flex flex-col h-full bg-card/30 backdrop-blur-sm border rounded-2xl overflow-hidden glass shadow-xl">
       <div className="border-b p-4 bg-muted/30">
-        <h3 className="font-semibold">Booking Chat</h3>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Booking ID: {bookingId.slice(0, 8)}</p>
+        <h3 className="font-semibold">{t("chatTitle")}</h3>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          {t("bookingIdLabel", { id: bookingId.slice(0, 8) })}
+        </p>
       </div>
 
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         <div className="space-y-4">
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-12 italic text-sm">
-              Start the conversation...
+              {t("startConversation")}
             </div>
           ) : (
             messages.map((msg) => {
@@ -175,7 +180,7 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
         >
           <Input
             type="text"
-            placeholder="Type your message..."
+            placeholder={t("placeholder")}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             disabled={isSending}

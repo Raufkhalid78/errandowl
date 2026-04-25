@@ -1,46 +1,50 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "About Us",
-  description:
-    "Learn about ErrandOwl's mission to connect people with skilled taskers for everyday needs across Pakistan.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "About" });
+  return {
+    title: t("titlePlain") + " - ErrandOwl",
+    description: "Learn about ErrandOwl's mission to connect people with skilled taskers for everyday needs across Pakistan.",
+  };
+}
 
 const stats = (t: any) => [
-  { value: "10K+", label: "Happy Customers" },
-  { value: "500+", label: "Trusted Taskers" },
-  { value: "15K+", label: "Tasks Completed" },
-  { value: "4.9★", label: "Average Rating" },
+  { value: "10K+", label: t("stat_happy_customers") },
+  { value: "500+", label: t("stat_trusted_taskers") },
+  { value: "15K+", label: t("stat_tasks_completed") },
+  { value: "4.9★", label: t("stat_avg_rating") },
 ];
 
-const values = [
+const values = (t: any) => [
   {
     icon: "🤝",
-    title: "Trust & Safety",
-    desc: "Every tasker is background-checked and CNIC-verified. Your safety is our top priority.",
+    title: t("value_trust_title"),
+    desc: t("value_trust_desc"),
   },
   {
     icon: "⚡",
-    title: "Speed & Reliability",
-    desc: "Same-day availability for most services in major Pakistani cities.",
+    title: t("value_speed_title"),
+    desc: t("value_speed_desc"),
   },
   {
     icon: "💰",
-    title: "Fair Pricing",
-    desc: "Transparent pricing with no hidden fees. You agree on the price before booking.",
+    title: t("value_price_title"),
+    desc: t("value_price_desc"),
   },
   {
     icon: "🌍",
-    title: "Community Impact",
-    desc: "We're empowering local workers to build sustainable careers and serve their communities.",
+    title: t("value_community_title"),
+    desc: t("value_community_desc"),
   },
 ];
 
-export default function AboutPage() {
-  const t = useTranslations("About");
+export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "About" });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -84,7 +88,7 @@ export default function AboutPage() {
         {/* Stats */}
         <section className="py-12 bg-muted/30">
           <div className="container mx-auto px-4 md:px-6 max-w-3xl">
-            <h2 className="text-xl font-bold mb-8 text-center">📊 By the Numbers</h2>
+            <h2 className="text-xl font-bold mb-8 text-center">{t("statsTitle")}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               {stats(t).map((s) => (
                 <div key={s.label}>
@@ -99,9 +103,9 @@ export default function AboutPage() {
         {/* Values */}
         <section className="py-16">
           <div className="container mx-auto px-4 md:px-6 max-w-3xl">
-            <h2 className="text-xl font-bold mb-8 text-center">💡 Our Values</h2>
+            <h2 className="text-xl font-bold mb-8 text-center">{t("valuesTitle")}</h2>
             <div className="grid sm:grid-cols-2 gap-6">
-              {values.map((v) => (
+              {values(t).map((v) => (
                 <div
                   key={v.title}
                   className="p-6 rounded-2xl border border-border/50 hover-lift transition-all"

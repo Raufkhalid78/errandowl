@@ -20,12 +20,23 @@ import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { getPricingSettings, type PricingSettings } from "@/lib/pricing"
 
-export function BookingForm({ categoryId, userId }: { categoryId: string, userId: string }) {
+export function BookingForm({ 
+  categoryId, 
+  userId,
+  taskerId,
+  taskerRate
+}: { 
+  categoryId: string; 
+  userId: string;
+  taskerId?: string;
+  taskerRate?: number;
+}) {
   const t = useTranslations("Booking")
   const [date, setDate] = React.useState<Date>()
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string | null>(null)
   const [settings, setSettings] = React.useState<PricingSettings | null>(null)
+  const [estimatedHours, setEstimatedHours] = React.useState<number>(2)
   
   const router = useRouter()
   const supabase = createClient()
@@ -33,6 +44,9 @@ export function BookingForm({ categoryId, userId }: { categoryId: string, userId
   React.useEffect(() => {
     getPricingSettings().then(setSettings)
   }, [])
+
+  const rateToUse = taskerRate || 1000 // default fallback
+  const totalCost = rateToUse * estimatedHours
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
@@ -49,17 +63,17 @@ export function BookingForm({ categoryId, userId }: { categoryId: string, userId
       description: { value: string }
       location: { value: string }
       time: { value: string }
-      estimated_hours?: { value: string }
     }
 
     const bookingData = {
       client_id: userId,
       category_id: categoryId,
+      tasker_id: taskerId || null,
       description: target.description.value,
       location: target.location.value,
       date: format(date, "yyyy-MM-dd"),
       time: target.time.value,
-      estimated_hours: settings?.pricing_mode === 'hourly' ? parseInt(target.estimated_hours?.value || "1") : 1,
+      estimated_hours: settings?.pricing_mode === 'hourly' ? estimatedHours : 1,
       pricing_mode: settings?.pricing_mode || 'hourly',
       status: "pending",
     }
@@ -74,7 +88,7 @@ export function BookingForm({ categoryId, userId }: { categoryId: string, userId
       return
     }
 
-    router.push("/dashboard?message=Booking created successfully")
+    router.push("/dashboard/bookings?message=Booking created successfully")
     router.refresh()
   }
 
@@ -148,16 +162,40 @@ export function BookingForm({ categoryId, userId }: { categoryId: string, userId
           {settings.pricing_mode === 'hourly' && (
             <div className="grid gap-2">
               <Label htmlFor="estimated_hours">{t('estimatedHours')}</Label>
-              <Input id="estimated_hours" required type="number" min="1" max="24" defaultValue="2" className="h-10" />
+              <Input 
+                id="estimated_hours" 
+                required 
+                type="number" 
+                min="1" 
+                max="24" 
+                value={estimatedHours}
+                onChange={(e) => setEstimatedHours(parseInt(e.target.value) || 1)}
+                className="h-10" 
+              />
             </div>
           )}
+
+          {/* Cost Estimate Preview */}
+          <div className="bg-muted p-4 rounded-xl flex items-center justify-between mt-2">
+            <div>
+              <p className="text-sm font-medium">Estimated Cost</p>
+              <p className="text-xs text-muted-foreground">
+                {settings.pricing_mode === 'hourly' 
+                  ? `${estimatedHours} hours × Rs ${rateToUse}/hr` 
+                  : "Fixed price task"}
+              </p>
+            </div>
+            <div className="text-xl font-bold text-owl-violet">
+              Rs {totalCost.toLocaleString()}
+            </div>
+          </div>
 
           {error && <div className="text-sm text-red-500 font-medium">{error}</div>}
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={isLoading} className="w-full bg-owl-violet hover:bg-owl-violet-dark text-white">
+          <Button type="submit" disabled={isLoading} className="w-full bg-owl-violet hover:bg-owl-violet-dark text-white h-11">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t('submit')}
+            {taskerId ? "Confirm Direct Booking" : "Post Open Job"}
           </Button>
         </CardFooter>
       </form>

@@ -19,7 +19,10 @@ import {
 import { createClient } from "@/lib/supabase/client"
 import { Link, useRouter } from "@/i18n/routing"
 
+import { useTranslations } from "next-intl"
+
 export function UserNav({ user }: { user: { name: string, email: string, avatar?: string } }) {
+  const t = useTranslations("UserNav")
   const router = useRouter()
   const supabase = createClient()
   
@@ -60,18 +63,18 @@ export function UserNav({ user }: { user: { name: string, email: string, avatar?
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
-            Profile
+            {t("profile")}
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
-            Settings
+            {t("settings")}
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <form onSubmit={(e) => { e.preventDefault(); handleSignOut(); }}>
           <DropdownMenuItem nativeButton render={<button type="submit" className="w-full text-left" />}>
-            Log out
+            {t("logout")}
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </DropdownMenuItem>
         </form>

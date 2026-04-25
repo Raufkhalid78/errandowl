@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,15 +17,14 @@ export function OnboardingWizard({
   profile: any, 
   user: any 
 }) {
+  const t = useTranslations("OnboardingWizard")
   const [step, setStep] = React.useState(1)
   const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter()
   const supabase = createClient()
   
-  // Try to load auth translation namespace, fallback if not existing yet
-  // We'll create translations shortly
   const isTasker = profile?.role === 'tasker'
-  const totalSteps = isTasker ? 2 : 1
+  const totalSteps = isTasker ? 3 : 1
 
   const [formData, setFormData] = React.useState({
     phone: profile?.phone || "",
@@ -33,8 +32,33 @@ export function OnboardingWizard({
     bio: profile?.bio || "",
   })
 
+  // Tasker specific state
   const [cnicFrontFile, setCnicFrontFile] = React.useState<File | null>(null)
   const [cnicBackFile, setCnicBackFile] = React.useState<File | null>(null)
+  
+  const [taskerData, setTaskerData] = React.useState({
+    hourlyRate: 1000,
+    skills: "General Tasks, Delivery",
+    categories: [] as string[],
+    availabilityDays: ["Mon", "Tue", "Wed", "Thu", "Fri"] as string[]
+  })
+
+  // Available options
+  const allCategories = [
+    { id: "cat-1", name: "Furniture Assembly" },
+    { id: "cat-2", name: "Home Cleaning" },
+    { id: "cat-3", name: "Moving Help" },
+    { id: "cat-4", name: "Mounting" },
+    { id: "cat-5", name: "Plumbing" },
+    { id: "cat-6", name: "Electrical" },
+    { id: "cat-7", name: "Painting" },
+    { id: "cat-8", name: "Yard Work" },
+    { id: "cat-9", name: "Delivery" },
+    { id: "cat-10", name: "Personal Assistant" },
+    { id: "cat-11", name: "Home Repairs" },
+    { id: "cat-12", name: "Heavy Lifting" },
+  ]
+  const allDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
   const uploadDocument = async (file: File, side: 'front' | 'back') => {
     const fileExt = file.name.split('.').pop()
@@ -57,7 +81,7 @@ export function OnboardingWizard({
   const handleNext = async () => {
     if (step === 1) {
       if (!formData.phone || !formData.location) {
-        toast.error("Please fill in required fields")
+        toast.error(t("error_required"))
         return
       }
       
@@ -68,7 +92,13 @@ export function OnboardingWizard({
       }
     } else if (step === 2) {
       if (!cnicFrontFile || !cnicBackFile) {
-        toast.error("Please upload both sides of your CNIC")
+        toast.error(t("error_cnic"))
+        return
+      }
+      setStep(3)
+    } else if (step === 3) {
+      if (taskerData.categories.length === 0) {
+        toast.error(t("error_category"))
         return
       }
       await completeOnboarding()
@@ -105,76 +135,99 @@ export function OnboardingWizard({
 
       if (error) throw error
 
-      // If user is a tasker, ensure their tasker_profile exists so they appear in search
       if (isTasker && profile?.id) {
+        const skillsArray = taskerData.skills.split(',').map(s => s.trim()).filter(s => s.length > 0)
+        
         const { error: taskerError } = await supabase
           .from('tasker_profiles')
           .upsert({
             profile_id: profile.id,
             city: formData.location,
             active: true,
-            hourly_rate: 1000, // default rate
-            categories: []
+            hourly_rate: taskerData.hourlyRate,
+            skills: skillsArray,
+            categories: taskerData.categories,
+            availability_days: taskerData.availabilityDays
           }, { onConflict: 'profile_id' })
           
         if (taskerError) {
           console.error("Tasker profile creation error:", taskerError)
-          // We don't throw here to not block the user, but we log it
         }
       }
 
-      toast.success("Profile completed successfully!")
+      toast.success(t("success_msg"))
       router.push("/dashboard")
       router.refresh()
     } catch (err: any) {
-      toast.error(err.message || "An error occurred")
+      toast.error(err.message || t("error_msg"))
       setIsLoading(false)
     }
   }
 
+  const toggleCategory = (id: string) => {
+    setTaskerData(prev => ({
+      ...prev,
+      categories: prev.categories.includes(id) 
+        ? prev.categories.filter(c => c !== id)
+        : [...prev.categories, id]
+    }))
+  }
+
+  const toggleDay = (day: string) => {
+    setTaskerData(prev => ({
+      ...prev,
+      availabilityDays: prev.availabilityDays.includes(day) 
+        ? prev.availabilityDays.filter(d => d !== day)
+        : [...prev.availabilityDays, day]
+    }))
+  }
+
+  const stepName = step === 1 ? t("step_1") : step === 2 ? t("step_2") : t("step_3")
+
   return (
     <div className="max-w-xl mx-auto w-full bg-card p-6 md:p-8 rounded-2xl shadow-sm border">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold tracking-tight">Complete your profile</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("title")}</h2>
         <p className="text-muted-foreground mt-2">
-          Step {step} of {totalSteps}: {step === 1 ? "Basic Information" : "Verification Documents"}
+          {t("step_desc", { step, totalSteps, stepName })}
         </p>
         <div className="flex gap-2 mt-4">
           <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
           {isTasker && <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />}
+          {isTasker && <div className={`h-2 flex-1 rounded-full ${step >= 3 ? 'bg-primary' : 'bg-muted'}`} />}
         </div>
       </div>
 
       {step === 1 && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number *</Label>
+            <Label htmlFor="phone">{t("phone_label")}</Label>
             <Input
               id="phone"
               value={formData.phone}
               onChange={e => setFormData(s => ({ ...s, phone: e.target.value }))}
-              placeholder="+92 300 1234567"
+              placeholder={t("phone_placeholder")}
               disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">City *</Label>
+            <Label htmlFor="location">{t("city_label")}</Label>
             <Input
               id="location"
               value={formData.location}
               onChange={e => setFormData(s => ({ ...s, location: e.target.value }))}
-              placeholder="e.g. Lahore, Karachi"
+              placeholder={t("city_placeholder")}
               disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bio">About You (Optional)</Label>
+            <Label htmlFor="bio">{t("bio_label")}</Label>
             <textarea
               id="bio"
               value={formData.bio}
               onChange={e => setFormData(s => ({ ...s, bio: e.target.value }))}
               className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Tell clients a bit about yourself and your skills..."
+              placeholder={t("bio_placeholder")}
               disabled={isLoading}
             />
           </div>
@@ -184,11 +237,11 @@ export function OnboardingWizard({
       {step === 2 && isTasker && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
           <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-lg text-sm mb-6">
-            To maintain a safe community, all taskers must provide a valid CNIC for identity verification. Your documents are securely encrypted.
+            {t("cnic_notice")}
           </div>
           
           <div className="space-y-4">
-            <Label>CNIC Front Side *</Label>
+            <Label>{t("cnic_front_label")}</Label>
             <div className="border-2 border-dashed rounded-xl p-8 text-center hover:bg-muted/50 transition-colors">
               <input 
                 type="file" 
@@ -206,13 +259,13 @@ export function OnboardingWizard({
                   <>
                     <CheckCircle className="h-10 w-10 text-green-500" />
                     <span className="font-medium">{cnicFrontFile.name}</span>
-                    <span className="text-xs text-muted-foreground">Click to change</span>
+                    <span className="text-xs text-muted-foreground">{t("cnic_click_change")}</span>
                   </>
                 ) : (
                   <>
                     <UploadCloud className="h-10 w-10 text-muted-foreground" />
-                    <span className="font-medium">Upload Front of CNIC</span>
-                    <span className="text-xs text-muted-foreground">JPG, PNG up to 5MB</span>
+                    <span className="font-medium">{t("upload_front")}</span>
+                    <span className="text-xs text-muted-foreground">{t("upload_format")}</span>
                   </>
                 )}
               </Label>
@@ -220,7 +273,7 @@ export function OnboardingWizard({
           </div>
 
           <div className="space-y-4">
-            <Label>CNIC Back Side *</Label>
+            <Label>{t("cnic_back_label")}</Label>
             <div className="border-2 border-dashed rounded-xl p-8 text-center hover:bg-muted/50 transition-colors">
               <input 
                 type="file" 
@@ -238,16 +291,82 @@ export function OnboardingWizard({
                   <>
                     <CheckCircle className="h-10 w-10 text-green-500" />
                     <span className="font-medium">{cnicBackFile.name}</span>
-                    <span className="text-xs text-muted-foreground">Click to change</span>
+                    <span className="text-xs text-muted-foreground">{t("cnic_click_change")}</span>
                   </>
                 ) : (
                   <>
                     <UploadCloud className="h-10 w-10 text-muted-foreground" />
-                    <span className="font-medium">Upload Back of CNIC</span>
-                    <span className="text-xs text-muted-foreground">JPG, PNG up to 5MB</span>
+                    <span className="font-medium">{t("upload_back")}</span>
+                    <span className="text-xs text-muted-foreground">{t("upload_format")}</span>
                   </>
                 )}
               </Label>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && isTasker && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+          <div className="space-y-2">
+            <Label htmlFor="hourlyRate">{t("hourly_rate_label")}</Label>
+            <Input
+              id="hourlyRate"
+              type="number"
+              min="300"
+              value={taskerData.hourlyRate}
+              onChange={e => setTaskerData(s => ({ ...s, hourlyRate: parseInt(e.target.value) || 0 }))}
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="skills">{t("skills_label")}</Label>
+            <Input
+              id="skills"
+              value={taskerData.skills}
+              onChange={e => setTaskerData(s => ({ ...s, skills: e.target.value }))}
+              placeholder={t("skills_placeholder")}
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label>{t("categories_label")}</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {allCategories.map(cat => (
+                <label key={cat.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer hover:bg-muted/50">
+                  <input
+                    type="checkbox"
+                    checked={taskerData.categories.includes(cat.id)}
+                    onChange={() => toggleCategory(cat.id)}
+                    className="rounded border-gray-300 text-owl-violet focus:ring-owl-violet"
+                    disabled={isLoading}
+                  />
+                  <span className="text-sm">{cat.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>{t("availability_label")}</Label>
+            <div className="flex flex-wrap gap-2">
+              {allDays.map(day => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => toggleDay(day)}
+                  disabled={isLoading}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    taskerData.availabilityDays.includes(day)
+                      ? "bg-owl-violet text-white"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {day}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -257,10 +376,10 @@ export function OnboardingWizard({
         {step > 1 && (
           <Button 
             variant="outline" 
-            onClick={() => setStep(1)}
+            onClick={() => setStep(step - 1)}
             disabled={isLoading}
           >
-            Back
+            {t("back_btn")}
           </Button>
         )}
         <Button 
@@ -270,7 +389,7 @@ export function OnboardingWizard({
         >
           {isLoading ? (
              <svg className="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          ) : step === totalSteps ? "Complete Profile" : "Continue"}
+          ) : step === totalSteps ? t("complete_btn") : t("continue_btn")}
         </Button>
       </div>
     </div>

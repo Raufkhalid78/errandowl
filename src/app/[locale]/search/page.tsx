@@ -10,26 +10,10 @@ import { Search, Star, MapPin, List, Map as MapIcon, Loader2 } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { useTranslations, useLocale } from "next-intl";
 import { getPricingSettings, formatRate, type PricingSettings } from "@/lib/pricing";
+import { TaskerMap } from "@/components/search/tasker-map";
 import { motion } from "framer-motion";
 
-const categories = [
-  { id: "cat-1", name: "Furniture Assembly", icon: "🪑" },
-  { id: "cat-2", name: "Home Cleaning", icon: "🧹" },
-  { id: "cat-3", name: "Moving Help", icon: "📦" },
-  { id: "cat-4", name: "Mounting", icon: "🔧" },
-  { id: "cat-5", name: "Plumbing", icon: "🔩" },
-  { id: "cat-6", name: "Electrical", icon: "⚡" },
-  { id: "cat-7", name: "Painting", icon: "🎨" },
-  { id: "cat-8", name: "Yard Work", icon: "🌿" },
-  { id: "cat-9", name: "Delivery", icon: "🚗" },
-  { id: "cat-10", name: "Personal Assistant", icon: "📋" },
-  { id: "cat-11", name: "Home Repairs", icon: "🏠" },
-  { id: "cat-12", name: "Heavy Lifting", icon: "💪" },
-];
-
 const avatarColors = ["bg-owl-violet", "bg-owl-amber", "bg-owl-emerald", "bg-indigo-500", "bg-rose-500", "bg-cyan-500", "bg-purple-500", "bg-orange-500"];
-
-import { TaskerMap } from "@/components/search/tasker-map";
 
 function SearchContent() {
   const t = useTranslations("Search");
@@ -43,7 +27,9 @@ function SearchContent() {
   const [verifiedFilter, setVerifiedFilter] = useState(false);
   const [sortBy, setSortBy] = useState("rating");
   const [view, setView] = useState<"list" | "map">("list");
+  
   const [taskers, setTaskers] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<PricingSettings | null>(null);
   const supabase = createClient();
@@ -51,26 +37,32 @@ function SearchContent() {
   useEffect(() => {
     getPricingSettings().then(setSettings);
     
-    const fetchTaskers = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      // In production, we'd join with profiles to get name/verified status
-      // For now, fetching from taskers table (or profiles if unified)
-      const { data } = await supabase.from("tasker_profiles").select("*, profiles(*)").eq("active", true);
-      if (data) {
-        setTaskers(data.map(t => ({
+      
+      const [taskersRes, categoriesRes] = await Promise.all([
+        supabase.from("tasker_profiles").select("*, profiles(*)").eq("active", true),
+        supabase.from("categories").select("*").eq("active", true).order("sort_order")
+      ]);
+
+      if (categoriesRes.data) {
+        setCategories(categoriesRes.data);
+      }
+
+      if (taskersRes.data) {
+        setTaskers(taskersRes.data.map(t => ({
             ...t,
             name: t.profiles?.name,
-            verified: t.profiles?.is_verified,
-            location: t.city || t.profiles?.city,
+            verified: t.profiles?.is_verified || t.profiles?.cnic_status === 'approved',
+            location: t.city || t.profiles?.city || t.profiles?.location,
             bio: t.profiles?.bio
         })));
       }
       setLoading(false);
     };
-    fetchTaskers();
+    fetchData();
   }, []);
 
-  // Filter and sort
   const filtered = taskers
     .filter((t) => {
       if (query) {
@@ -103,7 +95,6 @@ function SearchContent() {
 
   return (
     <>
-      {/* Search Hero */}
       <section className="relative py-16 gradient-hero overflow-hidden">
         <div className="hero-orb hero-orb-1 opacity-20" />
         <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
@@ -131,25 +122,23 @@ function SearchContent() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* Filters & Results */}
       <section className="py-10">
         <div className="container mx-auto px-4 md:px-6">
-          {/* Filters */}
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8">
             <select
               value={cityFilter}
               onChange={(e) => setCityFilter(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-border text-sm bg-card focus:border-owl-violet focus:outline-none"
             >
-              <option value="">{t('filters.allCities') || "All Cities"}</option>
-              <option value="Karachi">Karachi</option>
-              <option value="Lahore">Lahore</option>
-              <option value="Islamabad">Islamabad</option>
-              <option value="Rawalpindi">Rawalpindi</option>
-              <option value="Faisalabad">Faisalabad</option>
-              <option value="Multan">Multan</option>
-              <option value="Peshawar">Peshawar</option>
-              <option value="Quetta">Quetta</option>
+              <option value="">{t('filters.allCities')}</option>
+              <option value="Karachi">{t('filters.karachi')}</option>
+              <option value="Lahore">{t('filters.lahore')}</option>
+              <option value="Islamabad">{t('filters.islamabad')}</option>
+              <option value="Rawalpindi">{t('filters.rawalpindi')}</option>
+              <option value="Faisalabad">{t('filters.faisalabad')}</option>
+              <option value="Multan">{t('filters.multan')}</option>
+              <option value="Peshawar">{t('filters.peshawar')}</option>
+              <option value="Quetta">{t('filters.quetta')}</option>
             </select>
             <label className="flex items-center space-x-2 px-3 py-2.5 rounded-xl border border-border text-sm bg-card cursor-pointer">
               <input
@@ -158,7 +147,7 @@ function SearchContent() {
                 onChange={(e) => setVerifiedFilter(e.target.checked)}
                 className="rounded border-gray-300 text-owl-violet focus:ring-owl-violet"
               />
-              <span>{t('filters.verifiedOnly') || "Verified Only"}</span>
+              <span>{t('filters.verifiedOnly')}</span>
             </label>
 
             <select
@@ -169,7 +158,7 @@ function SearchContent() {
               <option value="">{t('filters.allCategories')}</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.icon} {c.name}
+                  {c.icon} {locale === 'ur' ? c.name_ur : c.name_en}
                 </option>
               ))}
             </select>
@@ -233,32 +222,65 @@ function SearchContent() {
             </div>
           </div>
 
-          {/* Results */}
           {loading ? (
-             <div className="flex justify-center py-20"><Loader2 className="animate-spin h-10 w-10 text-owl-violet" /></div>
+             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+               {[1, 2, 3, 4, 5, 6].map((i) => (
+                 <div key={i} className="p-6 rounded-2xl border border-border/50 bg-card animate-pulse">
+                   <div className="flex items-start gap-4 mb-4">
+                     <div className="w-14 h-14 rounded-2xl bg-muted" />
+                     <div className="flex-1 space-y-2 py-1">
+                       <div className="h-4 bg-muted rounded w-3/4" />
+                       <div className="h-3 bg-muted rounded w-1/2" />
+                     </div>
+                   </div>
+                   <div className="space-y-2 mb-4">
+                     <div className="h-3 bg-muted rounded w-full" />
+                     <div className="h-3 bg-muted rounded w-5/6" />
+                   </div>
+                   <div className="flex justify-between">
+                     <div className="h-4 bg-muted rounded w-16" />
+                     <div className="h-4 bg-muted rounded w-16" />
+                   </div>
+                 </div>
+               ))}
+             </div>
           ) : view === "map" ? (
             <TaskerMap taskers={filtered} />
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 border border-dashed rounded-2xl bg-muted/20">
-              <div className="text-4xl mb-4">🔍</div>
-              <h3 className="font-medium mb-2">{t('noResults')}</h3>
-              <p className="text-sm text-muted-foreground">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              className="text-center py-16 border border-dashed border-border/50 rounded-2xl bg-muted/20 flex flex-col items-center justify-center min-h-[300px]"
+            >
+              <div className="text-6xl mb-4 opacity-50">🦉</div>
+              <h3 className="font-semibold text-lg mb-2">{t('noResults')}</h3>
+              <p className="text-sm text-muted-foreground max-w-sm">
                 {t('noResultsSub')}
               </p>
-            </div>
+              <Button 
+                variant="outline" 
+                className="mt-6 rounded-xl"
+                onClick={() => { setQuery(""); setCategoryFilter(""); setCityFilter(""); setPriceFilter(""); }}
+              >
+                {t('clearFilters')}
+              </Button>
+            </motion.div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <motion.div 
+              variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } }}
+              initial="hidden" animate="show"
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
+            >
               {filtered.map((t_data, i) => {
                 const initials = t_data.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "T";
                 const rate = settings.pricing_mode === 'hourly' ? t_data.hourly_rate : t_data.fixed_rate;
                 
                 return (
+                  <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }} key={t_data.id}>
                   <Link
-                    key={t_data.id}
-                    href={`/tasker/${t_data.id}`}
+                    href={`/tasker/${t_data.profile_id || t_data.id}`}
                     className="group p-6 rounded-2xl border border-border/50 hover:border-owl-violet/30 hover-lift transition-all bg-card"
                   >
-                    {/* Header */}
                     <div className="flex items-start gap-4 mb-4">
                       <div
                         className={`w-14 h-14 rounded-2xl ${avatarColors[i % avatarColors.length]} flex items-center justify-center text-white font-bold text-lg`}
@@ -284,12 +306,10 @@ function SearchContent() {
                       </div>
                     </div>
 
-                    {/* Bio */}
                     <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-4">
                       {t_data.bio}
                     </p>
 
-                    {/* Stats */}
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-owl-amber text-owl-amber" />
@@ -303,14 +323,14 @@ function SearchContent() {
                       </div>
                     </div>
 
-                    {/* Tasks completed */}
                     <div className="mt-3 text-xs text-muted-foreground">
                       {t('tasksCompleted', { count: t_data.completed_tasks || 0 })}
                     </div>
                   </Link>
+                 </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>

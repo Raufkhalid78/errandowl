@@ -58,9 +58,9 @@ export default function MessagesPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-10rem)] space-y-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">{t("title") || "Messages"}</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
         <p className="text-muted-foreground">
-          {t("subtitle") || "Communicate with your taskers and clients in real-time."}
+          {t("subtitle")}
         </p>
       </div>
 
@@ -68,13 +68,13 @@ export default function MessagesPage() {
         {/* Sidebar */}
         <div className="w-full md:w-1/3 border-r flex flex-col bg-muted/10">
           <div className="p-4 border-b font-medium bg-muted/30">
-            {t("conversations") || "Conversations"}
+            {t("conversations")}
           </div>
           <ScrollArea className="flex-1">
             {bookings.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground text-sm">
                 <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                {t("noConversations") || "No active conversations"}
+                {t("noConversations")}
               </div>
             ) : (
               <div className="flex flex-col">
@@ -93,7 +93,7 @@ export default function MessagesPage() {
                     >
                       <div className="flex justify-between items-center w-full">
                         <span className="font-medium text-sm truncate">
-                          {t("bookingPrefix") || "Booking"} #{booking.id.slice(0, 6)}
+                          {t("bookingPrefix")} #{booking.id.slice(0, 6)}
                         </span>
                         <span className="text-[10px] text-muted-foreground">
                           {new Date(booking.created_at).toLocaleDateString()}
@@ -120,7 +120,7 @@ export default function MessagesPage() {
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground flex-col gap-2">
               <MessageSquare className="h-12 w-12 opacity-20" />
-              <p>{t("selectConversation") || "Select a conversation to start messaging"}</p>
+              <p>{t("selectConversation")}</p>
             </div>
           )}
         </div>

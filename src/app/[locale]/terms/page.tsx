@@ -1,12 +1,20 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Terms of Service", description: "Read the ErrandOwl Pakistan terms of service and user agreement." };
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Legal" });
+  return {
+    title: t("termsTitle") + " - ErrandOwl",
+    description: "Read the ErrandOwl Pakistan terms of service and user agreement.",
+  };
+}
 
-export default function TermsPage() {
-  const t = useTranslations("Legal");
+export default async function TermsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Legal" });
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />

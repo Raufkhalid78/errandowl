@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { JobsList } from "@/components/dashboard/jobs-list"
+import { getTranslations } from "next-intl/server"
 
 export default async function JobsPage() {
   const supabase = await createClient()
+  const t = await getTranslations("DashboardJobs")
 
   const {
     data: { user },
@@ -46,9 +48,9 @@ export default async function JobsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Open Jobs</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
         <p className="text-muted-foreground">
-          Browse available tasks requested by clients and submit your offers.
+          {t("description")}
         </p>
       </div>
 

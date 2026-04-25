@@ -5,7 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 
+import { useTranslations } from "next-intl"
+
 export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount: number }) {
+  const t = useTranslations("Checkout")
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string | null>(null)
   const supabase = createClient()
@@ -21,14 +24,14 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
       })
 
       if (fnError) {
-        throw new Error(fnError.message || "Failed to initialize payment")
+        throw new Error(fnError.message || t("error_init"))
       }
 
       if (data?.url) {
         // Redirect to PayFast checkout page
         window.location.href = data.url
       } else {
-        throw new Error("No payment URL returned")
+        throw new Error(t("error_url"))
       }
     } catch (err: any) {
       setError(err.message)
@@ -39,14 +42,14 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Order Summary</CardTitle>
+        <CardTitle>{t("summary_title")}</CardTitle>
         <CardDescription>
-          Booking ID: {bookingId.slice(0, 8)}...
+          {t("booking_id", { id: bookingId.slice(0, 8) })}...
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center py-4 border-b border-t mb-4">
-          <span className="font-medium">Total Amount Due</span>
+          <span className="font-medium">{t("total_due")}</span>
           <span className="text-2xl font-bold">Rs. {amount.toLocaleString()}</span>
         </div>
         {error && <div className="text-sm text-red-500 font-medium mb-4">{error}</div>}
@@ -75,7 +78,7 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
               ></path>
             </svg>
           )}
-          Pay with PayFast
+          {t("pay_btn")}
         </Button>
       </CardFooter>
     </Card>

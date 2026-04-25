@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, ExternalLink, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 
 export default function VerificationQueuePage() {
   const [taskers, setTaskers] = useState<any[]>([]);
@@ -17,9 +18,10 @@ export default function VerificationQueuePage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("profiles")
-      .select("*, tasker_profiles!inner(*)")
+      .select("*, tasker_profiles(*)")
       .eq("is_verified", false)
-      .eq("role", "tasker");
+      .eq("role", "tasker")
+      .not("cnic_url", "is", null); // Only show taskers who have actually uploaded documents
 
     if (data) setTaskers(data);
     setLoading(false);
@@ -37,8 +39,9 @@ export default function VerificationQueuePage() {
       .eq("id", userId);
 
     if (error) {
-      alert("Error: " + error.message);
+      toast.error("Error: " + error.message);
     } else {
+      toast.success(status ? "Tasker approved successfully." : "Tasker application rejected.");
       setTaskers(taskers.filter(t => t.id !== userId));
     }
     setProcessingId(null);
@@ -88,13 +91,26 @@ export default function VerificationQueuePage() {
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                   <Button
                     variant="outline"
+                    size="sm"
                     className="flex-1 md:flex-none gap-2 h-10"
-                    onClick={() => window.open(tasker.tasker_profiles?.[0]?.cnic_front_url || "#", "_blank")}
+                    onClick={() => window.open(tasker.cnic_url || "#", "_blank")}
+                    disabled={!tasker.cnic_url}
                   >
-                    <ExternalLink className="h-4 w-4" /> View CNIC
+                    <ExternalLink className="h-4 w-4" /> View Front
                   </Button>
+                  {tasker.cnic_back_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 md:flex-none gap-2 h-10"
+                      onClick={() => window.open(tasker.cnic_back_url || "#", "_blank")}
+                    >
+                      <ExternalLink className="h-4 w-4" /> View Back
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
+                    size="sm"
                     className="flex-1 md:flex-none text-destructive hover:text-destructive hover:bg-destructive/10 h-10"
                     onClick={() => handleVerify(tasker.id, false)}
                     disabled={!!processingId}
@@ -102,6 +118,7 @@ export default function VerificationQueuePage() {
                     <XCircle className="h-4 w-4 mr-2" /> Reject
                   </Button>
                   <Button
+                    size="sm"
                     className="flex-1 md:flex-none bg-owl-emerald hover:bg-owl-emerald-dark text-white h-10 px-6"
                     onClick={() => handleVerify(tasker.id, true)}
                     disabled={!!processingId}

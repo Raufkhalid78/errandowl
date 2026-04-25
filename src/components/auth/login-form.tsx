@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, Link } from "@/i18n/routing"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -36,8 +36,8 @@ export function LoginForm({
     })
 
     if (error) {
-      setError(error.message)
-      toast.error(error.message)
+      setError(t("error"))
+      toast.error(t("error"))
       setIsLoading(false)
       return
     }
@@ -66,7 +66,12 @@ export function LoginForm({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">{t("password")}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">{t("password")}</Label>
+              <Link href="/forgot-password" className="text-sm font-medium text-owl-violet hover:underline" tabIndex={-1}>
+                {t("forgotPassword") || "Forgot Password?"}
+              </Link>
+            </div>
             <Input
               id="password"
               name="password"

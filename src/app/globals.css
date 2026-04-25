@@ -431,3 +431,17 @@
 
 [dir="rtl"] .left-0 { left: auto; right: 0; }
 [dir="rtl"] .right-0 { right: auto; left: 0; }
+
+/* Enhanced Urdu Typography alignment */
+[dir="rtl"] body {
+  line-height: 1.7;
+}
+
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+  line-height: 1.4;
+  padding-bottom: 0.2em; /* Prevents Nastaleeq descent clipping */
+}
+
+[dir="rtl"] button, [dir="rtl"] .btn {
+  padding-top: 0.1em; /* Optical center for Nastaleeq inside buttons */
+}

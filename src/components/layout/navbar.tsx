@@ -16,7 +16,7 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
   const tl = useTranslations("Logo");
   const supabase = createClient();
   const [user, setUser] = useState<any>(initialUser);
-  
+
   const navLinks = [
     { href: "/services", label: t("services") },
     { href: "/search", label: t("findTaskers") },
@@ -34,14 +34,14 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
-    
+
     // Check auth status
     const fetchUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
     };
     fetchUser();
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
@@ -56,25 +56,24 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        useScrolledStyle
-          ? "glass shadow-lg shadow-owl-violet/5 py-2"
-          : "bg-transparent py-4"
-      }`}
+      className={`fixed top-0 inset-x-0 w-full z-50 transition-all duration-300 ${useScrolledStyle
+        ? "glass shadow-lg shadow-owl-violet/5 py-2"
+        : "bg-transparent py-4"
+        }`}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 min-h-[3rem] lg:min-h-[3.5rem]">
           {/* Logo */}
           <div className="flex-shrink-0">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl">🦉</span>
-            <span className="font-bold text-xl tracking-tight">
-              <span className="gradient-text">{tl("text1")}</span>
-              <span className={useScrolledStyle ? "text-foreground" : "text-white"}>
-                {tl("text2")}
+            <Link href="/" className="flex items-center gap-2 group">
+              <span className="text-2xl">🦉</span>
+              <span className="font-bold text-xl tracking-tight">
+                <span className="gradient-text">{tl("text1")}</span>
+                <span className={useScrolledStyle ? "text-foreground" : "text-white"}>
+                  {tl("text2")}
+                </span>
               </span>
-            </span>
-          </Link>
+            </Link>
           </div>
 
           {/* Desktop Nav */}
@@ -83,11 +82,10 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
               <Link
                 key={link.href}
                 href={link.href as any}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-white/10 ${
-                  useScrolledStyle
-                    ? "text-foreground/70 hover:text-foreground hover:bg-muted"
-                    : "text-white/80 hover:text-white"
-                }`}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-white/10 ${useScrolledStyle
+                  ? "text-foreground/70 hover:text-foreground hover:bg-muted"
+                  : "text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white"
+                  }`}
               >
                 {link.label}
               </Link>
@@ -100,48 +98,46 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
               <LanguageSwitcher />
               <ThemeSwitcher />
             </div>
-            
+
             {user ? (
-              <Link 
-                href="/dashboard" 
-                className="inline-flex items-center justify-center rounded-xl bg-owl-violet px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-owl-violet/25 hover:bg-owl-violet-dark hover:shadow-owl-violet/40 transition-all"
+              <Button
+                render={<Link href="/dashboard" />}
+                className="bg-owl-violet hover:bg-owl-violet-dark text-white shadow-lg shadow-owl-violet/25 hover:shadow-owl-violet/40 transition-all h-10 px-5 rounded-xl"
               >
                 {t("dashboard") || "Dashboard"}
-              </Link>
+              </Button>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
-                    useScrolledStyle
-                      ? "text-foreground/70 hover:text-foreground hover:bg-muted"
-                      : "text-white/80 hover:text-white"
-                  }`}
+                  className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${useScrolledStyle
+                    ? "text-foreground/70 hover:text-foreground hover:bg-muted"
+                    : "text-white/80 hover:text-white"
+                    }`}
                 >
                   {tCommon("login")}
                 </Link>
-                <Link 
-                  href="/signup" 
-                  className="inline-flex items-center justify-center rounded-xl bg-owl-violet px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-owl-violet/25 hover:bg-owl-violet-dark hover:shadow-owl-violet/40 transition-all"
+                <Button
+                  render={<Link href="/signup" />}
+                  className="bg-owl-violet hover:bg-owl-violet-dark text-white shadow-lg shadow-owl-violet/25 hover:shadow-owl-violet/40 transition-all h-10 px-5 rounded-xl"
                 >
                   {t("getStarted")}
-                </Link>
+                </Button>
               </>
             )}
           </div>
 
           {/* Mobile Toggle */}
           <div className="flex items-center md:hidden">
-             <button
-                onClick={() => setIsMobileOpen(!isMobileOpen)}
-                className={`p-2 rounded-lg transition-colors ${
-                useScrolledStyle
-                    ? "text-foreground hover:bg-muted"
-                    : "text-white hover:bg-white/10"
+            <button
+              onClick={() => setIsMobileOpen(!isMobileOpen)}
+              className={`p-2 rounded-lg transition-colors ${useScrolledStyle
+                ? "text-foreground hover:bg-muted"
+                : "text-white hover:bg-white/10"
                 }`}
-                aria-label="Toggle menu"
+              aria-label="Toggle menu"
             >
-                {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -151,10 +147,10 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass mt-2 mx-4 rounded-xl overflow-hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="md:hidden glass mt-2 mx-4 rounded-xl overflow-hidden shadow-lg border border-border/50"
           >
             <nav className="flex flex-col p-4 space-y-1">
               {navLinks.map((link) => (
@@ -167,25 +163,39 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
                   {link.label}
                 </Link>
               ))}
-              
-              <div className="pt-3 border-t border-border/50 flex flex-col space-y-4">
+
+              <div className="pt-3 mt-2 border-t border-border/50 flex flex-col space-y-4">
                 <div className="flex items-center justify-center gap-4 py-2">
                   <LanguageSwitcher />
                   <ThemeSwitcher />
                 </div>
-                
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileOpen(false)}
-                  className="px-4 py-3 text-sm font-medium text-center rounded-lg hover:bg-muted text-foreground/80"
-                >
-                  {tCommon("login")}
-                </Link>
-                <Button
-                  render={<Link href="/signup">{t("getStarted")}</Link>}
-                  className="bg-owl-violet hover:bg-owl-violet-dark text-white w-full"
-                  onClick={() => setIsMobileOpen(false)}
-                />
+
+                {user ? (
+                  <Button
+                    render={<Link href="/dashboard" />}
+                    className="bg-owl-violet hover:bg-owl-violet-dark text-white w-full"
+                    onClick={() => setIsMobileOpen(false)}
+                  >
+                    {t("dashboard") || "Dashboard"}
+                  </Button>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setIsMobileOpen(false)}
+                      className="px-4 py-3 text-sm font-medium text-center rounded-lg hover:bg-muted text-foreground/80"
+                    >
+                      {tCommon("login")}
+                    </Link>
+                    <Button
+                      render={<Link href="/signup" />}
+                      className="bg-owl-violet hover:bg-owl-violet-dark text-white w-full"
+                      onClick={() => setIsMobileOpen(false)}
+                    >
+                      {t("getStarted")}
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </motion.div>

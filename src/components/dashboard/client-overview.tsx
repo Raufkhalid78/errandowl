@@ -1,18 +1,39 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { createClient } from "@/lib/supabase/server"
+import { getTranslations } from "next-intl/server"
 
-export function ClientOverview() {
+export async function ClientOverview({ userId, profileId }: { userId: string, profileId: string }) {
+  const supabase = await createClient()
+  const t = await getTranslations("DashboardOverview")
+
+  // Fetch active bookings
+  const { data: activeBookings } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("client_id", profileId)
+    .in("status", ["pending", "accepted", "in_progress"])
+
+  // Fetch total spent
+  const { data: pastBookings } = await supabase
+    .from("bookings")
+    .select("total_cost")
+    .eq("client_id", profileId)
+    .eq("payment_status", "paid")
+
+  const activeCount = activeBookings?.length || 0
+  const totalSpent = pastBookings?.reduce((sum, b) => sum + (b.total_cost || 0), 0) || 0
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
+      <Card className="glass">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Active Bookings
+            {t("activeBookings")}
           </CardTitle>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -22,7 +43,7 @@ export function ClientOverview() {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            className="h-4 w-4 text-muted-foreground"
+            className="h-4 w-4 text-owl-violet"
           >
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" />
@@ -30,16 +51,16 @@ export function ClientOverview() {
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">2</div>
+          <div className="text-2xl font-bold">{activeCount}</div>
           <p className="text-xs text-muted-foreground">
-            1 upcoming this week
+            {t("tasksInProgress")}
           </p>
         </CardContent>
       </Card>
-      <Card>
+      <Card className="glass">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Total Spent
+            {t("totalSpent")}
           </CardTitle>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -55,13 +76,12 @@ export function ClientOverview() {
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">Rs. 4,500</div>
+          <div className="text-2xl font-bold">Rs {totalSpent.toLocaleString()}</div>
           <p className="text-xs text-muted-foreground">
-            +15% from last month
+            {t("lifetimeSpending")}
           </p>
         </CardContent>
       </Card>
-      {/* Additional client metrics could go here */}
     </div>
   )
 }

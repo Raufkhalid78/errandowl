@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 
 export type PricingMode = 'hourly' | 'fixed';
 
@@ -15,10 +15,7 @@ export interface PricingSettings {
  * Defaults to hourly if not found.
  */
 export async function getPricingSettings(): Promise<PricingSettings> {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   const { data, error } = await supabase
     .from('settings')
