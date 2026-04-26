@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
   variable: "--font-sans",
@@ -76,6 +77,7 @@ export default async function LocaleLayout({
             <Toaster richColors position="top-center" />
           </NextIntlClientProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
