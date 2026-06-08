@@ -7,12 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Save } from "lucide-react";
-import { toast } from "sonner"; // Assuming sonner is available or just use alert
-import { type PricingSettings, type PricingMode } from "@/lib/pricing";
 import { useTranslations } from "next-intl";
 
+interface Settings {
+  site_name?: string;
+  currency?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  pricing_mode?: string;
+  min_rate?: number;
+  max_rate?: number;
+  service_fee_percent?: number;
+  office_address?: string;
+  [key: string]: unknown;
+}
+
 interface SettingsFormProps {
-  initialSettings: any;
+  initialSettings: Settings;
 }
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {

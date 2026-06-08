@@ -6,6 +6,8 @@ import { NotificationBell } from "@/components/dashboard/notification-bell"
 import { Link } from "@/i18n/routing"
 import { ThemeSwitcher } from "@/components/layout/theme-switcher"
 import { LanguageSwitcher } from "@/components/layout/language-switcher"
+import { cookies } from "next/headers"
+import { ImpersonateBanner } from "@/components/admin/impersonate-banner"
 
 export default async function DashboardLayout({
   children,
@@ -13,6 +15,8 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  const isImpersonating = !!cookieStore.get("sb-impersonate-id")?.value
 
   const {
     data: { user },
@@ -29,11 +33,18 @@ export default async function DashboardLayout({
     .eq("auth_id", user.id)
     .maybeSingle()
 
+  if (profile?.status === "suspended" || profile?.status === "banned") {
+    redirect("/suspended")
+  }
+
   const fallbackName = user.user_metadata?.full_name || user.email?.split("@")[0] || "User"
   const role = profile?.role || user.user_metadata?.role || "client"
 
   return (
     <div className="flex min-h-screen flex-col">
+      {isImpersonating && (
+        <ImpersonateBanner name={profile?.name || "User"} email={profile?.email || ""} />
+      )}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center">

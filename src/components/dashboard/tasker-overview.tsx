@@ -7,7 +7,7 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { getTranslations } from "next-intl/server"
 
-export async function TaskerOverview({ userId, profileId }: { userId: string, profileId: string }) {
+export async function TaskerOverview({ profileId }: { profileId: string }) {
   const supabase = await createClient()
   const t = await getTranslations("DashboardOverview")
 

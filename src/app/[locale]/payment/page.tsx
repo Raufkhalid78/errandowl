@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "@/i18n/routing"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ShieldCheck, CreditCard, Loader2 } from "lucide-react"
@@ -21,8 +22,8 @@ export default function PaymentPage() {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      // Redirect to dashboard with success message
-      router.push("/dashboard/bookings?message=Payment%20Successful")
+      // Redirect to success verification page so that database updates are applied
+      router.push(`/payment/success?basket_id=${bookingId}`)
     }, 2000)
   }
 

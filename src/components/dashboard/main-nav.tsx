@@ -20,8 +20,15 @@ export function MainNav({
     { href: isTasker ? "/dashboard/jobs" : "/dashboard/services", label: isTasker ? t("openJobs") : t("services") },
     { href: "/dashboard/bookings", label: t("bookings") },
     { href: "/dashboard/messages", label: t("messages") },
+    { href: "/dashboard/community", label: "Community" },
+    { href: "/dashboard/wallet", label: "Wallet" },
     { href: "/dashboard/notifications", label: t("notifications") },
   ]
+
+  if (!isTasker) {
+    // We use a fallback if the translation doesn't exist yet
+    navLinks.splice(3, 0, { href: "/dashboard/favorites", label: "Favorites" })
+  }
 
   return (
     <>
@@ -41,7 +48,7 @@ export function MainNav({
         {navLinks.map(link => (
           <Link
             key={link.href}
-            href={link.href as any}
+            href={link.href as never}
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             {link.label}
@@ -56,7 +63,7 @@ export function MainNav({
             {navLinks.map(link => (
               <Link
                 key={link.href}
-                href={link.href as any}
+                href={link.href as never}
                 onClick={() => setIsOpen(false)}
                 className="text-sm font-medium p-2 hover:bg-muted rounded-md transition-colors"
               >

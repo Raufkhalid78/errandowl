@@ -1,0 +1,4 @@
+Contact: mailto:support@errandowl.com.pk
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en, ur
+Canonical: https://www.errandowl.com.pk/.well-known/security.txt

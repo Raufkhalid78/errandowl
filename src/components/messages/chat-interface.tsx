@@ -11,7 +11,8 @@ type Message = {
   id: string
   booking_id: string
   sender_id: string
-  text: string
+  text?: string
+  attachment_url?: string
   read: boolean
   created_at: string
   profiles?: { name: string, avatar_url?: string }
@@ -30,8 +31,10 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
   const [newMessage, setNewMessage] = React.useState("")
   const [isSending, setIsSending] = React.useState(false)
   const [loading, setLoading] = React.useState(true)
+  const [isUploading, setIsUploading] = React.useState(false)
   const supabase = createClient()
   const scrollRef = React.useRef<HTMLDivElement>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
     // 1. Fetch initial messages
@@ -98,7 +101,7 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
     const messageData = {
       booking_id: bookingId,
       sender_id: userId,
-      text: newMessage.trim(),
+      text: newMessage.trim() || null,
     }
 
     const { error } = await supabase
@@ -112,6 +115,39 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
     }
 
     setIsSending(false)
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${bookingId}/${userId}-${Math.random()}.${fileExt}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('chat_attachments')
+      .upload(fileName, file)
+
+    if (uploadError) {
+      console.error('Error uploading file:', uploadError)
+      setIsUploading(false)
+      return
+    }
+
+    const messageData = {
+      booking_id: bookingId,
+      sender_id: userId,
+      attachment_url: fileName, // Save private relative path
+    }
+
+    const { error } = await supabase.from('messages').insert(messageData)
+    if (error) {
+      console.error("Error sending attachment:", error)
+    }
+
+    setIsUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   if (loading) {
@@ -164,7 +200,18 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
                         : "bg-muted rounded-tl-none border border-border/50"
                     }`}
                   >
-                    {msg.text}
+                    {msg.attachment_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img 
+                        src={msg.attachment_url.startsWith("http") 
+                          ? msg.attachment_url 
+                          : `/api/attachments?path=${encodeURIComponent(msg.attachment_url)}`
+                        } 
+                        alt="attachment" 
+                        className="rounded-xl max-w-[200px] mb-2 object-cover" 
+                      />
+                    )}
+                    {msg.text && <span>{msg.text}</span>}
                   </div>
                 </div>
               )
@@ -178,17 +225,34 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
           onSubmit={handleSendMessage}
           className="flex w-full items-center space-x-2"
         >
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload}
+            className="hidden" 
+            accept="image/*"
+          />
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="h-11 w-11 rounded-xl"
+          >
+            {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>}
+          </Button>
           <Input
             type="text"
             placeholder={t("placeholder")}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            disabled={isSending}
+            disabled={isSending || isUploading}
             className="flex-1 h-11 rounded-xl bg-background border-border/50 focus:ring-owl-violet/20"
           />
           <Button 
             type="submit" 
-            disabled={isSending || !newMessage.trim()}
+            disabled={isSending || isUploading || !newMessage.trim()}
             className="h-11 w-11 rounded-xl bg-owl-violet hover:bg-owl-violet-dark text-white p-0 flex items-center justify-center shadow-lg shadow-owl-violet/20"
           >
             {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}

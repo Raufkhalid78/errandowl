@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Star, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Review } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
 
@@ -12,13 +13,13 @@ interface ReviewListProps {
 
 export function ReviewList({ taskerId }: ReviewListProps) {
   const t = useTranslations("Reviews");
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabaseClient = createClient();
     const fetchReviews = async () => {
-      const { data } = await supabase
+      const { data } = await supabaseClient
         .from("reviews")
         .select("*, profiles!client_id(name, avatar_url)")
         .eq("tasker_id", taskerId)
@@ -59,6 +60,22 @@ export function ReviewList({ taskerId }: ReviewListProps) {
             </div>
           </div>
           <p className="text-sm text-foreground/80 leading-relaxed">{review.text}</p>
+          
+          {(review.rating_punctuality || review.rating_quality || review.rating_communication) && (
+            <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border/30 text-[10px] text-muted-foreground">
+              {review.rating_punctuality && <div>Punctuality: {review.rating_punctuality}/5</div>}
+              {review.rating_quality && <div>Quality: {review.rating_quality}/5</div>}
+              {review.rating_communication && <div>Communication: {review.rating_communication}/5</div>}
+            </div>
+          )}
+
+          {review.tasker_reply && (
+            <div className="mt-3 bg-muted/30 p-3 rounded-lg border-l-2 border-owl-amber text-sm">
+              <div className="text-[10px] font-bold text-owl-amber mb-1 uppercase">Tasker Reply</div>
+              <p className="text-foreground/80 text-xs">{review.tasker_reply}</p>
+            </div>
+          )}
+
           <div className="mt-2 text-[10px] text-muted-foreground">
             {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
           </div>

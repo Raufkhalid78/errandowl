@@ -20,6 +20,22 @@ export function LoginForm({
   const supabase = createClient()
   const t = useTranslations("Auth.login")
 
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true)
+    setError(null)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
+    })
+    if (error) {
+      setError(error.message)
+      toast.error(error.message)
+      setIsLoading(false)
+    }
+  }
+
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
     setIsLoading(true)
@@ -108,6 +124,43 @@ export function LoginForm({
           </Button>
         </div>
       </form>
+      <div className="relative my-2">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            {t("orContinueWith") || "Or continue with"}
+          </span>
+        </div>
+      </div>
+      <Button 
+        type="button" 
+        variant="outline" 
+        disabled={isLoading} 
+        onClick={handleGoogleSignIn}
+        className="w-full h-11 flex items-center justify-center gap-2"
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24">
+          <path
+            fill="#EA4335"
+            d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.16 2.7 1.09 6.645l4.176 3.12z"
+          />
+          <path
+            fill="#34A853"
+            d="M16.04 15.345c-1.11.727-2.5 1.155-4.04 1.155a7.077 7.077 0 0 1-6.734-4.855L1.09 14.764C3.16 18.709 7.27 21.409 12 21.409c3.09 0 5.864-1.09 7.9-3l-3.86-3.064z"
+          />
+          <path
+            fill="#4285F4"
+            d="M23.49 12.273c0-.818-.073-1.609-.2-2.364H12v4.51h6.47c-.28 1.482-1.12 2.736-2.38 3.582l3.86 3.064c2.255-2.082 3.54-5.145 3.54-8.79z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.266 14.235A7.09 7.09 0 0 1 4.91 12c0-.79.127-1.555.356-2.264L1.09 6.61A11.966 11.966 0 0 0 0 12c0 1.927.455 3.745 1.255 5.364l3.973-3.13z"
+          />
+        </svg>
+        Google
+      </Button>
     </div>
   )
 }

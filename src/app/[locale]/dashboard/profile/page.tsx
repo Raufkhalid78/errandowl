@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ProfileForm } from "@/components/profile/profile-form"
+import { PortfolioManager } from "@/components/profile/portfolio-manager"
 import { getTranslations } from "next-intl/server"
 
 export default async function ProfilePage() {
@@ -31,6 +32,12 @@ export default async function ProfilePage() {
       </div>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[500px]">
         <ProfileForm initialProfile={profile} userEmail={user.email} />
+        
+        {profile?.role === "tasker" && (
+          <div className="mt-8 pt-8 border-t border-border">
+            <PortfolioManager taskerId={profile.id} />
+          </div>
+        )}
       </div>
     </div>
   )

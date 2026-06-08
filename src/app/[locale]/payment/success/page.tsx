@@ -2,20 +2,21 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Link, useRouter } from "@/i18n/routing";
-import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Link } from "@/i18n/routing";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+
   const [loading, setLoading] = useState(true);
   const [bookingId, setBookingId] = useState<string | null>(null);
-  const supabase = createClient();
+
 
   useEffect(() => {
     const handleSuccess = async () => {
+      const supabase = createClient();
       // PayFast usually sends back the basket_id or order_id
       const basketId = searchParams.get("basket_id") || searchParams.get("order_id");
       if (!basketId) {

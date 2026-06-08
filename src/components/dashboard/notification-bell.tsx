@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { createClient } from "@/lib/supabase/client";
-import { useRouter, Link } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
 
 interface NotificationBellProps {
   userId: string;
@@ -16,7 +16,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const t = useTranslations("Notifications");
   const [unreadCount, setUnreadCount] = useState(0);
   const supabase = createClient();
-  const router = useRouter();
+
 
   useEffect(() => {
     // Initial fetch
@@ -42,7 +42,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
           table: "notifications",
           filter: `user_id=eq.${userId}`,
         },
-        (payload) => {
+        () => {
           setUnreadCount((prev) => prev + 1);
         }
       )

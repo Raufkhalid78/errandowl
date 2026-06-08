@@ -22,11 +22,15 @@ export default async function DashboardPage() {
     .eq("auth_id", user.id)
     .maybeSingle()
 
-  const role = profile?.role || user.user_metadata?.role || "client"
+  if (!profile) {
+    redirect("/login")
+  }
+
+  const role = profile.role || user.user_metadata?.role || "client"
   // For clients: need phone + location
-  // For taskers: additionally need CNIC docs
-  const isClientComplete = !!(profile?.phone && profile?.location)
-  const isTaskerComplete = !!(profile?.cnic_url && profile?.cnic_back_url)
+  // For taskers: additionally need CNIC docs and cnic_status must not be rejected
+  const isClientComplete = !!(profile.phone && profile.location)
+  const isTaskerComplete = !!(profile.cnic_url && profile.cnic_back_url && profile.cnic_status !== 'rejected')
   const isComplete = role === "client"
     ? isClientComplete
     : role === "tasker"
@@ -42,9 +46,9 @@ export default async function DashboardPage() {
     <div className="space-y-4">
       <h2 className="text-3xl font-bold tracking-tight">{t("overview")}</h2>
       {role === "tasker" || role === "admin" ? (
-        <TaskerOverview userId={user.id} profileId={profile?.id} />
+        <TaskerOverview profileId={profile.id} />
       ) : (
-        <ClientOverview userId={user.id} profileId={profile?.id} />
+        <ClientOverview profileId={profile.id} />
       )}
     </div>
   )

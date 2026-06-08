@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bell, Shield, Palette, Lock, Wallet, Loader2, User, Briefcase, UploadCloud, CheckCircle } from "lucide-react";
+import { Bell, Shield, Palette, Briefcase, UploadCloud, Loader2, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -16,7 +16,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const t = useTranslations("DashboardSettings");
   
-  const [user, setUser] = useState<any>(null);
+
   const [profile, setProfile] = useState<any>(null);
   const [taskerProfile, setTaskerProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ export default function SettingsPage() {
         router.push("/login");
         return;
       }
-      setUser(user);
+
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -41,19 +41,28 @@ export default function SettingsPage() {
       
       setProfile(profile);
 
-      if (profile?.role === "tasker") {
+      if (profile?.role === "tasker" || profile?.role === "admin") {
         const { data: tp } = await supabase
           .from("tasker_profiles")
           .select("*")
           .eq("profile_id", profile.id)
           .single();
         
-        if (tp) setTaskerProfile({
-          ...tp,
-          skills: tp.skills ? tp.skills.join(", ") : "",
-          availability_days: tp.availability_days || ["Mon", "Tue", "Wed", "Thu", "Fri"],
-          categories: tp.categories || [],
-        });
+        if (tp) {
+          setTaskerProfile({
+            ...tp,
+            skills: tp.skills ? tp.skills.join(", ") : "",
+            availability_days: tp.availability_days || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            categories: tp.categories || [],
+          });
+        } else {
+          setTaskerProfile({
+            hourly_rate: 0,
+            skills: "",
+            availability_days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            categories: [],
+          });
+        }
       }
       
       setLoading(false);
@@ -77,12 +86,13 @@ export default function SettingsPage() {
     try {
       const skillsArray = taskerProfile.skills.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
       
-      const { error } = await supabase.from("tasker_profiles").update({
+      const { error } = await supabase.from("tasker_profiles").upsert({
+        profile_id: profile.id,
         hourly_rate: taskerProfile.hourly_rate,
         skills: skillsArray,
         categories: taskerProfile.categories,
         availability_days: taskerProfile.availability_days
-      }).eq("profile_id", profile.id);
+      }, { onConflict: 'profile_id' });
 
       if (error) throw error;
       toast.success(t("success"));

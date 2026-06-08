@@ -28,7 +28,7 @@ export function LanguageSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger nativeButton render={
+      <DropdownMenuTrigger render={
         <Button variant="ghost" size="sm" className="gap-2 px-2 h-9 rounded-lg">
           <Globe className="h-4 w-4" />
           <span className="uppercase text-xs font-bold">{locale}</span>

@@ -11,7 +11,10 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
   const t = useTranslations("Checkout")
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [tipAmount, setTipAmount] = React.useState<number>(0)
   const supabase = createClient()
+
+  const finalAmount = amount + tipAmount
 
   const handlePayment = async () => {
     setIsLoading(true)
@@ -20,7 +23,7 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
     try {
       // Call the Supabase Edge Function to initiate PayFast checkout
       const { data, error: fnError } = await supabase.functions.invoke("payfast-checkout", {
-        body: { bookingId, amount },
+        body: { bookingId, amount: finalAmount, tipAmount },
       })
 
       if (fnError) {
@@ -33,8 +36,9 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
       } else {
         throw new Error(t("error_url"))
       }
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const error = err as Error
+      setError(error.message)
       setIsLoading(false)
     }
   }
@@ -48,9 +52,31 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-between items-center py-4 border-b border-t mb-4">
+        <div className="flex justify-between items-center py-2">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span className="font-medium">Rs. {amount.toLocaleString()}</span>
+        </div>
+
+        <div className="py-4 space-y-3">
+          <p className="text-sm font-medium">Add a tip for your Tasker</p>
+          <div className="flex gap-2">
+            {[0, 100, 300, 500].map((tip) => (
+              <Button
+                key={tip}
+                type="button"
+                variant={tipAmount === tip ? "default" : "outline"}
+                className={`flex-1 ${tipAmount === tip ? "bg-owl-violet text-white" : ""}`}
+                onClick={() => setTipAmount(tip)}
+              >
+                {tip === 0 ? "No Tip" : `Rs. ${tip}`}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center py-4 border-b border-t mb-4 mt-2">
           <span className="font-medium">{t("total_due")}</span>
-          <span className="text-2xl font-bold">Rs. {amount.toLocaleString()}</span>
+          <span className="text-2xl font-bold">Rs. {finalAmount.toLocaleString()}</span>
         </div>
         {error && <div className="text-sm text-red-500 font-medium mb-4">{error}</div>}
       </CardContent>

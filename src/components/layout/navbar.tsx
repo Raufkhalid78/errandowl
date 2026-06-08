@@ -14,7 +14,6 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
   const t = useTranslations("Nav");
   const tCommon = useTranslations("Common");
   const tl = useTranslations("Logo");
-  const supabase = createClient();
   const [user, setUser] = useState<any>(initialUser);
 
   const navLinks = [
@@ -32,6 +31,7 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
   const isHome = pathname === "/";
 
   useEffect(() => {
+    const supabase = createClient();
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
 
@@ -50,7 +50,7 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
       window.removeEventListener("scroll", handleScroll);
       subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, []);
 
   const useScrolledStyle = isScrolled || !isHome;
 
@@ -81,7 +81,7 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href as any}
+                href={link.href as never}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-white/10 ${useScrolledStyle
                   ? "text-foreground/70 hover:text-foreground hover:bg-muted"
                   : "text-foreground/80 dark:text-white/80 hover:text-foreground dark:hover:text-white"
@@ -156,7 +156,7 @@ export function Navbar({ initialUser }: { initialUser?: any }) {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href as any}
+                  href={link.href as never}
                   onClick={() => setIsMobileOpen(false)}
                   className="px-4 py-3 text-sm font-medium rounded-lg hover:bg-muted transition-colors text-foreground/80 hover:text-foreground"
                 >

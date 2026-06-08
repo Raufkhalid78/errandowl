@@ -13,7 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const { bookingId, amount, customerEmail, customerPhone } = await req.json()
+    const { bookingId, amount, tipAmount, customerEmail, customerPhone } = await req.json()
+
+    const finalTipAmount = tipAmount || 0;
 
     // 1. Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
@@ -37,6 +39,7 @@ serve(async (req) => {
       .insert({
         booking_id: bookingId,
         amount: amount,
+        tip_amount: finalTipAmount,
         method: "payfast",
         status: "pending",
       })
@@ -44,6 +47,11 @@ serve(async (req) => {
       .single()
 
     if (paymentError) throw paymentError
+
+    // Also update booking with tip amount
+    if (finalTipAmount > 0) {
+      await supabase.from("bookings").update({ tip_amount: finalTipAmount }).eq("id", bookingId);
+    }
 
     // 4. PayFast Integration
     const merchantId = Deno.env.get("PAYFAST_MERCHANT_ID")

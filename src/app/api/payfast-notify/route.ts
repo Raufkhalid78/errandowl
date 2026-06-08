@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+
 
 export async function POST(request: Request) {
   try {
@@ -57,8 +57,9 @@ export async function POST(request: Request) {
 
     // PayFast expects a 200 OK response to stop retrying
     return new Response("OK", { status: 200 });
-  } catch (error: any) {
-    console.error("IPN Handler Error:", error.message);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("IPN Handler Error:", err.message);
     return new Response("Error", { status: 400 });
   }
 }

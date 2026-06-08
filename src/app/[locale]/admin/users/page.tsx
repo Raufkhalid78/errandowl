@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, Search, Eye, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { exportToCSV } from "@/lib/csv-export";
 
 export default function AdminUsersPage() {
   const t = useTranslations("AdminUsers");
@@ -14,23 +17,71 @@ export default function AdminUsersPage() {
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    const { data } = await supabase.from("profiles").select("*").order("registered_at", { ascending: false });
-    if (data) setUsers(data);
-    setLoading(false);
-  };
-
   useEffect(() => {
+    const fetchUsers = async () => {
+      const { data } = await supabase.from("profiles").select("*").order("registered_at", { ascending: false });
+      if (data) setUsers(data);
+      setLoading(false);
+    };
     fetchUsers();
-  }, []);
+  }, [supabase]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     const { error } = await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
     if (!error) {
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      toast.success("User role updated successfully");
     } else {
-      alert("Error updating role");
+      toast.error("Error updating role: " + error.message);
+    }
+  };
+
+  const handleStatusChange = async (userId: string, newStatus: string) => {
+    const { error } = await supabase.from("profiles").update({ status: newStatus }).eq("id", userId);
+    if (!error) {
+      setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+      toast.success("User status updated to " + newStatus);
+    } else {
+      toast.error("Error updating status: " + error.message);
+    }
+  };
+
+  const handleImpersonate = (targetAuthId: string) => {
+    if (!targetAuthId) {
+      toast.error("User does not have a valid auth session");
+      return;
+    }
+    document.cookie = `sb-impersonate-id=${targetAuthId}; path=/; max-age=3600; SameSite=Lax;`;
+    toast.success("Impersonation active. Redirecting to dashboard...");
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 1000);
+  };
+
+  const handleExportCSV = () => {
+    const dataToExport = filteredUsers.map(u => ({
+      name: u.name || "Unknown",
+      email: u.email || "",
+      city: u.city || u.location || "—",
+      joined: u.registered_at ? new Date(u.registered_at).toLocaleDateString() : "—",
+      status: u.status || "active",
+      role: u.role || "client"
+    }));
+
+    const headersMap = {
+      name: "Name",
+      email: "Email",
+      city: "City/Location",
+      joined: "Joined Date",
+      status: "Status",
+      role: "Role"
+    };
+
+    const success = exportToCSV(dataToExport, "errandowl-users.csv", headersMap);
+    if (success) {
+      toast.success("CSV export downloaded successfully!");
+    } else {
+      toast.error("No data available to export");
     }
   };
 
@@ -47,9 +98,19 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
-        <span className="text-sm px-3 py-1.5 rounded-full bg-owl-violet/10 text-owl-violet font-medium">
-          {filteredUsers.length} {t("title").toLowerCase()}
-        </span>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 h-9"
+          >
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+          <span className="text-sm px-3 py-1.5 rounded-full bg-owl-violet/10 text-owl-violet font-medium">
+            {filteredUsers.length} {t("title").toLowerCase()}
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -84,14 +145,16 @@ export default function AdminUsersPage() {
                   <th className="text-left p-4 font-medium text-muted-foreground">{t("user")}</th>
                   <th className="text-left p-4 font-medium text-muted-foreground">{t("location")}</th>
                   <th className="text-left p-4 font-medium text-muted-foreground">{t("joined")}</th>
-                  <th className="text-right p-4 font-medium text-muted-foreground">{t("role")}</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
+                  <th className="text-left p-4 font-medium text-muted-foreground">{t("role")}</th>
+                  <th className="text-right p-4 font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={4} className="p-8 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-owl-violet" /></td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-owl-violet" /></td></tr>
                 ) : filteredUsers.length === 0 ? (
-                  <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">{t("noUsers")}</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">{t("noUsers")}</td></tr>
                 ) : filteredUsers.map((user: any) => (
                   <tr key={user.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
                     <td className="p-4">
@@ -109,7 +172,22 @@ export default function AdminUsersPage() {
                     <td className="p-4 text-muted-foreground text-xs">
                       {user.registered_at ? new Date(user.registered_at).toLocaleDateString() : "—"}
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="p-4">
+                      <select
+                        value={user.status || 'active'}
+                        onChange={(e) => handleStatusChange(user.id, e.target.value)}
+                        className={`text-xs px-2.5 py-1 rounded-full capitalize cursor-pointer border font-semibold outline-none ${
+                          user.status === "suspended" ? "bg-amber-500/10 text-amber-600 border-amber-500/20" :
+                          user.status === "banned" ? "bg-rose-500/10 text-rose-600 border-rose-500/20" :
+                          "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                        }`}
+                      >
+                        <option value="active" className="text-black bg-white">Active</option>
+                        <option value="suspended" className="text-black bg-white">Suspended</option>
+                        <option value="banned" className="text-black bg-white">Banned</option>
+                      </select>
+                    </td>
+                    <td className="p-4">
                       <select
                         value={user.role || 'client'}
                         onChange={(e) => handleRoleChange(user.id, e.target.value)}
@@ -123,6 +201,18 @@ export default function AdminUsersPage() {
                         <option value="tasker" className="text-black bg-white">{t("tasker")}</option>
                         <option value="admin" className="text-black bg-white">{t("admin")}</option>
                       </select>
+                    </td>
+                    <td className="p-4 text-right">
+                      {user.role !== "admin" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleImpersonate(user.auth_id)}
+                          className="h-8 text-xs font-semibold text-owl-violet hover:bg-owl-violet/10 flex items-center gap-1.5 ml-auto"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> Impersonate
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}

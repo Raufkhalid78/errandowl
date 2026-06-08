@@ -2,21 +2,22 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { createClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
-import { Star, MapPin, Shield, Clock, Calendar, MessageCircle, Loader2 } from "lucide-react";
+import { Star, MapPin, Shield, Clock, Calendar, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Metadata } from "next";
 import { getPricingSettings, formatRate } from "@/lib/pricing";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getTranslations } from "next-intl/server";
+import { FavoriteButton } from "@/components/taskers/favorite-button";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string, locale: string }> }): Promise<Metadata> {
-  const { id, locale } = await params;
+  const { id } = await params;
   const supabase = await createClient();
   const { data: tasker } = await supabase
     .from("tasker_profiles")
     .select("*, profiles!inner(name, city)")
-    .eq("id", id)
-    .single();
+    .or(`id.eq.${id},profile_id.eq.${id}`)
+    .maybeSingle();
 
   const name = tasker?.profiles?.name || "Tasker";
   const city = tasker?.profiles?.city || "Pakistan";
@@ -27,18 +28,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-const avatarColors = ["bg-owl-violet", "bg-owl-amber", "bg-owl-emerald", "bg-indigo-500"];
 
 export default async function TaskerProfilePage({ params }: { params: Promise<{ id: string, locale: string }> }) {
-  const { id, locale } = await params;
+  const { id, locale } = await params; // locale is kept because it's passed to formatRate
   const supabase = await createClient();
   const t = await getTranslations("TaskerProfile");
 
   const { data: tasker } = await supabase
     .from("tasker_profiles")
     .select("*, profiles!inner(*)")
-    .eq("id", id)
-    .single();
+    .or(`id.eq.${id},profile_id.eq.${id}`)
+    .maybeSingle();
+
+  const { data: portfolioItems } = await supabase
+    .from("portfolio_items")
+    .select("*")
+    .eq("tasker_id", tasker?.profile_id)
+    .order("created_at", { ascending: false });
 
   if (!tasker) {
     return (
@@ -83,6 +89,12 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                       ⭐ {t("elite")}
                     </span>
                   )}
+                  {tasker.badges?.map((badge: string) => (
+                    <span key={badge} className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-owl-violet-light/20 text-owl-violet-light border border-owl-violet-light/30">
+                      <Shield className="h-3 w-3" /> {badge}
+                    </span>
+                  ))}
+                  <FavoriteButton taskerId={tasker.profile_id} className="ml-auto" />
                 </div>
                 <div className="flex items-center gap-1 text-white/60 text-sm mb-3">
                   <MapPin className="h-4 w-4" />
@@ -134,14 +146,22 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
               <div className="p-5 rounded-2xl border border-border/50 glass">
                 <h3 className="font-semibold text-sm mb-3">{t("skills")}</h3>
                 <div className="flex flex-wrap gap-2">
-                  {(tasker.skills || ["General Tasks"]).map((skill: string) => (
-                    <span
-                      key={skill}
-                      className="text-xs px-3 py-1.5 rounded-full bg-owl-violet/10 text-owl-violet"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {(tasker.skills || ["General Tasks"]).map((skill: string) => {
+                    const isVerified = tasker.verified_skills?.includes(skill);
+                    return (
+                      <span
+                        key={skill}
+                        className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full ${
+                          isVerified 
+                            ? "bg-owl-emerald/10 text-owl-emerald border border-owl-emerald/20" 
+                            : "bg-owl-violet/10 text-owl-violet border border-transparent"
+                        }`}
+                      >
+                        {isVerified && <Shield className="h-3 w-3" />}
+                        {skill}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -167,12 +187,28 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
               </div>
             </div>
 
-            {/* Right — Reviews */}
-            <div className="md:col-span-2">
-              <h3 className="font-semibold mb-4">
-                {t("reviewsTitle")}
-              </h3>
-              <ReviewList taskerId={tasker.profile_id} />
+            {/* Right — Portfolio & Reviews */}
+            <div className="md:col-span-2 space-y-12">
+              {portfolioItems && portfolioItems.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-4 text-xl">Portfolio</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {portfolioItems.map((item: any) => (
+                      <div key={item.id} className="relative group rounded-xl overflow-hidden aspect-square border bg-muted">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.image_url} alt="Portfolio" className="object-cover w-full h-full hover:scale-105 transition-transform duration-300" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <h3 className="font-semibold mb-4 text-xl">
+                  {t("reviewsTitle")}
+                </h3>
+                <ReviewList taskerId={tasker.profile_id} />
+              </div>
             </div>
           </div>
         </div>

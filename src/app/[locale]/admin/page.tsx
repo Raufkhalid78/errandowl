@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, Calendar, DollarSign, TrendingUp, Activity } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { AnalyticsCharts } from "@/components/admin/analytics-charts";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -11,9 +12,9 @@ export default async function AdminDashboard() {
   const { count: usersCount } = await supabase.from("profiles").select("*", { count: "exact", head: true });
   const { count: taskersCount } = await supabase.from("tasker_profiles").select("*", { count: "exact", head: true });
   const { count: bookingsCount } = await supabase.from("bookings").select("*", { count: "exact", head: true });
-  const { data: payments } = await supabase.from("payments").select("amount");
+  const { data: payments } = await supabase.from("payments").select("amount, created_at, status");
 
-  const totalRevenue = payments?.reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0;
+  const totalRevenue = payments?.filter((p: any) => p.status === "completed").reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0) || 0;
 
   const stats = [
     { label: t("totalUsers"), value: (usersCount || 0).toLocaleString(), icon: Users, color: "bg-owl-violet/10 text-owl-violet", change: "+12%" },
@@ -21,6 +22,52 @@ export default async function AdminDashboard() {
     { label: t("totalBookings"), value: (bookingsCount || 0).toLocaleString(), icon: Calendar, color: "bg-blue-500/10 text-blue-500", change: "+23%" },
     { label: t("totalRevenue"), value: `Rs ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "bg-owl-amber/10 text-owl-amber", change: "+18%" },
   ];
+
+  // Process 30-Day Revenue Trend Data
+  const last30Days = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (29 - i));
+    return d.toISOString().split("T")[0];
+  });
+
+  const revenueByDayMap = new Map<string, number>();
+  last30Days.forEach(day => revenueByDayMap.set(day, 0));
+
+  payments?.forEach((p: any) => {
+    if (p.status === "completed" && p.created_at) {
+      const day = p.created_at.split("T")[0];
+      if (revenueByDayMap.has(day)) {
+        revenueByDayMap.set(day, revenueByDayMap.get(day)! + Number(p.amount));
+      }
+    }
+  });
+
+  const revenueData = last30Days.map(day => ({
+    date: new Date(day).toLocaleDateString("en-PK", { day: "numeric", month: "short" }),
+    revenue: revenueByDayMap.get(day) || 0
+  }));
+
+  // Process Category Booking Data
+  const { data: bookingsData } = await supabase
+    .from("bookings")
+    .select(`
+      id,
+      category_id,
+      categories (
+        name_en
+      )
+    `);
+
+  const categoryCountMap = new Map<string, number>();
+  bookingsData?.forEach((b: any) => {
+    const catName = b.categories?.name_en || b.category_id || "Other";
+    categoryCountMap.set(catName, (categoryCountMap.get(catName) || 0) + 1);
+  });
+
+  const categoryData = Array.from(categoryCountMap.entries()).map(([name, value]) => ({
+    name,
+    value
+  })).sort((a, b) => b.value - a.value);
 
   // Recent bookings
   const { data: recentBookings } = await supabase
@@ -67,6 +114,10 @@ export default async function AdminDashboard() {
         })}
       </div>
 
+      {/* Analytics & Charts */}
+      <AnalyticsCharts revenueData={revenueData} categoryData={categoryData} />
+
+      {/* Lists Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Bookings */}
         <Card>

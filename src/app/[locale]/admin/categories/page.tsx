@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Plus, X } from "lucide-react";
@@ -17,19 +17,19 @@ export default function AdminCategoriesPage() {
   // New category form state
   const [newCat, setNewCat] = useState({ id: "", name_en: "", name_ur: "", icon: "", description_en: "", description_ur: "" });
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = useCallback(async () => {
     const { data: cats } = await supabase.from("categories").select("*").order("sort_order");
     const { data: svcs } = await supabase.from("services").select("*");
     
     if (cats) setCategories(cats);
     if (svcs) setServices(svcs);
     setLoading(false);
-  };
+  }, [supabase]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();

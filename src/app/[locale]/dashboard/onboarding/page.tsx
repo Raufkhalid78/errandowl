@@ -25,7 +25,7 @@ export default async function OnboardingPage() {
 
   // If profile is already complete, redirect to dashboard
   const isComplete = profile?.phone && profile?.location && 
-    (profile.role === 'client' || (profile.role === 'tasker' && profile.cnic_url && profile.cnic_back_url))
+    (profile.role === 'client' || (profile.role === 'tasker' && profile.cnic_url && profile.cnic_back_url && profile.cnic_status !== 'rejected'))
     
   if (isComplete) {
     redirect("/dashboard")

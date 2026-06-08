@@ -32,16 +32,17 @@ function SearchContent() {
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<PricingSettings | null>(null);
-  const supabase = createClient();
+
 
   useEffect(() => {
     getPricingSettings().then(setSettings);
     
     const fetchData = async () => {
+      const supabase = createClient();
       setLoading(true);
       
       const [taskersRes, categoriesRes] = await Promise.all([
-        supabase.from("tasker_profiles").select("*, profiles(*)").eq("active", true),
+        supabase.from("tasker_profiles").select("*, profiles!inner(*)").eq("active", true).eq("profiles.cnic_status", "approved"),
         supabase.from("categories").select("*").eq("active", true).order("sort_order")
       ]);
 

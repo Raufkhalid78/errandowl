@@ -177,7 +177,8 @@
       "forgotPassword": "Forgot Password?",
       "submit": "Sign In",
       "success": "Successfully logged in!",
-      "error": "Failed to log in. Please check your credentials."
+      "error": "Failed to log in. Please check your credentials.",
+      "orContinueWith": "Or continue with"
     },
     "signup": {
       "title": "Create an account",
@@ -192,7 +193,8 @@
       "roleTasker": "Become a Tasker",
       "submit": "Create Account",
       "success": "Check your email to verify your account",
-      "error": "Failed to create account. Please try again."
+      "error": "Failed to create account. Please try again.",
+      "orContinueWith": "Or continue with"
     }
   },
   "About": {
@@ -409,12 +411,16 @@
   "Admin": {
     "title": "Admin Dashboard",
     "description": "Platform overview and analytics.",
+    "dashboard": "Dashboard",
+    "bookings": "Bookings",
     "users": "Users",
     "taskers": "Taskers",
     "categories": "Categories & Services",
     "verification": "Verification Queue",
     "revenue": "Revenue Dashboard",
     "settings": "Settings",
+    "promoCodes": "Promo Codes",
+    "disputes": "Disputes",
     "approve": "Approve",
     "reject": "Reject",
     "save": "Save Settings",
@@ -548,7 +554,8 @@
     "accept": "Accept",
     "reject": "Reject",
     "startJob": "Start Job",
-    "complete": "Complete"
+    "complete": "Complete",
+    "payNow": "Pay Now"
   },
   "DashboardOverview": {
     "totalEarnings": "Total Earnings",
@@ -662,12 +669,17 @@
     "bio_label": "About You (Optional)",
     "bio_placeholder": "Tell clients a bit about yourself and your skills...",
     "cnic_notice": "To maintain a safe community, all taskers must provide a valid CNIC for identity verification. Your documents are securely encrypted.",
+    "cnic_rejected_title": "Verification Documents Rejected",
+    "cnic_rejected_desc": "Your previous identity verification documents were rejected. Please upload clear, legible photos of your CNIC (front and back) to re-submit for review.",
     "cnic_front_label": "CNIC Front Side *",
     "cnic_back_label": "CNIC Back Side *",
     "cnic_click_change": "Click to change",
     "upload_front": "Upload Front of CNIC",
     "upload_back": "Upload Back of CNIC",
     "upload_format": "JPG, PNG up to 5MB",
+    "certificate_label": "Degree or Certification (Optional)",
+    "upload_certificate": "Upload Degree / Certificate",
+    "certificate_notice": "Upload educational degrees, professional training certificates, or licenses to boost your credibility.",
     "hourly_rate_label": "Hourly Rate (Rs) *",
     "skills_label": "Skills (Comma separated) *",
     "skills_placeholder": "e.g. Plumbing, Carpentry, Painting",
@@ -782,5 +794,103 @@
     "recentUsers": "Recent Users",
     "client": "Client:",
     "systemStatus": "Platform is running smoothly. All systems operational."
+  },
+  "CTASection": {
+    "badge": "Join 10,000+ happy users",
+    "title": "Ready to get started?",
+    "subtitle": "Join ErrandOwl today and make your life easier. Skill up or hire up, the choice is yours.",
+    "join": "Join ErrandOwl Pakistan",
+    "browse": "Browse Taskers"
+  },
+  "PricingPage": {
+    "title": "Supercharge Your Earnings",
+    "subtitle": "Upgrade to ErrandOwl Elite and get access to exclusive features, priority support, and 0% commission on your jobs.",
+    "basicPlan": {
+      "title": "Basic Tasker",
+      "desc": "Perfect for getting started",
+      "price": "Free",
+      "f1": "Standard listing visibility",
+      "f2": "Accept unlimited jobs",
+      "f3": "Standard platform fee (15%)",
+      "f4": "Basic support",
+      "btn": "Sign Up for Free"
+    },
+    "elitePlan": {
+      "badge": "RECOMMENDED",
+      "title": "Elite Tasker",
+      "desc": "For professional service providers",
+      "price": "Rs 2,500",
+      "month": "/month",
+      "f1": "Priority placement in search results",
+      "f2": "Elite Badge on your profile",
+      "f3": "0% Commission on jobs (keep 100%)",
+      "f4": "Advanced analytics & insights",
+      "f5": "Priority 24/7 support",
+      "btn": "Upgrade to Elite"
+    }
+  },
+  "BookingForm": {
+    "magicEstimate": "✨ Magic Estimate",
+    "magicTooltip": "AI will estimate hours based on description",
+    "analyzing": "Analyzing...",
+    "errorShortDesc": "Please type a longer description first.",
+    "aiPrefix": "AI:",
+    "recurrence": "Recurrence",
+    "recNone": "One-time task",
+    "recWeekly": "Weekly",
+    "recBiweekly": "Bi-weekly (Every 2 weeks)",
+    "recMonthly": "Monthly",
+    "estimatedCost": "Estimated Cost",
+    "fixedPrice": "Fixed price task",
+    "confirmDirect": "Confirm Direct Booking",
+    "postOpen": "Post Open Job"
+  },
+  "SubscriptionDashboard": {
+    "title": "My Subscription",
+    "subtitle": "Manage your ErrandOwl Elite membership and billing details.",
+    "elitePlan": "Elite Tasker",
+    "eliteDesc": "Your subscription is active. You are enjoying 0% commission on all jobs.",
+    "active": "Active",
+    "currentPlan": "Current Plan",
+    "billingCycle": "Billing Cycle",
+    "monthly": "Monthly (Rs 2,500/mo)",
+    "nextPayment": "Next Payment",
+    "paymentMethod": "Payment Method",
+    "updatePayment": "Update Payment Method",
+    "cancelSub": "Cancel Subscription",
+    "basicTitle": "Basic Plan",
+    "basicDesc": "You are currently on the free Basic plan.",
+    "free": "Free",
+    "stdVis": "Standard visibility",
+    "stdComm": "15% Commission on jobs",
+    "upgradeBadge": "UPGRADE",
+    "elitePlanTitle": "Elite Plan",
+    "elitePlanDesc": "Supercharge your earnings",
+    "price": "Rs 2,500",
+    "mo": "/mo",
+    "priority": "Priority Search Placement",
+    "noComm": "0% Commission",
+    "eliteBadge": "Elite Badge",
+    "subscribeBtn": "Subscribe Now"
+  },
+  "PortfolioManager": {
+    "title": "Portfolio",
+    "addImage": "Add Image",
+    "emptyState": "No portfolio items yet.",
+    "emptySub": "Upload photos of your past work to attract more clients.",
+    "errorUpload": "Error uploading image",
+    "confirmDelete": "Delete this image?",
+    "altImg": "Portfolio"
+  },
+  "Disputes": {
+    "raiseDispute": "Raise Dispute",
+    "raiseDisputeTitle": "Raise a Dispute",
+    "reasonLabel": "Reason for Dispute",
+    "reasonPlaceholder": "Please explain in detail why you are raising this dispute...",
+    "errorReason": "Please provide a reason for the dispute.",
+    "evidenceLabel": "Evidence (Optional)",
+    "cancel": "Cancel",
+    "submit": "Submit Dispute",
+    "successAlert": "Dispute raised successfully. Our support team will review it shortly."
   }
 }

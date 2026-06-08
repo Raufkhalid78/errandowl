@@ -68,7 +68,7 @@ export function CategoriesSection() {
           {categories(ts).map((cat) => (
             <motion.div key={cat.id} variants={itemVariants}>
               <Link
-                href={`/search?category=${cat.id}`}
+                href={`/services?category=${cat.id}` as never}
                 className={`group block p-5 rounded-2xl bg-gradient-to-br ${cat.color} border border-border/50 hover:border-owl-violet/30 hover-lift transition-all`}
               >
                 <div className="text-3xl mb-3 group-hover:scale-110 transition-transform">

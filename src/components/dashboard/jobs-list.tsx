@@ -7,8 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useTranslations } from "next-intl"
 import { motion } from "framer-motion"
+import { Link } from "@/i18n/routing"
 
-export function JobsList({ jobs }: { jobs: any[] }) {
+import { Booking } from "@/types"
+
+export function JobsList({ jobs }: { jobs: Booking[] }) {
   const t = useTranslations("DashboardJobs")
 
   if (!jobs || jobs.length === 0) {
@@ -45,17 +48,17 @@ export function JobsList({ jobs }: { jobs: any[] }) {
               <div className="flex flex-col space-y-1">
                 <CardTitle className="text-base">{job.location}</CardTitle>
                 <CardDescription className="text-xs">
-                  {t("timeAndHours", { date: job.date, time: job.time, hours: job.estimated_hours })}
+                  {t("timeAndHours", { date: job.date, time: job.time, hours: job.estimated_hours || 0 })}
                 </CardDescription>
               </div>
               <Badge variant="secondary">{t("pending")}</Badge>
             </CardHeader>
             <CardContent className="flex-1">
-              <p className="text-sm line-clamp-3 mt-2">{job.description}</p>
+              <p className="text-sm line-clamp-3 mt-2">{(job as any).description}</p>
               
               <div className="flex items-center space-x-2 mt-4">
                 <Avatar className="h-6 w-6">
-                  <AvatarImage src={job.profiles?.avatar} alt={job.profiles?.name} />
+                  <AvatarImage src={job.profiles?.avatar_url} alt={job.profiles?.name} />
                   <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
                 </Avatar>
                 <span className="text-xs text-muted-foreground">
@@ -64,7 +67,9 @@ export function JobsList({ jobs }: { jobs: any[] }) {
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">{t("acceptJob")}</Button>
+              <Button className="w-full bg-owl-violet hover:bg-owl-violet-dark text-white" render={<Link href={`/dashboard/jobs/${job.id}`} />}>
+                View Details & Bid
+              </Button>
             </CardFooter>
             </Card>
           </motion.div>

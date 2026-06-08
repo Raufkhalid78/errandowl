@@ -5,8 +5,9 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from 'sonner';
+import { NotificationManager } from '@/components/layout/notification-manager';
 
 const inter = Inter({
   variable: "--font-sans",
@@ -73,6 +74,7 @@ export default async function LocaleLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <NextIntlClientProvider messages={messages}>
             {children}
+            <NotificationManager />
             <Toaster richColors position="top-center" />
           </NextIntlClientProvider>
         </ThemeProvider>

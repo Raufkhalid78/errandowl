@@ -35,6 +35,7 @@ export function OnboardingWizard({
   // Tasker specific state
   const [cnicFrontFile, setCnicFrontFile] = React.useState<File | null>(null)
   const [cnicBackFile, setCnicBackFile] = React.useState<File | null>(null)
+  const [certificateFile, setCertificateFile] = React.useState<File | null>(null)
   
   const [taskerData, setTaskerData] = React.useState({
     hourlyRate: 1000,
@@ -60,9 +61,9 @@ export function OnboardingWizard({
   ]
   const allDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-  const uploadDocument = async (file: File, side: 'front' | 'back') => {
+  const uploadDocument = async (file: File, prefix: string) => {
     const fileExt = file.name.split('.').pop()
-    const fileName = `cnic_${side}_${Math.random()}.${fileExt}`
+    const fileName = `${prefix}_${Math.random()}.${fileExt}`
     const filePath = `${user.id}/${fileName}`
 
     const { error: uploadError } = await supabase.storage
@@ -110,10 +111,18 @@ export function OnboardingWizard({
     try {
       let frontUrl = profile?.cnic_url
       let backUrl = profile?.cnic_back_url
+      let certificateUrl = profile?.certificate_url
 
-      if (isTasker && cnicFrontFile && cnicBackFile) {
-        frontUrl = await uploadDocument(cnicFrontFile, 'front')
-        backUrl = await uploadDocument(cnicBackFile, 'back')
+      if (isTasker) {
+        if (cnicFrontFile) {
+          frontUrl = await uploadDocument(cnicFrontFile, 'cnic_front')
+        }
+        if (cnicBackFile) {
+          backUrl = await uploadDocument(cnicBackFile, 'cnic_back')
+        }
+        if (certificateFile) {
+          certificateUrl = await uploadDocument(certificateFile, 'certificate')
+        }
       }
 
       const updates = {
@@ -121,27 +130,32 @@ export function OnboardingWizard({
         phone: formData.phone,
         location: formData.location,
         bio: formData.bio,
-        ...(isTasker && frontUrl && backUrl ? {
+        ...(isTasker ? {
           cnic_url: frontUrl,
           cnic_back_url: backUrl,
-          cnic_status: 'pending' // trigger review
+          cnic_status: 'pending', // trigger review
+          certificate_url: certificateUrl
         } : {}),
         updated_at: new Date()
       }
 
-      const { error } = await supabase
+      const { data: updatedProfile, error } = await supabase
         .from('profiles')
         .upsert(updates, { onConflict: 'auth_id' })
+        .select('id')
+        .single()
 
       if (error) throw error
 
-      if (isTasker && profile?.id) {
+      const profileId = updatedProfile?.id || profile?.id
+
+      if (isTasker && profileId) {
         const skillsArray = taskerData.skills.split(',').map(s => s.trim()).filter(s => s.length > 0)
         
         const { error: taskerError } = await supabase
           .from('tasker_profiles')
           .upsert({
-            profile_id: profile.id,
+            profile_id: profileId,
             city: formData.location,
             active: true,
             hourly_rate: taskerData.hourlyRate,
@@ -236,9 +250,16 @@ export function OnboardingWizard({
 
       {step === 2 && isTasker && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-          <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-lg text-sm mb-6">
-            {t("cnic_notice")}
-          </div>
+          {profile?.cnic_status === "rejected" ? (
+            <div className="bg-destructive/10 text-destructive border border-destructive/20 p-4 rounded-xl text-sm mb-6 flex flex-col gap-1">
+              <span className="font-semibold">{t("cnic_rejected_title")}</span>
+              <span>{t("cnic_rejected_desc")}</span>
+            </div>
+          ) : (
+            <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-lg text-sm mb-6">
+              {t("cnic_notice")}
+            </div>
+          )}
           
           <div className="space-y-4">
             <Label>{t("cnic_front_label")}</Label>
@@ -297,6 +318,39 @@ export function OnboardingWizard({
                   <>
                     <UploadCloud className="h-10 w-10 text-muted-foreground" />
                     <span className="font-medium">{t("upload_back")}</span>
+                    <span className="text-xs text-muted-foreground">{t("upload_format")}</span>
+                  </>
+                )}
+              </Label>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <Label>{t("certificate_label")}</Label>
+            <p className="text-[11px] text-muted-foreground -mt-1 leading-relaxed">{t("certificate_notice")}</p>
+            <div className="border-2 border-dashed rounded-xl p-8 text-center hover:bg-muted/50 transition-colors">
+              <input 
+                type="file" 
+                id="certificate-file" 
+                className="hidden" 
+                accept="image/*,application/pdf"
+                onChange={e => {
+                  if (e.target.files && e.target.files[0]) {
+                    setCertificateFile(e.target.files[0])
+                  }
+                }}
+              />
+              <Label htmlFor="certificate-file" className="cursor-pointer flex flex-col items-center gap-3">
+                {certificateFile ? (
+                  <>
+                    <CheckCircle className="h-10 w-10 text-green-500" />
+                    <span className="font-medium">{certificateFile.name}</span>
+                    <span className="text-xs text-muted-foreground">{t("cnic_click_change")}</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="h-10 w-10 text-muted-foreground" />
+                    <span className="font-medium">{t("upload_certificate")}</span>
                     <span className="text-xs text-muted-foreground">{t("upload_format")}</span>
                   </>
                 )}

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
-import { LayoutDashboard, Users, UserCheck, Grid3x3, Briefcase, Calendar, Settings, Tag, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, Grid3x3, Briefcase, Calendar, Settings, Tag, AlertTriangle, LogOut } from "lucide-react";
 
 const sidebarLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const sidebarLinks = [
   { href: "/admin/taskers", label: "Taskers", icon: UserCheck },
   { href: "/admin/categories", label: "Categories", icon: Grid3x3 },
   { href: "/admin/bookings", label: "Bookings", icon: Calendar },
+  { href: "/admin/disputes", label: "Disputes", icon: AlertTriangle },
   { href: "/admin/promo-codes", label: "Promo Codes", icon: Tag },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
@@ -26,7 +27,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // Check if user is admin
   const { data: adminData } = await supabase.from("admins").select("*").eq("email", user.email).single();
-  const { data: profile } = await supabase.from("profiles").select("role").eq("auth_id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("role, status").eq("auth_id", user.id).single();
+
+  if (profile?.status === "suspended" || profile?.status === "banned") {
+    redirect("/suspended");
+  }
 
   if (!adminData && profile?.role !== "admin") {
     redirect("/dashboard");
@@ -56,7 +61,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             // Map labels to keys dynamically
             const tKey = link.label === "Verification Queue" ? "verification" : 
                          link.label === "Revenue" ? "revenue" : 
-                         link.label === "Promo Codes" ? "settings" : // reuse or ignore
+                         link.label === "Promo Codes" ? "promoCodes" : 
+                         link.label === "Disputes" ? "disputes" : 
                          link.label.toLowerCase();
             return (
               <Link

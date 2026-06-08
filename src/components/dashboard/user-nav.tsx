@@ -11,7 +11,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
@@ -41,7 +40,6 @@ export function UserNav({ user }: { user: { name: string, email: string, avatar?
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        nativeButton
         render={
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">

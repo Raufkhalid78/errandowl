@@ -216,7 +216,7 @@ CREATE POLICY "Taskers can update own profile." ON public.tasker_profiles FOR UP
 CREATE POLICY "Users can view their own bookings." ON public.bookings FOR SELECT USING (
     auth.uid() IN (SELECT auth_id FROM public.profiles WHERE id = client_id OR id = tasker_id)
     OR (SELECT role FROM public.profiles WHERE auth_id = auth.uid()) = 'admin'
-    OR (SELECT email FROM public.admins WHERE email = (SELECT email FROM auth.users WHERE id = auth.uid())) IS NOT NULL
+    OR EXISTS (SELECT 1 FROM public.admins WHERE email = auth.jwt() ->> 'email')
 );
 CREATE POLICY "Clients can create bookings." ON public.bookings FOR INSERT WITH CHECK (
     auth.uid() IN (SELECT auth_id FROM public.profiles WHERE id = client_id)

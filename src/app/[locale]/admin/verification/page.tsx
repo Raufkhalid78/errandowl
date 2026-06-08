@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, XCircle, ExternalLink, ShieldCheck } from "lucide-react";
@@ -14,22 +14,47 @@ export default function VerificationQueuePage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const supabase = createClient();
 
-  const fetchQueue = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*, tasker_profiles(*)")
-      .eq("is_verified", false)
-      .eq("role", "tasker")
-      .not("cnic_url", "is", null); // Only show taskers who have actually uploaded documents
+  const getStoragePathFromUrl = (url: string) => {
+    if (!url) return null;
+    const parts = url.split("/documents/");
+    if (parts.length > 1) {
+      return parts[1].split("?")[0];
+    }
+    return null;
+  };
 
-    if (data) setTaskers(data);
-    setLoading(false);
+  const handleViewCnic = async (url: string) => {
+    const path = getStoragePathFromUrl(url);
+    if (!path) {
+      window.open(url, "_blank");
+      return;
+    }
+    const { data, error } = await supabase.storage
+      .from("documents")
+      .createSignedUrl(path, 60);
+
+    if (error) {
+      toast.error("Error generating signed URL: " + error.message);
+    } else if (data?.signedUrl) {
+      window.open(data.signedUrl, "_blank");
+    }
   };
 
   useEffect(() => {
+    const fetchQueue = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*, tasker_profiles(*)")
+        .eq("cnic_status", "pending")
+        .eq("role", "tasker")
+        .not("cnic_url", "is", null);
+
+      if (data) setTaskers(data);
+      setLoading(false);
+    };
+
     fetchQueue();
-  }, []);
+  }, [supabase]);
 
   const handleVerify = async (userId: string, status: boolean) => {
     setProcessingId(userId);
@@ -93,19 +118,29 @@ export default function VerificationQueuePage() {
                     variant="outline"
                     size="sm"
                     className="flex-1 md:flex-none gap-2 h-10"
-                    onClick={() => window.open(tasker.cnic_url || "#", "_blank")}
+                    onClick={() => handleViewCnic(tasker.cnic_url)}
                     disabled={!tasker.cnic_url}
                   >
                     <ExternalLink className="h-4 w-4" /> View Front
                   </Button>
-                  {tasker.cnic_back_url && (
+                   {tasker.cnic_back_url && (
                     <Button
                       variant="outline"
                       size="sm"
                       className="flex-1 md:flex-none gap-2 h-10"
-                      onClick={() => window.open(tasker.cnic_back_url || "#", "_blank")}
+                      onClick={() => handleViewCnic(tasker.cnic_back_url)}
                     >
                       <ExternalLink className="h-4 w-4" /> View Back
+                    </Button>
+                  )}
+                  {tasker.certificate_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 md:flex-none gap-2 h-10"
+                      onClick={() => handleViewCnic(tasker.certificate_url)}
+                    >
+                      <ExternalLink className="h-4 w-4" /> View Cert/Degree
                     </Button>
                   )}
                   <Button

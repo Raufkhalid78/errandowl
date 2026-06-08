@@ -32,14 +32,19 @@ export function BookingForm({
   taskerRate?: number;
 }) {
   const t = useTranslations("Booking")
+  const tF = useTranslations("BookingForm")
   const [date, setDate] = React.useState<Date>()
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string | null>(null)
   const [settings, setSettings] = React.useState<PricingSettings | null>(null)
   const [estimatedHours, setEstimatedHours] = React.useState<number>(2)
+  const [recurrence, setRecurrence] = React.useState<string>("none")
+  const [isEstimating, setIsEstimating] = React.useState(false)
+  const [aiReasoning, setAiReasoning] = React.useState<string | null>(null)
   
   const router = useRouter()
   const supabase = createClient()
+  const descriptionRef = React.useRef<HTMLTextAreaElement>(null)
 
   React.useEffect(() => {
     getPricingSettings().then(setSettings)
@@ -75,6 +80,7 @@ export function BookingForm({
       time: target.time.value,
       estimated_hours: settings?.pricing_mode === 'hourly' ? estimatedHours : 1,
       pricing_mode: settings?.pricing_mode || 'hourly',
+      recurrence_pattern: recurrence,
       status: "pending",
     }
 
@@ -114,10 +120,46 @@ export function BookingForm({
             <Label htmlFor="description">{t('taskDescription')}</Label>
             <textarea
               id="description"
+              ref={descriptionRef}
               required
               className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               placeholder={t('taskPlaceholder')}
             />
+            <div className="flex justify-end">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={async () => {
+                  const desc = descriptionRef.current?.value
+                  if (!desc || desc.length < 10) return alert(tF("errorShortDesc"))
+                  
+                  setIsEstimating(true)
+                  try {
+                    const res = await fetch("/api/estimate", {
+                      method: "POST",
+                      body: JSON.stringify({ description: desc })
+                    })
+                    const data = await res.json()
+                    if (data.estimated_hours) setEstimatedHours(data.estimated_hours)
+                    if (data.reasoning) setAiReasoning(data.reasoning)
+                  } catch (e) {
+                    console.error("Estimate failed", e)
+                  }
+                  setIsEstimating(false)
+                }}
+                disabled={isEstimating}
+                className="text-xs h-8 gap-1 border-owl-violet/30 text-owl-violet hover:bg-owl-violet/10"
+              >
+                {isEstimating ? <Loader2 className="h-3 w-3 animate-spin" /> : <span className="text-base">✨</span>} 
+                {isEstimating ? tF("analyzing") : tF("magicEstimate")}
+              </Button>
+            </div>
+            {aiReasoning && (
+              <p className="text-xs text-owl-violet bg-owl-violet/10 p-2 rounded-md italic">
+                {tF("aiPrefix")} {aiReasoning}
+              </p>
+            )}
           </div>
 
           <div className="grid gap-2">
@@ -159,6 +201,21 @@ export function BookingForm({
             </div>
           </div>
 
+          <div className="grid gap-2">
+            <Label htmlFor="recurrence">{tF("recurrence")}</Label>
+            <select
+              id="recurrence"
+              value={recurrence}
+              onChange={(e) => setRecurrence(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="none">{tF("recNone")}</option>
+              <option value="weekly">{tF("recWeekly")}</option>
+              <option value="biweekly">{tF("recBiweekly")}</option>
+              <option value="monthly">{tF("recMonthly")}</option>
+            </select>
+          </div>
+
           {settings.pricing_mode === 'hourly' && (
             <div className="grid gap-2">
               <Label htmlFor="estimated_hours">{t('estimatedHours')}</Label>
@@ -178,11 +235,11 @@ export function BookingForm({
           {/* Cost Estimate Preview */}
           <div className="bg-muted p-4 rounded-xl flex items-center justify-between mt-2">
             <div>
-              <p className="text-sm font-medium">Estimated Cost</p>
+              <p className="text-sm font-medium">{tF("estimatedCost")}</p>
               <p className="text-xs text-muted-foreground">
                 {settings.pricing_mode === 'hourly' 
                   ? `${estimatedHours} hours × Rs ${rateToUse}/hr` 
-                  : "Fixed price task"}
+                  : tF("fixedPrice")}
               </p>
             </div>
             <div className="text-xl font-bold text-owl-violet">
@@ -195,7 +252,7 @@ export function BookingForm({
         <CardFooter>
           <Button type="submit" disabled={isLoading} className="w-full bg-owl-violet hover:bg-owl-violet-dark text-white h-11">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {taskerId ? "Confirm Direct Booking" : "Post Open Job"}
+            {taskerId ? tF("confirmDirect") : tF("postOpen")}
           </Button>
         </CardFooter>
       </form>

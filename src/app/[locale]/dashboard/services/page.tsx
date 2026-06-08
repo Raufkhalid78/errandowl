@@ -13,15 +13,7 @@ export default async function ServicesPage() {
     .select("*")
     .eq("active", true)
 
-  // Fallback to mock data if DB is empty for demonstration purposes
-  const categories = categoriesData && categoriesData.length > 0 ? categoriesData : [
-    { id: "cat-1", name: "Furniture Assembly", icon: "🪑", description: "Assemble or disassemble furniture items" },
-    { id: "cat-2", name: "Home Cleaning", icon: "🧹", description: "Professional home and apartment cleaning" },
-    { id: "cat-3", name: "Moving Help", icon: "📦", description: "Loading, unloading, and packing assistance" },
-    { id: "cat-4", name: "Mounting & Installation", icon: "🔧", description: "Mount TVs, shelves, art, and more" },
-    { id: "cat-5", name: "Plumbing", icon: "🔩", description: "Fix leaks, clogs, and plumbing issues" },
-    { id: "cat-6", name: "Electrical", icon: "⚡", description: "Light fixtures, outlets, and wiring" },
-  ]
+  const categories = categoriesData || []
 
   return (
     <div className="space-y-6">
@@ -33,25 +25,35 @@ export default async function ServicesPage() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {categories.map((category) => (
-          <Link href={`/dashboard/book?category=${category.id}`} key={category.id}>
-            <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-              <CardHeader>
-                <div className="flex items-center space-x-4">
-                  <div className="text-4xl">{category.icon}</div>
-                  <div>
-                    <CardTitle>{category.name}</CardTitle>
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <Link href={`/dashboard/book?category=${category.id}`} key={category.id}>
+              <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+                <CardHeader>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-4xl">{category.icon}</div>
+                    <div>
+                      <CardTitle>{category.name}</CardTitle>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-sm">
-                  {category.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-sm">
+                    {category.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </Link>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-16 border border-dashed rounded-2xl">
+            <div className="text-4xl mb-4">🛠️</div>
+            <h3 className="font-medium mb-2">No services available</h3>
+            <p className="text-sm text-muted-foreground">
+              We are currently setting up our service catalog. Check back soon!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

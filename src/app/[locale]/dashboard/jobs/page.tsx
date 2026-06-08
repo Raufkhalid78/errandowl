@@ -19,31 +19,12 @@ export default async function JobsPage() {
   // In a real app, you might filter by tasker's skills/categories
   const { data: openJobsData } = await supabase
     .from("bookings")
-    .select("*, profiles!client_id(name, avatar)")
+    .select("*, profiles!client_id(name, avatar_url)")
     .eq("status", "pending")
+    .is("tasker_id", null)
     .order("created_at", { ascending: false })
 
-  // Fallback mock data if DB is empty for demonstration
-  const openJobs = openJobsData && openJobsData.length > 0 ? openJobsData : [
-    {
-      id: "mock-1",
-      description: "Need help assembling an IKEA wardrobe. Should take about 2 hours.",
-      location: "DHA Phase 5, Lahore",
-      date: "2026-05-10",
-      time: "14:00",
-      estimated_hours: 2,
-      profiles: { name: "Ahmed R.", avatar: "" }
-    },
-    {
-      id: "mock-2",
-      description: "Deep cleaning for a 3-bedroom apartment before moving in.",
-      location: "Gulberg III, Lahore",
-      date: "2026-05-12",
-      time: "09:00",
-      estimated_hours: 4,
-      profiles: { name: "Sara K.", avatar: "" }
-    }
-  ]
+  const openJobs = openJobsData || []
 
   return (
     <div className="space-y-6">
@@ -55,7 +36,17 @@ export default async function JobsPage() {
       </div>
 
       <div className="grid gap-6">
-        <JobsList jobs={openJobs} />
+        {openJobs.length > 0 ? (
+          <JobsList jobs={openJobs} />
+        ) : (
+          <div className="text-center py-16 border border-dashed rounded-2xl">
+            <div className="text-4xl mb-4">🔍</div>
+            <h3 className="font-medium mb-2">No open jobs right now</h3>
+            <p className="text-sm text-muted-foreground">
+              Check back later for new opportunities in your area.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

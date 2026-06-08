@@ -16,6 +16,9 @@ interface ReviewFormProps {
 export function ReviewForm({ bookingId, clientId, taskerId, onSuccess }: ReviewFormProps) {
   const t = useTranslations("Reviews");
   const [rating, setRating] = useState(0);
+  const [punctuality, setPunctuality] = useState(0);
+  const [quality, setQuality] = useState(0);
+  const [communication, setCommunication] = useState(0);
   const [hover, setHover] = useState(0);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +34,9 @@ export function ReviewForm({ bookingId, clientId, taskerId, onSuccess }: ReviewF
       client_id: clientId,
       tasker_id: taskerId,
       rating,
+      rating_punctuality: punctuality || null,
+      rating_quality: quality || null,
+      rating_communication: communication || null,
       text,
     });
 
@@ -38,6 +44,9 @@ export function ReviewForm({ bookingId, clientId, taskerId, onSuccess }: ReviewF
       alert(error.message);
     } else {
       setRating(0);
+      setPunctuality(0);
+      setQuality(0);
+      setCommunication(0);
       setText("");
       if (onSuccess) onSuccess();
     }
@@ -48,23 +57,71 @@ export function ReviewForm({ bookingId, clientId, taskerId, onSuccess }: ReviewF
     <form onSubmit={handleSubmit} className="space-y-4 p-6 rounded-2xl border border-border/50 bg-card glass">
       <h3 className="font-semibold">{t('leaveReview')}</h3>
       
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            className="transition-all hover:scale-110 focus:outline-none"
-            onClick={() => setRating(star)}
-            onMouseEnter={() => setHover(star)}
-            onMouseLeave={() => setHover(0)}
-          >
-            <Star
-              className={`h-8 w-8 ${
-                (hover || rating) >= star ? "fill-owl-amber text-owl-amber" : "text-muted-foreground/30"
-              }`}
-            />
-          </button>
-        ))}
+      <div className="space-y-1">
+        <label className="text-xs font-medium text-muted-foreground">Overall Rating</label>
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              className="transition-all hover:scale-110 focus:outline-none"
+              onClick={() => setRating(star)}
+              onMouseEnter={() => setHover(star)}
+              onMouseLeave={() => setHover(0)}
+            >
+              <Star
+                className={`h-8 w-8 ${
+                  (hover || rating) >= star ? "fill-owl-amber text-owl-amber" : "text-muted-foreground/30"
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <div className="space-y-1">
+          <label className="text-[10px] font-medium text-muted-foreground uppercase">Punctuality</label>
+          <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                onClick={() => setPunctuality(star)}
+                className={`h-4 w-4 cursor-pointer transition-colors ${
+                  punctuality >= star ? "fill-owl-amber text-owl-amber" : "text-muted-foreground/30"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-medium text-muted-foreground uppercase">Quality</label>
+          <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                onClick={() => setQuality(star)}
+                className={`h-4 w-4 cursor-pointer transition-colors ${
+                  quality >= star ? "fill-owl-amber text-owl-amber" : "text-muted-foreground/30"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] font-medium text-muted-foreground uppercase">Communication</label>
+          <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                onClick={() => setCommunication(star)}
+                className={`h-4 w-4 cursor-pointer transition-colors ${
+                  communication >= star ? "fill-owl-amber text-owl-amber" : "text-muted-foreground/30"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       <textarea

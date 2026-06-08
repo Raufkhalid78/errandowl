@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Clock, MapPin, Star, MessageCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, Star, MessageCircle, Repeat } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 
@@ -15,45 +15,6 @@ const statusColors: Record<string, string> = {
   completed: "bg-owl-emerald/10 text-owl-emerald border-owl-emerald/20",
   cancelled: "bg-destructive/10 text-destructive border-destructive/20",
 };
-
-const mockBookings = [
-  {
-    id: "bk-1",
-    service_name: "IKEA Furniture Assembly",
-    tasker_name: "Ali Khan",
-    tasker_id: "tsk-1",
-    status: "completed",
-    date: "2026-04-15",
-    time: "14:00",
-    location: "DHA Phase 5, Lahore",
-    total_cost: 2400,
-    estimated_hours: 3,
-  },
-  {
-    id: "bk-2",
-    service_name: "Deep Cleaning",
-    tasker_name: "Fatima Zahra",
-    tasker_id: "tsk-2",
-    status: "pending",
-    date: "2026-04-25",
-    time: "09:00",
-    location: "Gulberg III, Lahore",
-    total_cost: 3500,
-    estimated_hours: 5,
-  },
-  {
-    id: "bk-3",
-    service_name: "Light Installation",
-    tasker_name: "Usman Ahmed",
-    tasker_id: "tsk-3",
-    status: "confirmed",
-    date: "2026-04-28",
-    time: "11:00",
-    location: "F-8, Islamabad",
-    total_cost: 2400,
-    estimated_hours: 2,
-  },
-];
 
 async function updateBookingStatus(bookingId: string, status: string) {
   "use server";
@@ -80,10 +41,10 @@ export default async function BookingsPage() {
 
   if (isTasker) {
     const { data } = await supabase.from("bookings").select("*").eq("tasker_id", profileId).order("created_at", { ascending: false });
-    bookings = data && data.length > 0 ? data : mockBookings;
+    bookings = data || [];
   } else {
     const { data } = await supabase.from("bookings").select("*").eq("client_id", profileId).order("created_at", { ascending: false });
-    bookings = data && data.length > 0 ? data : mockBookings;
+    bookings = data || [];
   }
 
   // Group by status
@@ -188,6 +149,14 @@ async function BookingCard({ booking, isTasker }: { booking: any; isTasker: bool
           <MapPin className="h-4 w-4 shrink-0" />
           <span className="truncate">{booking.location || t("locationTbd")}</span>
         </div>
+
+        {booking.recurrence_pattern && booking.recurrence_pattern !== 'none' && (
+          <div className="flex items-center gap-2 text-xs font-medium text-owl-violet bg-owl-violet/10 w-fit px-2 py-1 rounded-md mt-1">
+            <Repeat className="h-3 w-3 shrink-0" />
+            <span className="capitalize">{booking.recurrence_pattern} Booking</span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between pt-3 border-t border-border/50">
           <span className="font-semibold text-owl-violet">
             Rs {(booking.total_cost || 0).toLocaleString()}
@@ -199,14 +168,29 @@ async function BookingCard({ booking, isTasker }: { booking: any; isTasker: bool
 
         {/* Actions */}
         <div className="flex gap-2 pt-2">
+          {booking.tasker_id && booking.payment_status === "unpaid" && !isTasker && (
+            <Button size="sm" className="flex-1 text-xs bg-owl-emerald hover:bg-owl-emerald/90 text-white" render={<Link href={`/dashboard/checkout/${booking.id}`} />}>
+              {t("payNow")}
+            </Button>
+          )}
           {status === "completed" && !isTasker && (
             <Button size="sm" variant="outline" className="flex-1 text-xs" render={<Link href={`/tasker/${booking.tasker_id}#reviews`} />}>
               <Star className="h-3 w-3 mr-1" /> {t("review")}
             </Button>
           )}
-          {["pending", "confirmed", "in_progress"].includes(status) && (
+          {["pending", "confirmed", "in_progress"].includes(status) && booking.tasker_id && (
             <Button size="sm" variant="outline" className="flex-1 text-xs" render={<Link href={`/dashboard/messages?booking=${booking.id}`} />}>
               <MessageCircle className="h-3 w-3 mr-1" /> {t("message")}
+            </Button>
+          )}
+          {status === "pending" && !booking.tasker_id && !isTasker && (
+            <Button size="sm" className="flex-1 text-xs bg-owl-violet hover:bg-owl-violet-dark text-white" render={<Link href={`/dashboard/bookings/${booking.id}`} />}>
+              Review Bids
+            </Button>
+          )}
+          {status === "completed" && (
+            <Button size="sm" variant="outline" className="flex-1 text-xs" render={<Link href={`/dashboard/bookings/${booking.id}`} />}>
+              View Details
             </Button>
           )}
           {status === "pending" && isTasker && (

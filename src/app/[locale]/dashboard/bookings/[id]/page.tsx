@@ -1,0 +1,121 @@
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+
+import { MapPin, Calendar, Clock, ArrowLeft, Download } from "lucide-react"
+import { Link } from "@/i18n/routing"
+import { BidList } from "@/components/booking/bid-list"
+import { DisputeButton } from "@/components/booking/dispute-button"
+import { LiveMap } from "@/components/tracking/live-map"
+import { Button } from "@/components/ui/button"
+
+export default async function BookingDetailsPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
+  const { id } = await params
+  const supabase = await createClient()
+
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/login")
+
+  const { data: profile } = await supabase.from("profiles").select("id, role").eq("auth_id", user.id).single()
+  if (!profile) redirect("/dashboard")
+  
+  // Fetch booking
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("*, tasker:tasker_id(name), client:client_id(name)")
+    .eq("id", id)
+    .single()
+
+  if (!booking) redirect("/dashboard/bookings")
+
+  const isClient = profile?.id === booking.client_id
+  const isOpenJob = !booking.tasker_id && booking.status === "pending"
+
+  return (
+    <div className="max-w-3xl space-y-6">
+      <Link href="/dashboard/bookings" className="flex items-center text-sm text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Back to Bookings
+      </Link>
+
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="text-3xl font-bold tracking-tight">{booking.service_name || "Task"}</h2>
+            <span className="px-2.5 py-0.5 rounded-full border text-xs capitalize bg-muted">{booking.status.replace("_", " ")}</span>
+          </div>
+          <p className="text-muted-foreground">{booking.description}</p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {isClient && booking.tasker_id && booking.payment_status === "unpaid" && (
+            <Button 
+              className="bg-owl-emerald hover:bg-owl-emerald/90 text-white shrink-0"
+              render={<Link href={`/dashboard/checkout/${booking.id}`} />}
+            >
+              Pay Now
+            </Button>
+          )}
+          {booking.status === "completed" && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="shrink-0"
+              render={<Link href={`/dashboard/bookings/${booking.id}/invoice`} />}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Invoice
+            </Button>
+          )}
+          
+          <DisputeButton 
+            bookingId={booking.id} 
+            userId={profile.id} 
+            status={booking.status} 
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-4 text-sm text-muted-foreground p-4 bg-muted/20 rounded-xl border border-border/50">
+        <div className="flex items-center gap-1.5">
+          <Calendar className="h-4 w-4 text-owl-violet" />
+          {booking.date}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-4 w-4 text-owl-violet" />
+          {booking.time}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <MapPin className="h-4 w-4 text-owl-violet" />
+          {booking.location}
+        </div>
+      </div>
+
+      {isClient && isOpenJob && (
+        <div className="pt-4 border-t border-border/50">
+          <BidList bookingId={booking.id} />
+        </div>
+      )}
+      
+      {booking.tasker_id && (
+        <div className="pt-4 border-t border-border/50">
+          <h3 className="font-semibold text-lg mb-4">Assigned To</h3>
+          <div className="p-4 rounded-xl border border-border/50 bg-card/50">
+            <p className="font-medium">{booking.tasker?.name || "Tasker"}</p>
+            <p className="text-sm text-muted-foreground mt-1">Total Agreed Cost: Rs {booking.total_cost?.toLocaleString() || 0}</p>
+          </div>
+          
+          {booking.status === "in_progress" && (
+            <div className="mt-6 pt-6 border-t border-border/50">
+              <LiveMap 
+                bookingId={booking.id} 
+                taskerId={booking.tasker_id} 
+                isTasker={!isClient} 
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
