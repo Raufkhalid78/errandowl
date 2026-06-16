@@ -80,7 +80,7 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
         </div>
         {error && <div className="text-sm text-red-500 font-medium mb-4">{error}</div>}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex-col gap-2">
         <Button onClick={handlePayment} disabled={isLoading} className="w-full h-12 text-lg">
           {isLoading && (
             <svg
@@ -106,6 +106,10 @@ export function CheckoutForm({ bookingId, amount }: { bookingId: string, amount:
           )}
           {t("pay_btn")}
         </Button>
+        <div className="text-center text-xs text-muted-foreground mt-3 space-y-1">
+          <p>Payments are securely processed by our parent company, TechyDez.</p>
+          <p className="text-[10px] opacity-75">ErrandOwl is owned and operated by TechyDez.</p>
+        </div>
       </CardFooter>
     </Card>
   )
