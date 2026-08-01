@@ -6,7 +6,8 @@ import { Link } from "@/i18n/routing"
 import { BidList } from "@/components/booking/bid-list"
 import { DisputeButton } from "@/components/booking/dispute-button"
 import { SosButton } from "@/components/booking/sos-button"
-import { LiveMap } from "@/components/tracking/live-map"
+import { LiveTrackingMap } from "@/components/tracking/live-tracking-map"
+import { TaskerLocationEmitter } from "@/components/tracking/tasker-location-emitter"
 import { CompletionPhotoUploader } from "@/components/booking/completion-photo-uploader"
 import { Button } from "@/components/ui/button"
 
@@ -21,10 +22,9 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
   const { data: profile } = await supabase.from("profiles").select("id, role").eq("auth_id", user.id).single()
   if (!profile) redirect("/dashboard")
   
-  // Fetch booking
   const { data: booking } = await supabase
     .from("bookings")
-    .select("*, tasker:tasker_id(name), client:client_id(name), completion_photo_urls")
+    .select("*, tasker:tasker_id(name), client:client_id(name), completion_photo_urls, lat, lng")
     .eq("id", id)
     .single()
 
@@ -126,11 +126,18 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
               <div className="flex justify-end">
                 <SosButton bookingId={booking.id} userId={profile.id} />
               </div>
-              <LiveMap 
-                bookingId={booking.id} 
-                taskerId={booking.tasker_id} 
-                isTasker={!isClient} 
-              />
+              {isClient ? (
+                <LiveTrackingMap 
+                  bookingId={booking.id} 
+                  clientLat={booking.lat} 
+                  clientLng={booking.lng} 
+                />
+              ) : (
+                <TaskerLocationEmitter 
+                  bookingId={booking.id} 
+                  taskerProfileId={profile.id} 
+                />
+              )}
               {!isClient && (
                 <div className="pt-6 border-t border-border/50">
                   <CompletionPhotoUploader bookingId={booking.id} userId={profile.id} />
