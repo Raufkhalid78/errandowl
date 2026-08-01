@@ -15,7 +15,7 @@ export function ReferralLeaderboard() {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
         .from("referral_codes")
-        .select("*, public_profiles!inner(name, avatar_url, city)")
+        .select("*, profiles!inner(name, avatar_url, city)")
         .order("total_uses", { ascending: false })
         .limit(10);
 
@@ -63,7 +63,7 @@ export function ReferralLeaderboard() {
         ) : (
           <div className="space-y-3">
             {leaderboard.map((item, index) => {
-              const profile = item.public_profiles || {};
+              const profile = item.profiles || {};
               const initials = profile.name?.[0]?.toUpperCase() || "U";
               const rankColor =
                 index === 0

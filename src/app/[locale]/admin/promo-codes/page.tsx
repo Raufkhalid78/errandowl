@@ -4,10 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export default async function AdminPromoCodesPage() {
   const supabase = await createClient();
   const { data: promoCodes } = await supabase.from("promo_codes").select("*");
-  const promoList = promoCodes && promoCodes.length > 0 ? promoCodes : [
-    { id: "p1", code: "WELCOME500", discount_type: "fixed", discount_value: 500, current_uses: 45, max_uses: null, active: true },
-    { id: "p2", code: "LAUNCH50", discount_type: "percentage", discount_value: 50, current_uses: 12, max_uses: 100, active: true },
-  ];
+  const promoList = promoCodes || [];
 
   return (
     <div className="space-y-6">

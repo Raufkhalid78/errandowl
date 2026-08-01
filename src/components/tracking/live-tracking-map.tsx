@@ -54,15 +54,15 @@ export function LiveTrackingMap({ bookingId, clientLat = 31.5204, clientLng = 74
     const fetchInitialLocation = async () => {
       const { data } = await supabase
         .from("tracking_sessions")
-        .select("lat, lng, updated_at")
+        .select("current_lat, current_lng, last_updated")
         .eq("booking_id", bookingId)
         .maybeSingle();
 
-      if (data && data.lat && data.lng) {
-        const lat = parseFloat(data.lat);
-        const lng = parseFloat(data.lng);
+      if (data && data.current_lat && data.current_lng) {
+        const lat = parseFloat(data.current_lat as unknown as string);
+        const lng = parseFloat(data.current_lng as unknown as string);
         setTaskerLocation({ lat, lng });
-        setLastUpdated(new Date(data.updated_at));
+        setLastUpdated(new Date(data.last_updated as string));
         calculateDistanceAndEta(lat, lng, clientLat, clientLng);
       }
     };
@@ -81,9 +81,9 @@ export function LiveTrackingMap({ bookingId, clientLat = 31.5204, clientLng = 74
           filter: `booking_id=eq.${bookingId}`,
         },
         (payload: any) => {
-          if (payload.new && payload.new.lat && payload.new.lng) {
-            const lat = parseFloat(payload.new.lat);
-            const lng = parseFloat(payload.new.lng);
+          if (payload.new && payload.new.current_lat && payload.new.current_lng) {
+            const lat = parseFloat(payload.new.current_lat);
+            const lng = parseFloat(payload.new.current_lng);
             setTaskerLocation({ lat, lng });
             setLastUpdated(new Date());
             calculateDistanceAndEta(lat, lng, clientLat, clientLng);

@@ -37,11 +37,10 @@ export function SosButton({ bookingId, userId }: SosButtonProps) {
   const submitSos = async (lat: number, lng: number) => {
     try {
       const { error } = await supabase.from("sos_events").insert({
+        profile_id: userId,
         booking_id: bookingId,
-        user_id: userId,
-        lat,
-        lng,
-        status: "triggered",
+        location: `${lat},${lng}`,
+        status: "active",
       });
 
       if (error) throw error;

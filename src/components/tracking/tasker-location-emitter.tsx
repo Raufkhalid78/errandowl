@@ -31,10 +31,10 @@ export function TaskerLocationEmitter({ bookingId, taskerProfileId }: TaskerLoca
           {
             booking_id: bookingId,
             tasker_id: taskerProfileId,
-            lat: latitude,
-            lng: longitude,
+            current_lat: latitude,
+            current_lng: longitude,
             heading: heading || 0,
-            updated_at: new Date().toISOString(),
+            last_updated: new Date().toISOString(),
           },
           { onConflict: "booking_id" }
         );

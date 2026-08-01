@@ -55,18 +55,19 @@ export async function POST(request: Request) {
     const webhookSecret = process.env.RAPID_GATEWAY_WEBHOOK_SECRET || process.env.RAPID_GATEWAY_SECRET_KEY || "";
     const signatureHeader = request.headers.get("x-rapid-signature") || request.headers.get("x-signature") || payload.signature || "";
 
-    if (webhookSecret && signatureHeader) {
-      const isValidSig = verifyRapidGatewaySignature(rawBody, signatureHeader, webhookSecret);
-      if (!isValidSig) {
-        console.error("Rapid Gateway signature verification failed!");
-        await supabase.from("payment_webhook_logs").insert({
-          booking_id: bookingId,
-          payload,
-          status: "rejected",
-          error_message: "Rapid Gateway HMAC-SHA256 signature verification failed",
-        });
-        return new Response("Invalid Signature", { status: 400 });
-      }
+    if (!webhookSecret) {
+      console.error("RAPID_GATEWAY_WEBHOOK_SECRET not configured");
+      return new Response("Server misconfigured", { status: 500 });
+    }
+    if (!signatureHeader || !verifyRapidGatewaySignature(rawBody, signatureHeader, webhookSecret)) {
+      console.error("Rapid Gateway signature verification failed!");
+      await supabase.from("payment_webhook_logs").insert({
+        booking_id: bookingId || null,
+        payload,
+        status: "rejected",
+        error_message: "Invalid or missing signature",
+      });
+      return new Response("Invalid signature", { status: 400 });
     }
 
     // 2. Fetch booking and existing payment record
@@ -130,14 +131,18 @@ export async function POST(request: Request) {
 
     if (isSuccess) {
       // Update Booking
-      await supabase
+      const { error: bookingUpdateError } = await supabase
         .from("bookings")
         .update({ payment_status: "paid", updated_at: new Date().toISOString() })
         .eq("id", bookingId);
+        
+      if (bookingUpdateError) {
+        throw new Error(`Failed to update booking: ${bookingUpdateError.message}`);
+      }
 
       // Update or Insert Payment Record
       if (existingPayment) {
-        await supabase
+        const { error: paymentUpdateError } = await supabase
           .from("payments")
           .update({
             status: "completed",
@@ -146,14 +151,22 @@ export async function POST(request: Request) {
             amount: grossAmount,
           })
           .eq("id", existingPayment.id);
+          
+        if (paymentUpdateError) {
+          throw new Error(`Failed to update payment: ${paymentUpdateError.message}`);
+        }
       } else {
-        await supabase.from("payments").insert({
+        const { error: paymentInsertError } = await supabase.from("payments").insert({
           booking_id: bookingId,
           amount: grossAmount,
           method: "rapidgateway",
           provider_ref: transactionId,
           status: "completed",
         });
+        
+        if (paymentInsertError) {
+          throw new Error(`Failed to insert payment: ${paymentInsertError.message}`);
+        }
       }
 
       await supabase.from("payment_webhook_logs").insert({

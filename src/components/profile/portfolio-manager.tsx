@@ -41,9 +41,16 @@ export function PortfolioManager({ taskerId }: { taskerId: string }) {
     if (!file) return
 
     setIsUploading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      alert("You must be logged in to upload files.")
+      setIsUploading(false)
+      return
+    }
+    
     const fileExt = file.name.split('.').pop()
     const fileName = `${taskerId}-${Math.random()}.${fileExt}`
-    const filePath = `${fileName}`
+    const filePath = `${user.id}/${fileName}`
 
     // Upload image
     const { error: uploadError } = await supabase.storage
@@ -74,10 +81,11 @@ export function PortfolioManager({ taskerId }: { taskerId: string }) {
   const handleDelete = async (id: string, imageUrl: string) => {
     if (!confirm(t("confirmDelete"))) return
     
+    const { data: { user } } = await supabase.auth.getUser()
     // Attempt to extract filename from URL to delete from storage as well
     const fileName = imageUrl.split('/').pop()
-    if (fileName) {
-      await supabase.storage.from('portfolios').remove([fileName])
+    if (fileName && user) {
+      await supabase.storage.from('portfolios').remove([`${user.id}/${fileName}`])
     }
 
     await supabase.from("portfolio_items").delete().eq("id", id)

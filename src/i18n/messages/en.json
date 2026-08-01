@@ -12,7 +12,7 @@
       "s3Title": "3. User Accounts",
       "s3Text": "You must create an account to use certain features of the Platform. You are responsible for maintaining the confidentiality of your account credentials and for all activities under your account.",
       "s4Title": "4. Payments & Fees",
-      "s4Text": "Clients agree to pay the quoted price plus a 10% service fee. Payments are processed securely through PayFast. Taskers receive 85% of the task price, with the remaining 15% retained as a platform fee.",
+      "s4Text": "Clients agree to pay the quoted price plus a 10% service fee. Payments are processed securely through Rapid Gateway. Taskers receive 85% of the task price, with the remaining 15% retained as a platform fee.",
       "s5Title": "5. Cancellation Policy",
       "s5Text": "Clients may cancel bookings up to 2 hours before the scheduled time at no cost. Late cancellations may result in a fee of up to 25% of the booking value.",
       "s6Title": "6. Dispute Resolution",
@@ -43,7 +43,7 @@
       "s2L3": "Quality of work was significantly below standard",
       "s2L4": "Overcharging beyond the agreed estimate",
       "s3Title": "Refund Process",
-      "s3Text": "Submit a refund request within 48 hours of task completion through your dashboard or by emailing support@errandowl.com.pk. We will review your case within 2 business days and process approved refunds within 5-7 business days.",
+      "s3Text": "Submit a refund request within 48 hours of task completion through your dashboard or by emailing support@errandowl.com.pk. We will review your case within 2 business days. Approved refunds for payments made via Rapid Gateway will be credited back to the original payment method within 5-10 business days.",
       "s4Title": "Cancellation Fees",
       "s4Text": "Free cancellation up to 2 hours before the scheduled time. Late cancellations: up to 25% of booking value. No-shows by clients: full charge may apply."
     }
@@ -253,7 +253,7 @@
       "q3": "What if I'm not satisfied?",
       "a3": "We have a Happiness Pledge. If you're not satisfied with the work, contact our support team and we'll work to make it right, including re-doing the task or providing a refund.",
       "q4": "How do payments work?",
-      "a4": "All payments are processed securely through our platform via PayFast. We support JazzCash, EasyPaisa, and bank transfers. You're only charged when the task is completed.",
+      "a4": "All payments are processed securely through our platform via Rapid Gateway. We support JazzCash, EasyPaisa, and bank transfers. You're only charged when the task is completed.",
       "q5": "Can I become a tasker?",
       "a5": "Absolutely! Click \"Become a Tasker\" to apply. You can set your own hours, rates, and choose which tasks to accept. It's free to join.",
       "q6": "What types of tasks can I book?",
@@ -717,7 +717,7 @@
     "summary_title": "Order Summary",
     "booking_id": "Booking ID: {id}",
     "total_due": "Total Amount Due",
-    "pay_btn": "Pay with PayFast",
+    "pay_btn": "Pay with Rapid Gateway",
     "error_init": "Failed to initialize payment",
     "error_url": "No payment URL returned"
   },
@@ -752,7 +752,7 @@
       "taskerQ2": "How much can I earn?",
       "taskerA2": "You keep 85% of every task. Earnings depend on your hourly rate, number of tasks, and reviews. Top taskers earn Rs 50,000+ per month.",
       "taskerQ3": "When do I get paid?",
-      "taskerA3": "Payments are released within 24 hours of task completion and deposited to your registered account via PayFast.",
+      "taskerA3": "Payments are released within 24 hours of task completion and deposited to your registered account via Rapid Gateway.",
       "taskerQ4": "How do reviews work?",
       "taskerA4": "Clients rate your work after completion. Higher ratings lead to more visibility and bookings.",
       "accountQ1": "How do I reset my password?",
@@ -778,9 +778,9 @@
     "bookingRef": "Booking Reference",
     "serviceFee": "Service Fee",
     "totalAmount": "Total Amount",
-    "demoNoticeTitle": "Demo Mode:",
-    "demoNoticeText": "PayFast integration is pending. Clicking pay below will simulate a successful transaction and redirect you.",
-    "payBtn": "Pay via PayFast",
+    "demoNoticeTitle": "Payment Processing:",
+    "demoNoticeText": "You will be securely redirected to Rapid Gateway to complete your transaction.",
+    "payBtn": "Pay via Rapid Gateway",
     "cancelBtn": "Cancel and Return"
   },
   "AdminDashboard": {
