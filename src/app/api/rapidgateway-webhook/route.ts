@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
     // 1. Verify HMAC-SHA256 Webhook Signature
     const webhookSecret = process.env.RAPID_GATEWAY_WEBHOOK_SECRET || process.env.RAPID_GATEWAY_SECRET_KEY || "";
-    const signatureHeader = request.headers.get("x-rapid-signature") || request.headers.get("x-signature") || payload.signature || "";
+    const signatureHeader = request.headers.get("x-rg-signature") || request.headers.get("x-rapid-signature") || payload.signature || "";
 
     if (!webhookSecret) {
       console.error("RAPID_GATEWAY_WEBHOOK_SECRET not configured");

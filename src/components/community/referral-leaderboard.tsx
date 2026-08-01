@@ -13,15 +13,34 @@ export function ReferralLeaderboard() {
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
-      const { data } = await supabase
+      // Step 1: get top referral codes (no join)
+      const { data: codes } = await supabase
         .from("referral_codes")
-        .select("*, profiles!inner(name, avatar_url, city)")
+        .select("id, profile_id, code, total_uses")
         .order("total_uses", { ascending: false })
         .limit(10);
 
-      if (data) {
-        setLeaderboard(data);
+      if (!codes || codes.length === 0) {
+        setLeaderboard([]);
+        setLoading(false);
+        return;
       }
+
+      // Step 2: batch-fetch matching public profile info
+      const profileIds = codes.map((c) => c.profile_id);
+      const { data: profiles } = await supabase
+        .from("public_profiles")
+        .select("id, name, avatar_url, city")
+        .in("id", profileIds);
+
+      // Step 3: merge client-side
+      const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+      const leaderboardData = codes.map((c) => ({
+        ...c,
+        profiles: profileMap.get(c.profile_id) ?? {},
+      }));
+
+      setLeaderboard(leaderboardData);
       setLoading(false);
     };
 

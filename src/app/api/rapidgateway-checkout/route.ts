@@ -43,10 +43,9 @@ export async function POST(request: Request) {
         email: booking.profiles?.email || user.email,
         phone: booking.profiles?.phone || "+923000000000",
       },
-      redirect_urls: {
-        success_url: `${siteOrigin}/payment/success?order_id=${booking.id}`,
-        cancel_url: `${siteOrigin}/payment/error?order_id=${booking.id}`,
-      },
+      methods: ["easypaisa", "jazzcash", "card"],
+      return_url: `${siteOrigin}/payment/success?order_id=${booking.id}`,
+      webhook_url: `${siteOrigin}/api/rapidgateway-webhook`,
       metadata: {
         booking_id: booking.id,
         platform: "ErrandOwl Pakistan",

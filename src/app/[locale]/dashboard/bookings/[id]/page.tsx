@@ -5,6 +5,7 @@ import { MapPin, Calendar, Clock, ArrowLeft, Download } from "lucide-react"
 import { Link } from "@/i18n/routing"
 import { BidList } from "@/components/booking/bid-list"
 import { DisputeButton } from "@/components/booking/dispute-button"
+import { SosButton } from "@/components/booking/sos-button"
 import { LiveMap } from "@/components/tracking/live-map"
 import { Button } from "@/components/ui/button"
 
@@ -106,7 +107,10 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
           </div>
           
           {booking.status === "in_progress" && (
-            <div className="mt-6 pt-6 border-t border-border/50">
+            <div className="mt-6 pt-6 border-t border-border/50 space-y-6">
+              <div className="flex justify-end">
+                <SosButton bookingId={booking.id} userId={profile.id} />
+              </div>
               <LiveMap 
                 bookingId={booking.id} 
                 taskerId={booking.tasker_id} 

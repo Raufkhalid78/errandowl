@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 interface LiveTrackingMapInnerProps {
   taskerLat: number;
   taskerLng: number;
+  taskerHeading?: number;
   clientLat: number;
   clientLng: number;
 }
@@ -14,6 +15,7 @@ interface LiveTrackingMapInnerProps {
 export default function LiveTrackingMapInner({
   taskerLat,
   taskerLng,
+  taskerHeading,
   clientLat,
   clientLng,
 }: LiveTrackingMapInnerProps) {
@@ -57,11 +59,13 @@ export default function LiveTrackingMapInner({
         .bindPopup("<b>Job Location</b>");
 
       // Tasker live marker
+      const headingRotate = taskerHeading !== undefined ? `transform: rotate(${taskerHeading}deg); transform-origin: center; display: inline-block;` : "";
+      
       const taskerIcon = L.divIcon({
         className: "tasker-live-pin",
         html: `
           <div style="background: #6366f1; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 11px; border: 2px solid white; box-shadow: 0 4px 12px rgba(99,102,241,0.5); display: flex; align-items: center; gap: 4px; animation: pulse 2s infinite;">
-            <span>🦉</span> <span>Tasker</span>
+            <span style="${headingRotate}">⬆️</span> <span>Tasker</span>
           </div>
         `,
         iconSize: [80, 30],
@@ -78,6 +82,19 @@ export default function LiveTrackingMapInner({
 
     if (mapRef.current && taskerMarkerRef.current) {
       taskerMarkerRef.current.setLatLng([taskerLat, taskerLng]);
+      
+      const headingRotate = taskerHeading !== undefined ? `transform: rotate(${taskerHeading}deg); transform-origin: center; display: inline-block;` : "";
+      const taskerIcon = L.divIcon({
+        className: "tasker-live-pin",
+        html: `
+          <div style="background: #6366f1; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 11px; border: 2px solid white; box-shadow: 0 4px 12px rgba(99,102,241,0.5); display: flex; align-items: center; gap: 4px; animation: pulse 2s infinite;">
+            <span style="${headingRotate}">⬆️</span> <span>Tasker</span>
+          </div>
+        `,
+        iconSize: [80, 30],
+        iconAnchor: [40, 15],
+      });
+      taskerMarkerRef.current.setIcon(taskerIcon);
 
       const bounds = L.latLngBounds([
         [taskerLat, taskerLng],
@@ -85,7 +102,7 @@ export default function LiveTrackingMapInner({
       ]);
       mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
     }
-  }, [taskerLat, taskerLng, clientLat, clientLng]);
+  }, [taskerLat, taskerLng, taskerHeading, clientLat, clientLng]);
 
   useEffect(() => {
     return () => {

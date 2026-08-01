@@ -24,7 +24,7 @@ const LeafletTrackingMapInner = dynamic(() => import("./live-tracking-map-inner"
 });
 
 export function LiveTrackingMap({ bookingId, clientLat = 31.5204, clientLng = 74.3587 }: LiveTrackingMapProps) {
-  const [taskerLocation, setTaskerLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [taskerLocation, setTaskerLocation] = useState<{ lat: number; lng: number; heading?: number } | null>(null);
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -54,14 +54,15 @@ export function LiveTrackingMap({ bookingId, clientLat = 31.5204, clientLng = 74
     const fetchInitialLocation = async () => {
       const { data } = await supabase
         .from("tracking_sessions")
-        .select("current_lat, current_lng, last_updated")
+        .select("current_lat, current_lng, last_updated, heading")
         .eq("booking_id", bookingId)
         .maybeSingle();
 
       if (data && data.current_lat && data.current_lng) {
         const lat = parseFloat(data.current_lat as unknown as string);
         const lng = parseFloat(data.current_lng as unknown as string);
-        setTaskerLocation({ lat, lng });
+        const heading = data.heading ? parseFloat(data.heading as unknown as string) : undefined;
+        setTaskerLocation({ lat, lng, heading });
         setLastUpdated(new Date(data.last_updated as string));
         calculateDistanceAndEta(lat, lng, clientLat, clientLng);
       }
@@ -84,7 +85,8 @@ export function LiveTrackingMap({ bookingId, clientLat = 31.5204, clientLng = 74
           if (payload.new && payload.new.current_lat && payload.new.current_lng) {
             const lat = parseFloat(payload.new.current_lat);
             const lng = parseFloat(payload.new.current_lng);
-            setTaskerLocation({ lat, lng });
+            const heading = payload.new.heading !== null && payload.new.heading !== undefined ? parseFloat(payload.new.heading) : undefined;
+            setTaskerLocation({ lat, lng, heading });
             setLastUpdated(new Date());
             calculateDistanceAndEta(lat, lng, clientLat, clientLng);
           }
@@ -124,6 +126,7 @@ export function LiveTrackingMap({ bookingId, clientLat = 31.5204, clientLng = 74
         <LeafletTrackingMapInner
           taskerLat={taskerLocation?.lat || clientLat + 0.01}
           taskerLng={taskerLocation?.lng || clientLng + 0.01}
+          taskerHeading={taskerLocation?.heading}
           clientLat={clientLat}
           clientLng={clientLng}
         />
