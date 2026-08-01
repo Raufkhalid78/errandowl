@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { createNotification } from "@/lib/notifications"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -74,6 +75,17 @@ export default function AdminDisputesPage() {
         
       if (error) throw error;
       
+      // Notify the user who raised it
+      if (dispute.raised_by) {
+        await createNotification({
+          userId: dispute.raised_by,
+          type: "system",
+          title: "Dispute Resolved",
+          body: `Your dispute for booking '${dispute.booking?.service_name || "Unknown"}' has been resolved.`,
+          link: `/dashboard/bookings/${dispute.booking_id}`
+        });
+      }
+
       toast.success(resolution === 'resolved_refunded' ? "Dispute resolved and client refunded!" : "Dispute dismissed")
       fetchDisputes()
     } catch (err: any) {

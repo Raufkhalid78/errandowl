@@ -64,7 +64,7 @@ export default async function DashboardLayout({
               <LanguageSwitcher />
               <ThemeSwitcher />
             </div>
-            <NotificationBell userId={user.id} />
+            <NotificationBell userId={profile?.id || user.id} />
             <UserNav user={{ name: profile?.name || fallbackName, email: user.email!, avatar: profile?.avatar }} />
           </div>
         </div>

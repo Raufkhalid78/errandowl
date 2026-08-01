@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "@/i18n/routing"
 import { createClient } from "@/lib/supabase/client"
+import { createNotification } from "@/lib/notifications"
 import { JobBid } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
@@ -22,7 +23,7 @@ export function BidList({ bookingId }: { bookingId: string }) {
         .from("job_bids")
         .select("*, profiles!tasker_id(name, avatar_url)")
         .eq("booking_id", bookingId)
-        .order("proposed_amount", { ascending: true })
+        .order("amount", { ascending: true })
 
       if (data) setBids(data)
       setLoading(false)
@@ -43,6 +44,27 @@ export function BidList({ bookingId }: { bookingId: string }) {
       status: "confirmed",
       total_amount: amount
     }).eq("id", bookingId)
+
+    // 4. Notify accepted tasker
+    await createNotification({
+      userId: taskerId,
+      type: "booking_update",
+      title: "Bid Accepted!",
+      body: "Your bid has been accepted. The job is now confirmed.",
+      link: `/dashboard/jobs/${bookingId}`
+    })
+
+    // 5. Notify rejected taskers
+    const rejectedBids = bids.filter(b => b.id !== bidId)
+    for (const rejected of rejectedBids) {
+      await createNotification({
+        userId: rejected.tasker_id,
+        type: "booking_update",
+        title: "Bid Rejected",
+        body: "Your bid for a job was not accepted.",
+        link: `/dashboard/jobs`
+      })
+    }
 
     router.refresh()
   }
@@ -66,15 +88,15 @@ export function BidList({ bookingId }: { bookingId: string }) {
               </Avatar>
               <div>
                 <p className="font-medium">{bid.profiles?.name}</p>
-                <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 max-w-sm">{bid.proposal_text}</p>
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 max-w-sm">{bid.cover_letter}</p>
               </div>
             </div>
             
             <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-3 sm:gap-1">
-              <div className="text-lg font-bold text-owl-violet">Rs {bid.proposed_amount.toLocaleString()}</div>
+              <div className="text-lg font-bold text-owl-violet">Rs {bid.amount?.toLocaleString()}</div>
               <Button 
                 size="sm" 
-                onClick={() => handleAcceptBid(bid.id, bid.tasker_id, bid.proposed_amount)}
+                onClick={() => handleAcceptBid(bid.id, bid.tasker_id, bid.amount)}
                 disabled={acceptingId !== null || bid.status !== "pending"}
                 className="bg-owl-emerald hover:bg-owl-emerald/90 text-white"
               >

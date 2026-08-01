@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { createClient } from "@/lib/supabase/client"
+import { createNotification } from "@/lib/notifications"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -112,6 +113,21 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
       console.error("Error sending message:", error)
     } else {
       setNewMessage("")
+
+      // Notify recipient
+      const { data: booking } = await supabase.from('bookings').select('client_id, tasker_id').eq('id', bookingId).single()
+      if (booking) {
+        const recipientId = booking.client_id === userId ? booking.tasker_id : booking.client_id
+        if (recipientId) {
+          await createNotification({
+            userId: recipientId,
+            type: "new_message",
+            title: "New Message",
+            body: `You received a new message regarding a booking.`,
+            link: "/dashboard/messages"
+          })
+        }
+      }
     }
 
     setIsSending(false)
@@ -144,6 +160,21 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
     const { error } = await supabase.from('messages').insert(messageData)
     if (error) {
       console.error("Error sending attachment:", error)
+    } else {
+      // Notify recipient
+      const { data: booking } = await supabase.from('bookings').select('client_id, tasker_id').eq('id', bookingId).single()
+      if (booking) {
+        const recipientId = booking.client_id === userId ? booking.tasker_id : booking.client_id
+        if (recipientId) {
+          await createNotification({
+            userId: recipientId,
+            type: "new_message",
+            title: "New Attachment",
+            body: `You received a new file attachment regarding a booking.`,
+            link: "/dashboard/messages"
+          })
+        }
+      }
     }
 
     setIsUploading(false)

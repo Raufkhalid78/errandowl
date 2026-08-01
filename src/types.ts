@@ -39,8 +39,8 @@ export interface JobBid {
   id: string;
   booking_id: string;
   tasker_id: string;
-  proposed_amount: number;
-  proposal_text: string;
+  amount: number;
+  cover_letter: string;
   status: "pending" | "accepted" | "rejected";
   created_at: string;
   profiles?: Partial<Profile>; // joined relation

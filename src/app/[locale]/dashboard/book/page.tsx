@@ -19,6 +19,16 @@ export default async function BookPage({
     redirect("/login")
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("auth_id", user.id)
+    .single()
+
+  if (!profile) {
+    redirect("/login")
+  }
+
   // Await searchParams before using it
   const sp = await searchParams;
   const categoryId = sp.category as string || "cat-1"
@@ -64,7 +74,7 @@ export default async function BookPage({
         ) : (
           <BookingForm 
             categoryId={categoryId} 
-            userId={user.id} 
+            userId={profile.id} 
             taskerId={taskerId} 
             taskerRate={taskerDetails?.hourlyRate} 
           />

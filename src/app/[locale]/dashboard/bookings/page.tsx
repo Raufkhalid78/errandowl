@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/routing";
+import { createNotification } from "@/lib/notifications";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,27 @@ async function updateBookingStatus(bookingId: string, status: string) {
   "use server";
   const supabase = await createClient();
   await supabase.from("bookings").update({ status }).eq("id", bookingId);
+
+  // Notify other party
+  const { data: booking } = await supabase.from("bookings").select("client_id, tasker_id").eq("id", bookingId).single();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (booking && user) {
+    const { data: profile } = await supabase.from("profiles").select("id").eq("auth_id", user.id).single();
+    if (profile) {
+      const recipientId = booking.client_id === profile.id ? booking.tasker_id : booking.client_id;
+      if (recipientId) {
+        await createNotification({
+          userId: recipientId,
+          type: "booking_update",
+          title: "Booking Updated",
+          body: `The booking status was updated to ${status.replace("_", " ")}.`,
+          link: `/dashboard/bookings/${bookingId}`
+        });
+      }
+    }
+  }
+
   revalidatePath("/dashboard/bookings");
 }
 
