@@ -26,7 +26,7 @@ export default function AdminDisputesPage() {
         *,
         booking:booking_id(service_name, total_amount, client_id),
         raiser:raised_by(name, email, role),
-        evidence:dispute_evidence(file_url, description)
+        evidence:dispute_evidence(image_urls, evidence_text)
       `)
       .order("created_at", { ascending: false })
     
@@ -130,19 +130,26 @@ export default function AdminDisputesPage() {
                         <p className="text-sm font-medium mb-2">Attached Evidence:</p>
                         <div className="flex gap-3 overflow-x-auto pb-2">
                           {dispute.evidence.map((ev: any, i: number) => (
-                            <a 
-                              key={i} 
-                              href={ev.file_url} 
-                              target="_blank" 
-                              rel="noreferrer"
-                              className="shrink-0 relative group rounded-lg overflow-hidden border w-24 h-24 block"
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={ev.file_url} alt="Evidence" className="object-cover w-full h-full" />
-                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                <ExternalLink className="h-5 w-5" />
+                            <div key={i} className="flex flex-col gap-2">
+                              <div className="flex gap-3">
+                                {ev.image_urls?.map((url: string, j: number) => (
+                                  <a 
+                                    key={`${i}-${j}`} 
+                                    href={url} 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="shrink-0 relative group rounded-lg overflow-hidden border w-24 h-24 block"
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={url} alt="Evidence" className="object-cover w-full h-full" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                      <ExternalLink className="h-5 w-5" />
+                                    </div>
+                                  </a>
+                                ))}
                               </div>
-                            </a>
+                              {ev.evidence_text && <p className="text-xs text-muted-foreground">{ev.evidence_text}</p>}
+                            </div>
                           ))}
                         </div>
                       </div>

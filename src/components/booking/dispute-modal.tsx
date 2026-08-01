@@ -64,8 +64,8 @@ export function DisputeModal({ bookingId, userId, onClose }: DisputeModalProps) 
         await supabase.from("dispute_evidence").insert({
           dispute_id: dispute.id,
           uploaded_by: userId,
-          file_url: publicUrl,
-          description: "Initial evidence"
+          image_urls: [publicUrl],
+          evidence_text: "Initial evidence"
         })
       }
     }

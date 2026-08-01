@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { WalletBalanceCard } from "@/components/wallet/wallet-balance-card"
 import { ReferralCard } from "@/components/wallet/referral-card"
 import { PayoutRequestsCard } from "@/components/wallet/payout-requests-card"
+import { WalletTransactionsList } from "@/components/wallet/wallet-transactions-list"
 
 export default async function WalletPage() {
   const supabase = await createClient()
@@ -23,6 +24,12 @@ export default async function WalletPage() {
     .select("*")
     .eq("profile_id", profile.id)
     .single()
+
+  const { data: transactions } = await supabase
+    .from("wallet_transactions")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false })
 
   const isTasker = profile.role === "tasker" || profile.role === "admin"
 
@@ -47,6 +54,8 @@ export default async function WalletPage() {
           <PayoutRequestsCard profileId={profile.id} initialBalance={profile.wallet_balance || 0} />
         </div>
       )}
+      
+      <WalletTransactionsList transactions={transactions || []} />
     </div>
   )
 }
