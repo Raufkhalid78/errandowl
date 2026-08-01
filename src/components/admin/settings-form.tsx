@@ -10,14 +10,12 @@ import { Loader2, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface Settings {
-  site_name?: string;
   currency?: string;
-  contact_email?: string;
+  support_email?: string;
   contact_phone?: string;
   pricing_mode?: string;
-  min_rate?: number;
-  max_rate?: number;
-  service_fee_percent?: number;
+  min_hourly_rate?: number;
+  platform_fee_percent?: number;
   office_address?: string;
   [key: string]: unknown;
 }
@@ -57,34 +55,26 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <CardHeader><CardTitle className="text-base">{t("generalConfig")}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="site_name">{t("siteName")}</Label>
-              <Input 
-                id="site_name" 
-                value={settings.site_name} 
-                onChange={e => setSettings({...settings, site_name: e.target.value})}
-              />
-            </div>
-            <div className="grid gap-2">
               <Label htmlFor="currency">{t("currency")}</Label>
               <Input 
                 id="currency" 
-                value={settings.currency} 
+                value={settings.currency || ""} 
                 onChange={e => setSettings({...settings, currency: e.target.value})}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="contact_email">{t("supportEmail")}</Label>
+              <Label htmlFor="support_email">{t("supportEmail")}</Label>
               <Input 
-                id="contact_email" 
-                value={settings.contact_email} 
-                onChange={e => setSettings({...settings, contact_email: e.target.value})}
+                id="support_email" 
+                value={settings.support_email || ""} 
+                onChange={e => setSettings({...settings, support_email: e.target.value})}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="contact_phone">{t("supportPhone")}</Label>
               <Input 
                 id="contact_phone" 
-                value={settings.contact_phone} 
+                value={settings.contact_phone || ""} 
                 onChange={e => setSettings({...settings, contact_phone: e.target.value})}
               />
             </div>
@@ -125,34 +115,23 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="min_rate">{t("minRate")}</Label>
-                <Input 
-                  id="min_rate" 
-                  type="number"
-                  value={settings.min_rate} 
-                  onChange={e => setSettings({...settings, min_rate: parseInt(e.target.value)})}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="max_rate">{t("maxRate")}</Label>
-                <Input 
-                  id="max_rate" 
-                  type="number"
-                  value={settings.max_rate} 
-                  onChange={e => setSettings({...settings, max_rate: parseInt(e.target.value)})}
-                />
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="min_hourly_rate">{t("minRate")}</Label>
+              <Input 
+                id="min_hourly_rate" 
+                type="number"
+                value={settings.min_hourly_rate || 0} 
+                onChange={e => setSettings({...settings, min_hourly_rate: parseInt(e.target.value)})}
+              />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="service_fee">{t("serviceFee")}</Label>
+              <Label htmlFor="platform_fee_percent">{t("serviceFee")}</Label>
               <Input 
-                id="service_fee" 
+                id="platform_fee_percent" 
                 type="number"
-                value={settings.service_fee_percent} 
-                onChange={e => setSettings({...settings, service_fee_percent: parseFloat(e.target.value)})}
+                value={settings.platform_fee_percent || 0} 
+                onChange={e => setSettings({...settings, platform_fee_percent: parseFloat(e.target.value)})}
               />
             </div>
           </CardContent>

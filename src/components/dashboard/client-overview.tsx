@@ -21,12 +21,12 @@ export async function ClientOverview({ profileId }: { profileId: string }) {
   // Fetch total spent
   const { data: pastBookings } = await supabase
     .from("bookings")
-    .select("total_cost")
+    .select("total_amount")
     .eq("client_id", profileId)
     .eq("payment_status", "paid")
 
   const activeCount = activeBookings?.length || 0
-  const totalSpent = pastBookings?.reduce((sum, b) => sum + (b.total_cost || 0), 0) || 0
+  const totalSpent = pastBookings?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

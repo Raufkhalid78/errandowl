@@ -23,7 +23,7 @@ export default async function DashboardPage() {
     .maybeSingle()
 
   if (!profile) {
-    redirect("/login")
+    redirect("/dashboard/onboarding")
   }
 
   const role = profile.role || user.user_metadata?.role || "client"

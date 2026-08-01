@@ -43,21 +43,20 @@ export default async function JobDetailsPage({ params }: { params: Promise<{ id:
 
       <div>
         <h2 className="text-3xl font-bold tracking-tight">{job.service_name || "Open Task"}</h2>
-        <p className="text-muted-foreground mt-2">{job.description}</p>
       </div>
 
       <div className="flex gap-4 text-sm text-muted-foreground p-4 bg-muted/20 rounded-xl border border-border/50">
         <div className="flex items-center gap-1.5">
           <Calendar className="h-4 w-4 text-owl-violet" />
-          {job.date}
+          {job.scheduled_at ? new Date(job.scheduled_at).toLocaleDateString() : "TBD"}
         </div>
         <div className="flex items-center gap-1.5">
           <Clock className="h-4 w-4 text-owl-violet" />
-          {job.time} ({job.estimated_hours} hrs est.)
+          {job.scheduled_at ? new Date(job.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "TBD"} ({job.estimated_hours} hrs est.)
         </div>
         <div className="flex items-center gap-1.5">
           <MapPin className="h-4 w-4 text-owl-violet" />
-          {job.location}
+          {job.address}
         </div>
       </div>
 

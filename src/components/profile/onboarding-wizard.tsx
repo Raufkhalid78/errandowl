@@ -41,7 +41,9 @@ export function OnboardingWizard({
     hourlyRate: 1000,
     skills: "General Tasks, Delivery",
     categories: [] as string[],
-    availabilityDays: ["Mon", "Tue", "Wed", "Thu", "Fri"] as string[]
+    availabilityDays: ["Mon", "Tue", "Wed", "Thu", "Fri"] as string[],
+    startTime: "09:00",
+    endTime: "18:00"
   })
 
   // Available options
@@ -114,14 +116,12 @@ export function OnboardingWizard({
       let certificateUrl = profile?.certificate_url
 
       if (isTasker) {
-        if (cnicFrontFile) {
-          frontUrl = await uploadDocument(cnicFrontFile, 'cnic_front')
-        }
-        if (cnicBackFile) {
-          backUrl = await uploadDocument(cnicBackFile, 'cnic_back')
-        }
-        if (certificateFile) {
-          certificateUrl = await uploadDocument(certificateFile, 'certificate')
+        try {
+          if (cnicFrontFile) frontUrl = await uploadDocument(cnicFrontFile, 'cnic_front')
+          if (cnicBackFile) backUrl = await uploadDocument(cnicBackFile, 'cnic_back')
+          if (certificateFile) certificateUrl = await uploadDocument(certificateFile, 'certificate')
+        } catch (uploadErr: any) {
+          throw new Error("Storage Upload Error: " + (uploadErr.message || "Failed to upload document"))
         }
       }
 
@@ -145,7 +145,9 @@ export function OnboardingWizard({
         .select('id')
         .single()
 
-      if (error) throw error
+      if (error) {
+        throw new Error("Profile Database Error: " + error.message)
+      }
 
       const profileId = updatedProfile?.id || profile?.id
 
@@ -160,12 +162,28 @@ export function OnboardingWizard({
             active: true,
             hourly_rate: taskerData.hourlyRate,
             skills: skillsArray,
-            categories: taskerData.categories,
-            availability_days: taskerData.availabilityDays
+            categories: taskerData.categories
           }, { onConflict: 'profile_id' })
           
         if (taskerError) {
           console.error("Tasker profile creation error:", taskerError)
+          throw new Error("Tasker Profile Error: " + taskerError.message)
+        }
+
+        if (taskerData.availabilityDays.length > 0) {
+          await supabase.from('tasker_availability').delete().eq('tasker_id', profileId)
+          const schedules = taskerData.availabilityDays.map(day => ({
+            tasker_id: profileId,
+            day_of_week: day.toLowerCase(),
+            start_time: taskerData.startTime || '09:00',
+            end_time: taskerData.endTime || '18:00',
+            is_blocked: false
+          }))
+          const { error: scheduleError } = await supabase.from('tasker_availability').insert(schedules)
+          if (scheduleError) {
+            console.error("Tasker availability error:", scheduleError)
+            throw new Error("Availability Schedule Error: " + scheduleError.message)
+          }
         }
       }
 
@@ -405,7 +423,7 @@ export function OnboardingWizard({
 
           <div className="space-y-3">
             <Label>{t("availability_label")}</Label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-4">
               {allDays.map(day => (
                 <button
                   key={day}
@@ -421,6 +439,29 @@ export function OnboardingWizard({
                   {day}
                 </button>
               ))}
+            </div>
+            
+            <div className="flex gap-4">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="startTime">Start Time</Label>
+                <Input
+                  id="startTime"
+                  type="time"
+                  value={taskerData.startTime}
+                  onChange={e => setTaskerData(s => ({ ...s, startTime: e.target.value }))}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="endTime">End Time</Label>
+                <Input
+                  id="endTime"
+                  type="time"
+                  value={taskerData.endTime}
+                  onChange={e => setTaskerData(s => ({ ...s, endTime: e.target.value }))}
+                  disabled={isLoading}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -42,7 +42,7 @@ function SearchContent() {
       setLoading(true);
       
       const [taskersRes, categoriesRes] = await Promise.all([
-        supabase.from("tasker_profiles").select("*, profiles!inner(*)").eq("active", true).eq("profiles.cnic_status", "approved"),
+        supabase.from("tasker_profiles").select("*, public_profiles!inner(*)").eq("active", true).eq("public_profiles.cnic_status", "approved"),
         supabase.from("categories").select("*").eq("active", true).order("sort_order")
       ]);
 
@@ -51,13 +51,16 @@ function SearchContent() {
       }
 
       if (taskersRes.data) {
-        setTaskers(taskersRes.data.map(t => ({
+        setTaskers(taskersRes.data.map(t => {
+          const profile = t.public_profiles || t.profiles;
+          return {
             ...t,
-            name: t.profiles?.name,
-            verified: t.profiles?.is_verified || t.profiles?.cnic_status === 'approved',
-            location: t.city || t.profiles?.city || t.profiles?.location,
-            bio: t.profiles?.bio
-        })));
+            name: profile?.name,
+            verified: profile?.is_verified || profile?.cnic_status === 'approved',
+            location: t.city || profile?.city || profile?.location,
+            bio: profile?.bio
+          };
+        }));
       }
       setLoading(false);
     };

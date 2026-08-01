@@ -445,3 +445,4 @@
 [dir="rtl"] button, [dir="rtl"] .btn {
   padding-top: 0.1em; /* Optical center for Nastaleeq inside buttons */
 }
+@import 'leaflet/dist/leaflet.css';

@@ -55,11 +55,10 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <tr className="border-b border-gray-100">
             <td className="py-4">
               <p className="font-medium text-gray-800">{booking.service_name || "Task Service"}</p>
-              <p className="text-sm text-gray-500">{booking.description}</p>
-              <p className="text-xs text-gray-400 mt-1">Date: {booking.date}</p>
+              <p className="text-xs text-gray-400 mt-1">Date: {booking.scheduled_at ? new Date(booking.scheduled_at).toLocaleDateString() : "TBD"}</p>
             </td>
             <td className="py-4 text-right font-medium text-gray-800">
-              Rs {booking.total_cost?.toLocaleString() || 0}
+              Rs {booking.total_amount?.toLocaleString() || 0}
             </td>
           </tr>
           {payment?.tip_amount > 0 && (
@@ -75,7 +74,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         <div className="w-64 space-y-3">
           <div className="flex justify-between text-sm text-gray-600">
             <span>Subtotal</span>
-            <span>Rs {booking.total_cost?.toLocaleString() || 0}</span>
+            <span>Rs {booking.total_amount?.toLocaleString() || 0}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600">
             <span>Platform Fee (0%)</span>
@@ -83,9 +82,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           </div>
           <div className="flex justify-between font-bold text-lg text-gray-800 border-t border-gray-200 pt-3">
             <span>Total Paid</span>
-            <span>Rs {((booking.total_cost || 0) + (payment?.tip_amount || 0)).toLocaleString()}</span>
+            <span>Rs {((booking.total_amount || 0) + (payment?.tip_amount || 0)).toLocaleString()}</span>
           </div>
-          <p className="text-xs text-right text-gray-500 mt-1">Paid via {payment?.method || "PayFast"}</p>
+          <p className="text-xs text-right text-gray-500 mt-1">Paid via {payment?.method || "RapidGateway"}</p>
         </div>
       </div>
 

@@ -5,9 +5,8 @@ export type PricingMode = 'hourly' | 'fixed';
 export interface PricingSettings {
   pricing_mode: PricingMode;
   currency: string;
-  service_fee_percent: number;
-  min_rate: number;
-  max_rate: number;
+  platform_fee_percent: number;
+  min_hourly_rate: number;
 }
 
 /**
@@ -27,9 +26,8 @@ export async function getPricingSettings(): Promise<PricingSettings> {
     return {
       pricing_mode: 'hourly',
       currency: 'PKR',
-      service_fee_percent: 10,
-      min_rate: 300,
-      max_rate: 5000,
+      platform_fee_percent: 10,
+      min_hourly_rate: 300,
     };
   }
 

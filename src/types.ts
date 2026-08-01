@@ -20,10 +20,12 @@ export interface Booking {
   tasker_id?: string;
   service_name: string;
   status: "pending" | "confirmed" | "in_progress" | "completed" | "cancelled";
-  date: string;
-  time: string;
-  location: string;
-  total_cost?: number;
+  scheduled_at: string;
+  completed_at?: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+  total_amount?: number;
   estimated_hours?: number;
   recurrence_pattern?: "none" | "weekly" | "biweekly" | "monthly";
   created_at: string;

@@ -30,11 +30,11 @@ export default function RevenueDashboardPage() {
     // Fetch service fee from settings
     const { data: settings } = await supabase
       .from("settings")
-      .select("service_fee_percent")
+      .select("platform_fee_percent")
       .eq("id", "global")
       .single();
 
-    const feePercent = settings?.service_fee_percent || 10;
+    const feePercent = settings?.platform_fee_percent || 10;
     
     const totalVolume = payments?.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0) || 0;
     const totalFees = (totalVolume * feePercent) / 100;

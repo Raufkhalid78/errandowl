@@ -41,7 +41,7 @@ export function BidList({ bookingId }: { bookingId: string }) {
     await supabase.from("bookings").update({
       tasker_id: taskerId,
       status: "confirmed",
-      total_cost: amount
+      total_amount: amount
     }).eq("id", bookingId)
 
     router.refresh()

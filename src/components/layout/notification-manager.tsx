@@ -7,13 +7,13 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging"
 import { toast } from "sonner"
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAMw6C4KAJmWK0DTcepYH6gOOqgFS-YG8U",
-  authDomain: "errandowl-178.firebaseapp.com",
-  projectId: "errandowl-178",
-  storageBucket: "errandowl-178.firebasestorage.app",
-  messagingSenderId: "694782630826",
-  appId: "1:694782630826:web:27f2a92ba556661c9ea9d3",
-  measurementId: "G-MK6BE458QR"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAMw6C4KAJmWK0DTcepYH6gOOqgFS-YG8U",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "errandowl-178.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "errandowl-178",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "errandowl-178.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "694782630826",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:694782630826:web:27f2a92ba556661c9ea9d3",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-MK6BE458QR"
 }
 
 export function NotificationManager() {
@@ -34,7 +34,6 @@ export function NotificationManager() {
           const app = initializeApp(firebaseConfig)
           const messaging = getMessaging(app)
           
-          // Explicitly register our firebase service worker so it doesn't conflict with next-pwa
           let registration: any;
           try {
             registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
@@ -42,7 +41,6 @@ export function NotificationManager() {
             })
             console.log("Firebase SW registered with scope:", registration.scope)
 
-            // Wait until the service worker is active before subscribing
             await new Promise((resolve) => {
               if (registration.active) {
                 resolve(true);
@@ -60,9 +58,10 @@ export function NotificationManager() {
             console.error("Failed to register firebase SW", err)
           }
 
-          // Replace "YOUR_VAPID_KEY_HERE" with the actual Web Push certificate from Firebase Console
+          const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || "BFzi7om6qJ25yoEOZ-SSUFNfovsxpKqu7PzVrT8ErBTBVQ-InhMz1EZbNFIn-QQnleJb4IX7VKSgIn6qf8zIvCc";
+
           const token = await getToken(messaging, { 
-            vapidKey: "BFzi7om6qJ25yoEOZ-SSUFNfovsxpKqu7PzVrT8ErBTBVQ-InhMz1EZbNFIn-QQnleJb4IX7VKSgIn6qf8zIvCc",
+            vapidKey,
             serviceWorkerRegistration: registration
           })
           
@@ -86,7 +85,6 @@ export function NotificationManager() {
       }
     }
 
-    // Try to initialize after a short delay to not block main thread rendering
     const timer = setTimeout(() => {
       initializePush()
     }, 5000)
@@ -94,5 +92,5 @@ export function NotificationManager() {
     return () => clearTimeout(timer)
   }, [supabase])
 
-  return null // This component doesn't render anything
+  return null
 }

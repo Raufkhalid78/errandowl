@@ -16,7 +16,7 @@ const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.gstatic.com;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://*.supabase.co https://placehold.co;
+    img-src 'self' blob: data: https://*.supabase.co https://placehold.co https://*.cartocdn.com https://*.openstreetmap.org;
     font-src 'self';
     object-src 'none';
     base-uri 'self';
@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+            value: 'camera=(), microphone=(), geolocation=(self), browsing-topics=()',
           },
           {
             key: 'X-DNS-Prefetch-Control',

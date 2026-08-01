@@ -12,9 +12,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 import { SignupForm } from "@/components/auth/signup-form"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 
 export default async function SignupPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    redirect("/dashboard");
+  }
+
   const t = await getTranslations({ locale, namespace: "Auth.signup" });
   const te = await getTranslations({ locale, namespace: "AuthExtra" });
 

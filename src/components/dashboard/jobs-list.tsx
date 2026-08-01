@@ -46,15 +46,19 @@ export function JobsList({ jobs }: { jobs: Booking[] }) {
             <Card className="flex flex-col h-full hover-lift transition-all">
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
               <div className="flex flex-col space-y-1">
-                <CardTitle className="text-base">{job.location}</CardTitle>
+                <CardTitle className="text-base">{job.address}</CardTitle>
                 <CardDescription className="text-xs">
-                  {t("timeAndHours", { date: job.date, time: job.time, hours: job.estimated_hours || 0 })}
+                  {t("timeAndHours", { 
+                    date: job.scheduled_at ? new Date(job.scheduled_at).toLocaleDateString() : "TBD", 
+                    time: job.scheduled_at ? new Date(job.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "TBD", 
+                    hours: job.estimated_hours || 0 
+                  })}
                 </CardDescription>
               </div>
               <Badge variant="secondary">{t("pending")}</Badge>
             </CardHeader>
             <CardContent className="flex-1">
-              <p className="text-sm line-clamp-3 mt-2">{(job as any).description}</p>
+              <p className="text-sm font-medium mt-2">{job.service_name}</p>
               
               <div className="flex items-center space-x-2 mt-4">
                 <Avatar className="h-6 w-6">

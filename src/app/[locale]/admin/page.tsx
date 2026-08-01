@@ -130,9 +130,9 @@ export default async function AdminDashboard() {
           <CardContent>
             <div className="space-y-3">
               {(recentBookings && recentBookings.length > 0 ? recentBookings : [
-                { id: "1", service_name: "Home Cleaning", client_name: "Ahmed", status: "completed", total_cost: 3500 },
-                { id: "2", service_name: "TV Mounting", client_name: "Sara", status: "pending", total_cost: 1200 },
-                { id: "3", service_name: "Plumbing", client_name: "Usman", status: "confirmed", total_cost: 2400 },
+                { id: "1", service_name: "Home Cleaning", client_name: "Ahmed", status: "completed", total_amount: 3500 },
+                { id: "2", service_name: "TV Mounting", client_name: "Sara", status: "pending", total_amount: 1200 },
+                { id: "3", service_name: "Plumbing", client_name: "Usman", status: "confirmed", total_amount: 2400 },
               ]).map((b: any) => (
                 <div key={b.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                   <div>
@@ -140,7 +140,7 @@ export default async function AdminDashboard() {
                     <p className="text-xs text-muted-foreground">{t("client")} {b.client_name || "N/A"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">Rs {(b.total_cost || 0).toLocaleString()}</p>
+                    <p className="text-sm font-medium">Rs {(b.total_amount || 0).toLocaleString()}</p>
                     <span className={`text-xs capitalize ${
                       b.status === "completed" ? "text-owl-emerald" :
                       b.status === "pending" ? "text-owl-amber" : "text-blue-500"

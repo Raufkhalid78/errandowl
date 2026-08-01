@@ -31,12 +31,10 @@ export default function AdminBookingsPage() {
         .from("bookings")
         .select(`
           id,
-          description,
-          location,
-          city,
-          date,
-          time,
-          total_cost,
+          service_name,
+          address,
+          scheduled_at,
+          total_amount,
           status,
           client:client_id(name),
           tasker:tasker_id(name)
@@ -58,14 +56,14 @@ export default function AdminBookingsPage() {
   const handleExportCSV = () => {
     const dataToExport = bookings.map(b => ({
       id: b.id,
-      description: b.description || "",
+      description: b.service_name || "",
       client: b.client?.name || "Unknown",
       tasker: b.tasker?.name || "Unassigned",
-      date: b.date || "",
-      time: b.time || "",
-      location: b.location || "",
-      city: b.city || "",
-      amount: b.total_cost || 0,
+      date: b.scheduled_at ? new Date(b.scheduled_at).toLocaleDateString() : "",
+      time: b.scheduled_at ? new Date(b.scheduled_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "",
+      location: b.address || "",
+      city: "",
+      amount: b.total_amount || 0,
       status: b.status || ""
     }));
 
@@ -143,12 +141,14 @@ export default function AdminBookingsPage() {
                 ) : (
                   bookings.map((b: any) => (
                     <tr key={b.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-                      <td className="p-4 font-medium max-w-[200px] truncate" title={b.description}>{b.description || "—"}</td>
+                      <td className="p-4 font-medium max-w-[200px] truncate" title={b.service_name}>{b.service_name || "—"}</td>
                       <td className="p-4 text-muted-foreground">{b.client?.name || "—"}</td>
                       <td className="p-4 text-muted-foreground">{b.tasker?.name || t("unassigned")}</td>
-                      <td className="p-4 text-muted-foreground">{b.date} at {b.time?.slice(0, 5)}</td>
-                      <td className="p-4 text-muted-foreground">{b.city || b.location || "—"}</td>
-                      <td className="p-4 font-medium text-owl-violet">Rs {(b.total_cost || 0).toLocaleString()}</td>
+                      <td className="p-4 text-muted-foreground">
+                        {b.scheduled_at ? new Date(b.scheduled_at).toLocaleDateString() + " at " + new Date(b.scheduled_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "—"}
+                      </td>
+                      <td className="p-4 text-muted-foreground">{b.address || "—"}</td>
+                      <td className="p-4 font-medium text-owl-violet">Rs {(b.total_amount || 0).toLocaleString()}</td>
                       <td className="p-4">
                         <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${statusColors[b.status] || statusColors.pending}`}>
                           {(b.status || "pending").replace("_", " ")}

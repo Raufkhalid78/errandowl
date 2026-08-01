@@ -12,13 +12,11 @@ export default async function AdminSettingsPage() {
     .single();
 
   const defaultSettings = {
-    site_name: "ErrandOwl Pakistan",
     currency: "PKR",
     pricing_mode: "hourly",
-    service_fee_percent: 10,
-    min_rate: 300,
-    max_rate: 5000,
-    contact_email: "support@errandowl.com.pk",
+    platform_fee_percent: 10,
+    min_hourly_rate: 300,
+    support_email: "support@errandowl.com.pk",
     office_address: "Lahore, Pakistan",
     contact_phone: "+92 300 1234 567",
   };

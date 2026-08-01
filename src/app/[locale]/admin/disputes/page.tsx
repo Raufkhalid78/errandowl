@@ -24,7 +24,7 @@ export default function AdminDisputesPage() {
       .from("disputes")
       .select(`
         *,
-        booking:booking_id(service_name, total_cost),
+        booking:booking_id(service_name, total_amount),
         raiser:raised_by(name, email, role),
         evidence:dispute_evidence(file_url, description)
       `)
@@ -117,7 +117,7 @@ export default function AdminDisputesPage() {
 
                   <div className="w-full md:w-64 space-y-4 shrink-0 bg-muted/10 p-4 rounded-xl border">
                     <h4 className="font-medium text-sm">Resolution Controls</h4>
-                    <p className="text-xs text-muted-foreground mb-4">Total Booking Cost: Rs {dispute.booking?.total_cost || 0}</p>
+                    <p className="text-xs text-muted-foreground mb-4">Total Booking Amount: Rs {dispute.booking?.total_amount || 0}</p>
                     
                     {dispute.status === 'open' || dispute.status === 'in_review' ? (
                       <div className="space-y-2">

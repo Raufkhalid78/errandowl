@@ -141,13 +141,17 @@ async function BookingCard({ booking, isTasker }: { booking: any; isTasker: bool
       <CardContent className="space-y-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-4 w-4 shrink-0" />
-          <span className="truncate">{booking.date || "TBD"}</span>
+          <span className="truncate">
+            {booking.scheduled_at ? new Date(booking.scheduled_at).toLocaleDateString() : "TBD"}
+          </span>
           <Clock className="h-4 w-4 ml-2 shrink-0" />
-          <span className="truncate">{booking.time || "TBD"}</span>
+          <span className="truncate">
+            {booking.scheduled_at ? new Date(booking.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "TBD"}
+          </span>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4 shrink-0" />
-          <span className="truncate">{booking.location || t("locationTbd")}</span>
+          <span className="truncate">{booking.address || t("locationTbd")}</span>
         </div>
 
         {booking.recurrence_pattern && booking.recurrence_pattern !== 'none' && (
@@ -159,7 +163,7 @@ async function BookingCard({ booking, isTasker }: { booking: any; isTasker: bool
 
         <div className="flex items-center justify-between pt-3 border-t border-border/50">
           <span className="font-semibold text-owl-violet">
-            Rs {(booking.total_cost || 0).toLocaleString()}
+            Rs {(booking.total_amount || 0).toLocaleString()}
           </span>
           <span className="text-xs text-muted-foreground">
             {booking.estimated_hours || 0} hrs

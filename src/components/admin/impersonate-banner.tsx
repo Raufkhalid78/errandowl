@@ -9,10 +9,14 @@ interface ImpersonateBannerProps {
 }
 
 export function ImpersonateBanner({ name, email }: ImpersonateBannerProps) {
-  const handleStopImpersonating = () => {
-    // Delete the cookie
+  const handleStopImpersonating = async () => {
+    try {
+      await fetch("/api/admin/impersonate", { method: "DELETE" });
+    } catch (e) {
+      console.error("Failed to stop impersonation:", e);
+    }
+    // Delete cookie on client side as fallback
     document.cookie = "sb-impersonate-id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax;";
-    // Reload to restore the admin session
     window.location.href = "/admin/users";
   };
 

@@ -18,13 +18,29 @@ export default function PaymentPage() {
   const bookingId = searchParams.get("booking") || "TEST-BOOKING-123"
   const amount = searchParams.get("amount") || "1000"
 
-  const handleSimulatePayment = () => {
+  const handleSimulatePayment = async () => {
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      // Redirect to success verification page so that database updates are applied
-      router.push(`/payment/success?basket_id=${bookingId}`)
-    }, 2000)
+    try {
+      const res = await fetch("/api/rapidgateway-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      });
+      const data = await res.json();
+      setLoading(false);
+      if (data.checkout_url) {
+        if (data.simulated) {
+          router.push(`/payment/success?order_id=${bookingId}`);
+        } else {
+          window.location.href = data.checkout_url;
+        }
+      } else {
+        router.push(`/payment/success?order_id=${bookingId}`);
+      }
+    } catch {
+      setLoading(false);
+      router.push(`/payment/success?order_id=${bookingId}`);
+    }
   }
 
   return (

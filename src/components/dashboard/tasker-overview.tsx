@@ -21,11 +21,11 @@ export async function TaskerOverview({ profileId }: { profileId: string }) {
   // Fetch earnings
   const { data: bookings } = await supabase
     .from("bookings")
-    .select("total_cost")
+    .select("total_amount")
     .eq("tasker_id", profileId)
     .eq("payment_status", "paid")
 
-  const totalEarnings = bookings?.reduce((sum, b) => sum + (b.total_cost || 0), 0) || 0
+  const totalEarnings = bookings?.reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0
   const jobsCompleted = taskerProfile?.completed_tasks || 0
 
   return (

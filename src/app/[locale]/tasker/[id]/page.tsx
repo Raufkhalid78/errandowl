@@ -15,12 +15,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const supabase = await createClient();
   const { data: tasker } = await supabase
     .from("tasker_profiles")
-    .select("*, profiles!inner(name, city)")
+    .select("*, public_profiles!inner(name, city)")
     .or(`id.eq.${id},profile_id.eq.${id}`)
     .maybeSingle();
 
-  const name = tasker?.profiles?.name || "Tasker";
-  const city = tasker?.profiles?.city || "Pakistan";
+  const profile = (tasker as any)?.public_profiles || (tasker as any)?.profiles;
+  const name = profile?.name || "Tasker";
+  const city = profile?.city || "Pakistan";
 
   return {
     title: `${name} — ErrandOwl Pakistan`,
@@ -34,17 +35,27 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
   const supabase = await createClient();
   const t = await getTranslations("TaskerProfile");
 
-  const { data: tasker } = await supabase
+  const { data: rawTasker } = await supabase
     .from("tasker_profiles")
-    .select("*, profiles!inner(*)")
+    .select("*, public_profiles!inner(*)")
     .or(`id.eq.${id},profile_id.eq.${id}`)
     .maybeSingle();
+
+  const tasker = rawTasker ? {
+    ...rawTasker,
+    profiles: (rawTasker as any).public_profiles || (rawTasker as any).profiles
+  } : null;
 
   const { data: portfolioItems } = await supabase
     .from("portfolio_items")
     .select("*")
     .eq("tasker_id", tasker?.profile_id)
     .order("created_at", { ascending: false });
+
+  const { data: availabilityRows } = await supabase
+    .from("tasker_availability")
+    .select("*")
+    .eq("tasker_id", tasker?.profile_id);
 
   if (!tasker) {
     return (
@@ -172,8 +183,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                 </h3>
                 <div className="grid grid-cols-7 gap-1 text-center text-xs">
                   {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => {
-                    const avail = tasker.availability;
-                    const isAvailable = avail ? avail[day.toLowerCase().slice(0, 3)] : i < 5;
+                    const isAvailable = availabilityRows?.some(row => row.day_of_week === day);
                     return (
                       <div
                         key={day}
