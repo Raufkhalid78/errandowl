@@ -46,11 +46,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Target user not found" }, { status: 404 });
     }
 
+    // Need the admin's profile id, not just their email, to satisfy admin_id
+    const { data: adminProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("auth_id", user.id)
+      .single();
+
     // Record Audit Log Entry
-    await supabase.from("admin_audit_log").insert({
-      admin_email: user.email,
-      target_user_id: targetProfile.auth_id || targetProfile.id,
+    await supabase.from("admin_audit_logs").insert({
+      admin_id: adminProfile?.id,
       action: "impersonate_start",
+      entity_type: "profile",
+      entity_id: targetProfile.id,
       details: {
         target_name: targetProfile.name,
         target_email: targetProfile.email,
@@ -81,11 +89,18 @@ export async function DELETE() {
     const impersonateId = cookieStore.get("sb-impersonate-id")?.value;
 
     if (user && impersonateId) {
+      const { data: adminProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("auth_id", user.id)
+        .single();
+
       // Record Audit Log Entry
-      await supabase.from("admin_audit_log").insert({
-        admin_email: user.email,
-        target_user_id: impersonateId,
+      await supabase.from("admin_audit_logs").insert({
+        admin_id: adminProfile?.id,
         action: "impersonate_stop",
+        entity_type: "profile",
+        entity_id: impersonateId,
       });
     }
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function createNotification(params: {
   userId: string;
@@ -9,7 +9,10 @@ export async function createNotification(params: {
   body?: string;
   link?: string;
 }) {
-  const supabase = await createClient();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   
   const { error } = await supabase.from("notifications").insert({
     user_id: params.userId,
