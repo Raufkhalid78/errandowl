@@ -23,8 +23,8 @@ export function BidForm({ bookingId, taskerId }: { bookingId: string, taskerId: 
     const { error } = await supabase.from("job_bids").insert({
       booking_id: bookingId,
       tasker_id: taskerId,
-      proposed_amount: Number(amount),
-      proposal_text: text,
+      amount: Number(amount),
+      cover_letter: text,
       status: "pending"
     })
 

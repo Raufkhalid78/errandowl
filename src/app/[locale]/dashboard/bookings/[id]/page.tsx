@@ -9,6 +9,7 @@ import { SosButton } from "@/components/booking/sos-button"
 import { LiveTrackingMap } from "@/components/tracking/live-tracking-map"
 import { TaskerLocationEmitter } from "@/components/tracking/tasker-location-emitter"
 import { CompletionPhotoUploader } from "@/components/booking/completion-photo-uploader"
+import { ReviewModal } from "@/components/booking/review-modal"
 import { Button } from "@/components/ui/button"
 
 export default async function BookingDetailsPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
@@ -70,6 +71,16 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
             </Button>
           )}
           
+          {isClient && booking.status === "completed" && booking.tasker_id && (
+            <ReviewModal 
+              bookingId={booking.id} 
+              taskerId={booking.tasker_id} 
+              profileId={profile.id}
+              taskerName={booking.tasker?.name || "Tasker"}
+              serviceName={booking.service_name || "Task"} 
+            />
+          )}
+
           <DisputeButton 
             bookingId={booking.id} 
             userId={profile.id} 

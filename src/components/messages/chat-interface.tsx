@@ -11,7 +11,7 @@ type Message = {
   id: string
   booking_id: string
   sender_id: string
-  text?: string
+  content?: string
   attachment_url?: string
   read: boolean
   created_at: string
@@ -101,7 +101,7 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
     const messageData = {
       booking_id: bookingId,
       sender_id: userId,
-      text: newMessage.trim() || null,
+      content: newMessage.trim() || null,
     }
 
     const { error } = await supabase
@@ -123,7 +123,7 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
 
     setIsUploading(true)
     const fileExt = file.name.split('.').pop()
-    const fileName = `${bookingId}/${userId}-${Math.random()}.${fileExt}`
+    const fileName = `${userId}/${bookingId}-${Math.random()}.${fileExt}`
 
     const { error: uploadError } = await supabase.storage
       .from('chat_attachments')
@@ -211,7 +211,7 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
                         className="rounded-xl max-w-[200px] mb-2 object-cover" 
                       />
                     )}
-                    {msg.text && <span>{msg.text}</span>}
+                    {msg.content && <span>{msg.content}</span>}
                   </div>
                 </div>
               )

@@ -70,14 +70,15 @@ export function BookingForm({
       time: { value: string }
     }
 
+    const scheduledAt = new Date(`${format(date, "yyyy-MM-dd")}T${target.time.value}`)
+
     const bookingData = {
       client_id: userId,
       category_id: categoryId,
       tasker_id: taskerId || null,
       description: target.description.value,
-      location: target.location.value,
-      date: format(date, "yyyy-MM-dd"),
-      time: target.time.value,
+      address: target.location.value,
+      scheduled_at: scheduledAt.toISOString(),
       estimated_hours: settings?.pricing_mode === 'hourly' ? estimatedHours : 1,
       pricing_mode: settings?.pricing_mode || 'hourly',
       recurrence_pattern: recurrence,
