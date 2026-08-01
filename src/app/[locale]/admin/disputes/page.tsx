@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Loader2, AlertTriangle, ExternalLink } from "lucide-react"
-import { Link } from "@/i18n/routing"
+import { toast } from "sonner"
 
 export default function AdminDisputesPage() {
   const supabase = createClient()
@@ -24,7 +24,7 @@ export default function AdminDisputesPage() {
       .from("disputes")
       .select(`
         *,
-        booking:booking_id(service_name, total_amount),
+        booking:booking_id(service_name, total_amount, client_id),
         raiser:raised_by(name, email, role),
         evidence:dispute_evidence(file_url, description)
       `)
@@ -34,19 +34,53 @@ export default function AdminDisputesPage() {
     setLoading(false)
   }
 
-  const handleResolve = async (id: string, resolution: string) => {
-    setResolvingId(id)
-    const { error } = await supabase
-      .from("disputes")
-      .update({ status: resolution, admin_notes: "Resolved by Admin" })
-      .eq("id", id)
-      
-    if (!error) {
-      fetchDisputes()
-    } else {
-      alert("Error resolving dispute")
+  const handleResolve = async (dispute: any, resolution: string) => {
+    const notes = prompt("Enter resolution notes for this dispute (required):")
+    if (notes === null || notes.trim() === "") {
+      toast.error("Resolution notes are required")
+      return
     }
-    setResolvingId(null)
+
+    setResolvingId(dispute.id)
+
+    try {
+      if (resolution === 'resolved_refunded' && dispute.booking?.client_id) {
+        const clientId = dispute.booking.client_id;
+        const amount = dispute.booking.total_amount || 0;
+
+        // 1. Get current balance
+        const { data: profile } = await supabase.from('profiles').select('wallet_balance').eq('id', clientId).single();
+        const currentBalance = profile?.wallet_balance || 0;
+
+        // 2. Update balance
+        const { error: walletError } = await supabase.from('profiles').update({ wallet_balance: currentBalance + amount }).eq('id', clientId);
+        if (walletError) throw walletError;
+
+        // 3. Create transaction log
+        const { error: txError } = await supabase.from('wallet_transactions').insert([{
+          profile_id: clientId,
+          amount: amount,
+          type: 'credit',
+          description: `Refund for disputed booking: ${dispute.booking.service_name}`
+        }]);
+        if (txError) throw txError;
+      }
+
+      // Update dispute status
+      const { error } = await supabase
+        .from("disputes")
+        .update({ status: resolution, admin_notes: notes.trim() })
+        .eq("id", dispute.id)
+        
+      if (error) throw error;
+      
+      toast.success(resolution === 'resolved_refunded' ? "Dispute resolved and client refunded!" : "Dispute dismissed")
+      fetchDisputes()
+    } catch (err: any) {
+      toast.error("Error resolving dispute: " + err.message)
+    } finally {
+      setResolvingId(null)
+    }
   }
 
   if (loading) return <div className="flex justify-center p-20"><Loader2 className="animate-spin h-10 w-10 text-owl-violet" /></div>
@@ -122,9 +156,8 @@ export default function AdminDisputesPage() {
                     {dispute.status === 'open' || dispute.status === 'in_review' ? (
                       <div className="space-y-2">
                         <Button 
-                          className="w-full" 
-                          variant="outline"
-                          onClick={() => handleResolve(dispute.id, 'resolved_refunded')}
+                          className="w-full bg-owl-violet hover:bg-owl-violet-dark text-white" 
+                          onClick={() => handleResolve(dispute, 'resolved_refunded')}
                           disabled={resolvingId === dispute.id}
                         >
                           Resolve & Refund Client
@@ -132,16 +165,16 @@ export default function AdminDisputesPage() {
                         <Button 
                           className="w-full" 
                           variant="outline"
-                          onClick={() => handleResolve(dispute.id, 'resolved_closed')}
+                          onClick={() => handleResolve(dispute, 'resolved_closed')}
                           disabled={resolvingId === dispute.id}
                         >
                           Dismiss Dispute
                         </Button>
                       </div>
                     ) : (
-                      <div className="text-sm text-muted-foreground p-3 bg-muted rounded-lg border">
-                        <p className="font-medium mb-1">Resolved</p>
-                        <p className="text-xs">{dispute.admin_notes}</p>
+                      <div className="text-sm text-muted-foreground p-3 bg-card rounded-lg border">
+                        <p className="font-medium text-foreground mb-1">Admin Notes:</p>
+                        <p className="text-xs">{dispute.admin_notes || "No notes provided."}</p>
                       </div>
                     )}
                   </div>

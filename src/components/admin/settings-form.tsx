@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface Settings {
   currency?: string;
@@ -41,9 +42,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       });
 
     if (error) {
-      alert("Error saving settings: " + error.message);
+      toast.error("Error saving settings: " + error.message);
     } else {
-      alert("Settings saved successfully!");
+      toast.success("Settings saved successfully!");
     }
     setLoading(false);
   };
