@@ -7,6 +7,7 @@ import { BidList } from "@/components/booking/bid-list"
 import { DisputeButton } from "@/components/booking/dispute-button"
 import { SosButton } from "@/components/booking/sos-button"
 import { LiveMap } from "@/components/tracking/live-map"
+import { CompletionPhotoUploader } from "@/components/booking/completion-photo-uploader"
 import { Button } from "@/components/ui/button"
 
 export default async function BookingDetailsPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
@@ -23,7 +24,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
   // Fetch booking
   const { data: booking } = await supabase
     .from("bookings")
-    .select("*, tasker:tasker_id(name), client:client_id(name)")
+    .select("*, tasker:tasker_id(name), client:client_id(name), completion_photo_urls")
     .eq("id", id)
     .single()
 
@@ -97,6 +98,20 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
           <BidList bookingId={booking.id} />
         </div>
       )}
+
+      {isClient && booking.completion_photo_urls && booking.completion_photo_urls.length > 0 && (
+        <div className="pt-4 border-t border-border/50">
+          <h3 className="font-semibold text-lg mb-4">Completion Proof</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {booking.completion_photo_urls.map((url: string, i: number) => (
+              <a key={i} href={url} target="_blank" rel="noreferrer" className="block rounded-xl overflow-hidden border aspect-square hover:opacity-80 transition-opacity">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt={`Completion proof ${i + 1}`} className="w-full h-full object-cover" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
       
       {booking.tasker_id && (
         <div className="pt-4 border-t border-border/50">
@@ -116,6 +131,11 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
                 taskerId={booking.tasker_id} 
                 isTasker={!isClient} 
               />
+              {!isClient && (
+                <div className="pt-6 border-t border-border/50">
+                  <CompletionPhotoUploader bookingId={booking.id} userId={profile.id} />
+                </div>
+              )}
             </div>
           )}
         </div>

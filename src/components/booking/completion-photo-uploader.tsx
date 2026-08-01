@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Camera, Image as ImageIcon, Loader2 } from "lucide-react";
@@ -15,6 +15,16 @@ export function CompletionPhotoUploader({ bookingId, userId }: CompletionPhotoUp
   const [uploading, setUploading] = useState(false);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const supabase = createClient();
+
+
+  
+  useEffect(() => {
+    const loadExisting = async () => {
+      const { data } = await supabase.from("bookings").select("completion_photo_urls").eq("id", bookingId).single();
+      if (data?.completion_photo_urls) setPhotoUrls(data.completion_photo_urls);
+    };
+    loadExisting();
+  }, [bookingId, supabase]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -36,7 +46,23 @@ export function CompletionPhotoUploader({ bookingId, userId }: CompletionPhotoUp
         .from("completion_photos")
         .getPublicUrl(filePath);
 
-      setPhotoUrls((prev) => [...prev, data.publicUrl]);
+      // Persist to the booking record
+      const { data: current } = await supabase
+        .from("bookings")
+        .select("completion_photo_urls")
+        .eq("id", bookingId)
+        .single();
+
+      const updatedUrls = [...(current?.completion_photo_urls || []), data.publicUrl];
+
+      const { error: saveError } = await supabase
+        .from("bookings")
+        .update({ completion_photo_urls: updatedUrls })
+        .eq("id", bookingId);
+
+      if (saveError) throw saveError;
+
+      setPhotoUrls(updatedUrls);
       toast.success("Job completion photo uploaded!");
     } catch (err: any) {
       toast.error("Upload error: " + err.message);

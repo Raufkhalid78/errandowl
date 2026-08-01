@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Loader2, AlertTriangle, X } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 interface DisputeModalProps {
   bookingId: string
@@ -50,28 +51,38 @@ export function DisputeModal({ bookingId, userId, onClose }: DisputeModalProps) 
     // 2. Upload evidence if exists
     if (file && dispute) {
       const fileExt = file.name.split('.').pop()
-      const fileName = `${dispute.id}-${Math.random()}.${fileExt}`
+      const fileName = `${userId}/${dispute.id}-${Math.random()}.${fileExt}`
       
       const { error: uploadError } = await supabase.storage
         .from('disputes')
         .upload(fileName, file)
 
-      if (!uploadError) {
+      if (uploadError) {
+        setError("Dispute submitted, but the photo failed to upload: " + uploadError.message)
+        setIsLoading(false)
+        return
+      } else {
         const { data: { publicUrl } } = supabase.storage
           .from('disputes')
           .getPublicUrl(fileName)
           
-        await supabase.from("dispute_evidence").insert({
+        const { error: evidenceError } = await supabase.from("dispute_evidence").insert({
           dispute_id: dispute.id,
           submitted_by: userId,
           image_urls: [publicUrl],
           evidence_text: "Initial evidence"
         })
+
+        if (evidenceError) {
+          setError("Dispute submitted, but saving the evidence record failed: " + evidenceError.message)
+          setIsLoading(false)
+          return
+        }
       }
     }
 
     setIsLoading(false)
-    alert(t("successAlert"))
+    toast.success(t("successAlert"))
     onClose()
   }
 
