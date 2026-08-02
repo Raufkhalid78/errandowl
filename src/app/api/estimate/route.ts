@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const apiKey = process.env.GEMINI_API_KEY
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY
     if (!apiKey) {
       // Mock response if API key is missing
       return NextResponse.json({
@@ -42,42 +42,36 @@ Based on the user's task description, estimate:
 5. A 1-sentence reasoning.
 Return ONLY a valid JSON object with keys: category_id, estimated_hours, min_price, max_price, reasoning.`
 
-    // Fetch from Gemini API
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `${systemPrompt}\n\nUser Description: "${description}"`
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            responseMimeType: "application/json"
-          }
-        })
-      }
-    )
+    // Fetch from OpenRouter API
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://errandowl.com",
+        "X-Title": "ErrandOwl"
+      },
+      body: JSON.stringify({
+        model: "google/gemini-1.5-flash",
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `User Description: "${description}"` }
+        ]
+      })
+    })
 
     if (!response.ok) {
       const errText = await response.text()
-      console.error("Gemini API error text:", errText)
-      throw new Error("Failed to fetch Gemini AI response")
+      console.error("OpenRouter API error text:", errText)
+      throw new Error("Failed to fetch OpenRouter AI response")
     }
 
     const aiData = await response.json()
-    const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text
+    const content = aiData.choices?.[0]?.message?.content
 
     if (!content) {
-      throw new Error("Empty response from Gemini AI")
+      throw new Error("Empty response from OpenRouter AI")
     }
 
     const parsed = JSON.parse(content)
