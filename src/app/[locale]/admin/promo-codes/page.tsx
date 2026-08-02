@@ -20,7 +20,12 @@ export default function AdminPromoCodesPage() {
 
   const fetchPromoCodes = async () => {
     setLoading(true);
-    const { data } = await supabase.from("promo_codes").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("promo_codes").select("*").order("created_at", { ascending: false });
+    if (error) {
+      toast.error("Failed to load promo codes: " + error.message);
+      setLoading(false);
+      return;
+    }
     if (data) setPromoCodes(data);
     setLoading(false);
   };

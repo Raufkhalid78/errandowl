@@ -37,8 +37,14 @@ export default function AdminCategoriesPage() {
   const [newCat, setNewCat] = useState({ id: "", name_en: "", name_ur: "", icon: "", description_en: "", description_ur: "" });
 
   const fetchData = useCallback(async () => {
-    const { data: cats } = await supabase.from("categories").select("*").order("sort_order");
-    const { data: svcs } = await supabase.from("services").select("*");
+    const { data: cats, error: catsError } = await supabase.from("categories").select("*").order("sort_order");
+    const { data: svcs, error: svcsError } = await supabase.from("services").select("*");
+    
+    if (catsError || svcsError) {
+      toast.error("Failed to load categories: " + (catsError?.message || svcsError?.message));
+      setLoading(false);
+      return;
+    }
     
     if (cats) setCategories(cats);
     if (svcs) setServices(svcs);

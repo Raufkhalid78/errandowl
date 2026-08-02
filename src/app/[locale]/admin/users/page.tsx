@@ -23,7 +23,12 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const { data } = await supabase.from("profiles").select("*").order("registered_at", { ascending: false });
+      const { data, error } = await supabase.from("profiles").select("*").order("registered_at", { ascending: false });
+      if (error) {
+        toast.error("Failed to load users: " + error.message);
+        setLoading(false);
+        return;
+      }
       if (data) setUsers(data);
       setLoading(false);
     };
@@ -93,7 +98,10 @@ export default function AdminUsersPage() {
     setSelectedUser(user);
     if (user.role === 'tasker') {
       setLoadingProfile(true);
-      const { data } = await supabase.from('tasker_profiles').select('*').eq('id', user.id).single();
+      const { data, error } = await supabase.from('tasker_profiles').select('*').eq('id', user.id).single();
+      if (error && error.code !== 'PGRST116') { // Ignore "no rows returned" for non-taskers or incomplete profiles
+        toast.error("Failed to load tasker profile: " + error.message);
+      }
       setTaskerProfile(data || null);
       setLoadingProfile(false);
     } else {

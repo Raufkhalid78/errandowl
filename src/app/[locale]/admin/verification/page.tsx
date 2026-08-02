@@ -50,12 +50,15 @@ export default function VerificationQueuePage() {
       .not("cnic_url", "is", null);
 
     if (activeTab === 'pending') {
-      query = query.eq("cnic_status", "pending").order("created_at", { ascending: true });
+      query = query.eq("cnic_status", "pending").order("registered_at", { ascending: true });
     } else {
-      query = query.in("cnic_status", ["approved", "rejected"]).order("created_at", { ascending: false }).limit(50);
+      query = query.in("cnic_status", ["approved", "rejected"]).order("registered_at", { ascending: false }).limit(50);
     }
 
-    const { data } = await query;
+    const { data, error } = await query;
+    if (error) {
+      toast.error("Failed to load verification queue: " + error.message);
+    }
     if (data) setTaskers(data);
     setLoading(false);
   }, [supabase, activeTab]);
@@ -156,7 +159,7 @@ export default function VerificationQueuePage() {
                     <p className="text-sm text-muted-foreground">{tasker.email}</p>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <Badge variant="secondary" className="text-[10px] uppercase">{tasker.city || "Unknown City"}</Badge>
-                        <span className="text-[10px] text-muted-foreground">Joined {new Date(tasker.created_at).toLocaleDateString()}</span>
+                        <span className="text-[10px] text-muted-foreground">Joined {new Date(tasker.registered_at).toLocaleDateString()}</span>
                         {tasker.cnic_rejection_reason && (
                           <span className="text-[10px] text-destructive bg-destructive/10 px-2 py-0.5 rounded-full border border-destructive/20">
                             Reason: {tasker.cnic_rejection_reason}
