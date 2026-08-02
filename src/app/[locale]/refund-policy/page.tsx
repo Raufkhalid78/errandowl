@@ -37,6 +37,16 @@ export default function RefundPolicyPage() {
                 <h2 className="text-lg font-semibold mb-2">{t("refund.s4Title")}</h2>
                 <p className="text-muted-foreground leading-relaxed">{t("refund.s4Text")}</p>
               </section>
+              <section className="mt-8 border-t border-border/50 pt-8">
+                <h3 className="font-medium text-foreground mb-2">Contact Us</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  To request a refund or if you have any questions about our Refund Policy, please contact us:
+                  <br /><br />
+                  <strong>Phone:</strong> <a href="tel:+447517879333" className="text-owl-violet hover:underline">+447517879333</a><br />
+                  <strong>Email:</strong> <a href="mailto:hello@techydez.com" className="text-owl-violet hover:underline">hello@techydez.com</a><br />
+                  <strong>Address:</strong> TechyDez, Jhelum, Punjab, Pakistan
+                </p>
+              </section>
             </div>
           </div>
         </section>

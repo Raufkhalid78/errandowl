@@ -16,7 +16,7 @@ export default async function ForumPostPage({ params }: { params: Promise<{ id: 
 
   const { data: post } = await supabase
     .from("forum_posts")
-    .select("*, author:author_id(name, avatar_url)")
+    .select("*, author:author_id(name, avatar)")
     .eq("id", id)
     .single()
 
@@ -24,7 +24,7 @@ export default async function ForumPostPage({ params }: { params: Promise<{ id: 
 
   const { data: comments } = await supabase
     .from("forum_comments")
-    .select("*, author:author_id(name, avatar_url)")
+    .select("*, author:author_id(name, avatar)")
     .eq("post_id", id)
     .order("created_at", { ascending: true })
 
@@ -42,7 +42,7 @@ export default async function ForumPostPage({ params }: { params: Promise<{ id: 
           </span>
           <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+            {formatDistanceToNow(new Date(post.created_at as string), { addSuffix: true })}
           </span>
         </div>
         
@@ -50,14 +50,14 @@ export default async function ForumPostPage({ params }: { params: Promise<{ id: 
         
         <div className="flex items-center gap-2 mb-6">
           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-            {post.author?.avatar_url ? (
+            {post.author?.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={post.author.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+              <img src={post.author.avatar as string} alt="avatar" className="w-full h-full object-cover" />
             ) : (
-              post.author?.name?.[0] || "U"
+              (post.author?.name as string)?.[0] || "U"
             )}
           </div>
-          <span className="font-medium text-sm">{post.author?.name || "Anonymous"}</span>
+          <span className="font-medium text-sm">{(post.author?.name as string) || "Anonymous"}</span>
         </div>
 
         <div className="prose prose-sm max-w-none text-foreground/90 whitespace-pre-wrap">
@@ -74,17 +74,17 @@ export default async function ForumPostPage({ params }: { params: Promise<{ id: 
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center overflow-hidden text-xs">
-                    {comment.author?.avatar_url ? (
+                    {comment.author?.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={comment.author.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                      <img src={comment.author.avatar as string} alt="avatar" className="w-full h-full object-cover" />
                     ) : (
-                      comment.author?.name?.[0] || "U"
+                      (comment.author?.name as string)?.[0] || "U"
                     )}
                   </div>
-                  <span className="font-medium text-sm">{comment.author?.name || "Anonymous"}</span>
+                  <span className="font-medium text-sm">{(comment.author?.name as string) || "Anonymous"}</span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(comment.created_at as string), { addSuffix: true })}
                 </span>
               </div>
               <p className="text-sm pl-8 text-foreground/80 whitespace-pre-wrap">{comment.content}</p>

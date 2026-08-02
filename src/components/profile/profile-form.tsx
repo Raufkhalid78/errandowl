@@ -50,7 +50,7 @@ export function ProfileForm({
       phone: target.phone.value,
       location: target.location.value,
       bio: target.bio.value,
-      updated_at: new Date(),
+      updated_at: new Date().toISOString(),
     }
 
     // Upsert the profile record

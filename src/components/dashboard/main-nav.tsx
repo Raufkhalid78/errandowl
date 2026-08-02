@@ -19,6 +19,7 @@ export function MainNav({
     { href: "/dashboard", label: t("overview") },
     { href: isTasker ? "/dashboard/jobs" : "/dashboard/services", label: isTasker ? t("openJobs") : t("services") },
     { href: "/dashboard/bookings", label: t("bookings") },
+    ...(isTasker ? [{ href: "/dashboard/performance", label: "Performance" }] : []),
     { href: "/dashboard/messages", label: t("messages") },
     { href: "/dashboard/community", label: "Community" },
     { href: "/dashboard/wallet", label: "Wallet" },

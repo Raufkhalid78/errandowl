@@ -62,7 +62,7 @@ export function JobsList({ jobs }: { jobs: Booking[] }) {
               
               <div className="flex items-center space-x-2 mt-4">
                 <Avatar className="h-6 w-6">
-                  <AvatarImage src={job.profiles?.avatar_url} alt={job.profiles?.name} />
+                  <AvatarImage src={job.profiles?.avatar} alt={job.profiles?.name} />
                   <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
                 </Avatar>
                 <span className="text-xs text-muted-foreground">

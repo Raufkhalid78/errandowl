@@ -26,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (userError || !user) redirect("/login");
 
   // Check if user is admin
-  const { data: adminData } = await supabase.from("admins").select("*").eq("email", user.email).single();
+  const { data: adminData } = await supabase.from("admins").select("*").eq("email", user.email || "").single();
   const { data: profile } = await supabase.from("profiles").select("role, status").eq("auth_id", user.id).single();
 
   if (profile?.status === "suspended" || profile?.status === "banned") {

@@ -25,9 +25,9 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
   
   const { data: booking } = await supabase
     .from("bookings")
-    .select("*, tasker:tasker_id(name), client:client_id(name), completion_photo_urls, lat, lng")
+    .select("*, tasker:profiles!tasker_id(name), client:profiles!client_id(name), completion_photo_urls, lat, lng")
     .eq("id", id)
-    .single()
+    .single() as any
 
   if (!booking) redirect("/dashboard/bookings")
 
@@ -45,7 +45,7 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h2 className="text-3xl font-bold tracking-tight">{booking.service_name || "Task"}</h2>
-            <span className="px-2.5 py-0.5 rounded-full border text-xs capitalize bg-muted">{booking.status.replace("_", " ")}</span>
+            <span className="px-2.5 py-0.5 rounded-full border text-xs capitalize bg-muted">{(booking.status || "").replace("_", " ")}</span>
           </div>
           <p className="text-muted-foreground">{booking.address}</p>
         </div>
@@ -140,8 +140,8 @@ export default async function BookingDetailsPage({ params }: { params: Promise<{
               {isClient ? (
                 <LiveTrackingMap 
                   bookingId={booking.id} 
-                  clientLat={booking.lat} 
-                  clientLng={booking.lng} 
+                  clientLat={booking.lat || undefined} 
+                  clientLng={booking.lng || undefined} 
                 />
               ) : (
                 <TaskerLocationEmitter 

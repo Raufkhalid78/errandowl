@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const { data: adminCheck } = await supabase
       .from("admins")
       .select("id")
-      .eq("email", user.email)
+      .eq("email", user.email || "")
       .maybeSingle();
 
     const { data: profileCheck } = await supabase

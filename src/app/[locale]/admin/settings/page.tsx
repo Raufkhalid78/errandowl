@@ -30,7 +30,7 @@ export default async function AdminSettingsPage() {
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
       
-      <SettingsForm initialSettings={initialSettings} />
+      <SettingsForm initialSettings={initialSettings as any} />
     </div>
   );
 }

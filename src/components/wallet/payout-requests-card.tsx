@@ -50,7 +50,7 @@ export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequests
         .order("requested_at", { ascending: false });
 
       if (error) throw error;
-      setPayouts(data || []);
+      setPayouts(data as any || []);
     } catch (err: any) {
       console.error("Error fetching payouts:", {
         message: err.message,

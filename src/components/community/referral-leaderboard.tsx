@@ -16,8 +16,8 @@ export function ReferralLeaderboard() {
       // Step 1: get top referral codes (no join)
       const { data: codes } = await supabase
         .from("referral_codes")
-        .select("id, profile_id, code, total_uses")
-        .order("total_uses", { ascending: false })
+        .select("id, profile_id, code, usage_count")
+        .order("usage_count", { ascending: false })
         .limit(10);
 
       if (!codes || codes.length === 0) {
@@ -117,10 +117,10 @@ export function ReferralLeaderboard() {
 
                   <div className="text-right">
                     <div className="font-bold text-owl-violet text-sm">
-                      {item.total_uses} Invites
+                      {item.usage_count || 0} Invites
                     </div>
                     <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 justify-end">
-                      <Gift className="h-3 w-3" /> Rs {(item.total_uses * 500).toLocaleString()} Earned
+                      <Gift className="h-3 w-3" /> Rs {((item.usage_count || 0) * 500).toLocaleString()} Earned
                     </div>
                   </div>
                 </div>

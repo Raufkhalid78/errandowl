@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { Database } from '@/types/supabase'
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -11,7 +12,7 @@ export async function createClient() {
     console.warn('Supabase credentials are missing on the server. Check your .env.local file.')
   }
 
-  const client = createServerClient(
+  const client = createServerClient<Database>(
     supabaseUrl || '',
     supabaseAnonKey || '',
     {
@@ -50,7 +51,7 @@ export async function createClient() {
         const { data: adminCheck } = await client
           .from("admins")
           .select("id")
-          .eq("email", res.data.user.email)
+          .eq("email", res.data.user.email || "")
           .maybeSingle();
 
         if (adminCheck) {
@@ -76,12 +77,12 @@ export async function createClient() {
                 }
               },
               error: null
-            };
+            } as any;
           }
         }
       }
     }
-    return res;
+    return res as any;
   };
 
   return client;

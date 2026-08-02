@@ -9,9 +9,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select("*, tasker:tasker_id(name, hourly_rate), client:client_id(name, address), payments(amount, tip_amount, created_at, method)")
+    .select("*, tasker:profiles!tasker_id(name, hourly_rate), client:profiles!client_id(name, address), payments(amount, tip_amount, created_at, method)")
     .eq("id", id)
-    .single()
+    .single() as any
 
   if (!booking) redirect("/dashboard/bookings")
 

@@ -1,4 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr'
+import { Database } from '@/types/supabase'
 
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -8,7 +9,7 @@ export function createClient() {
     console.warn('Supabase credentials are missing. Check your .env.local file.')
   }
 
-  return createBrowserClient(
+  return createBrowserClient<Database>(
     supabaseUrl || '',
     supabaseAnonKey || ''
   )

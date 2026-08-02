@@ -6,7 +6,7 @@ export interface Profile {
   role: UserRole;
   name: string;
   email: string;
-  avatar_url?: string;
+  avatar?: string;
   phone?: string;
   address?: string;
   status?: "active" | "suspended" | "banned";

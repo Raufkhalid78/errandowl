@@ -30,7 +30,7 @@ export default function SuspendedPage() {
       if (profile && (profile.status === "active" || !profile.status)) {
         router.push("/dashboard");
       } else if (profile) {
-        setStatus(profile.status);
+        setStatus(profile.status || "suspended");
       }
       setLoading(false);
     };

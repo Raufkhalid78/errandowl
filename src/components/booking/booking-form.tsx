@@ -41,6 +41,9 @@ export function BookingForm({
   const [recurrence, setRecurrence] = React.useState<string>("none")
   const [isEstimating, setIsEstimating] = React.useState(false)
   const [aiReasoning, setAiReasoning] = React.useState<string | null>(null)
+  const [savedAddresses, setSavedAddresses] = React.useState<any[]>([])
+  const [selectedAddressId, setSelectedAddressId] = React.useState<string>("new")
+  const [newAddressText, setNewAddressText] = React.useState<string>("")
   
   const router = useRouter()
   const supabase = createClient()
@@ -48,7 +51,18 @@ export function BookingForm({
 
   React.useEffect(() => {
     getPricingSettings().then(setSettings)
-  }, [])
+    
+    // Fetch saved addresses
+    async function fetchAddresses() {
+      const { data } = await supabase.from("saved_addresses").select("*").eq("profile_id", userId).order("created_at", { ascending: false })
+      if (data && data.length > 0) {
+        setSavedAddresses(data)
+        const def = data.find(a => a.is_default)
+        if (def) setSelectedAddressId(def.id)
+      }
+    }
+    fetchAddresses()
+  }, [userId, supabase])
 
   const rateToUse = taskerRate || 1000 // default fallback
   const totalCost = rateToUse * estimatedHours
@@ -66,28 +80,56 @@ export function BookingForm({
 
     const target = event.target as typeof event.target & {
       description: { value: string }
-      location: { value: string }
       time: { value: string }
     }
 
-    const scheduledAt = new Date(`${format(date, "yyyy-MM-dd")}T${target.time.value}`)
+    const baseDate = new Date(`${format(date, "yyyy-MM-dd")}T${target.time.value}`)
+    
+    let addressToUse = newAddressText
+    if (selectedAddressId !== "new") {
+      const saved = savedAddresses.find(a => a.id === selectedAddressId)
+      if (saved) addressToUse = saved.address
+    }
 
-    const bookingData = {
+    if (!addressToUse) {
+      setError("Please provide an address.")
+      setIsLoading(false)
+      return
+    }
+
+    const baseBooking = {
       client_id: userId,
       category_id: categoryId,
       tasker_id: taskerId || null,
       description: target.description.value,
-      address: target.location.value,
-      scheduled_at: scheduledAt.toISOString(),
+      address: addressToUse,
       estimated_hours: settings?.pricing_mode === 'hourly' ? estimatedHours : 1,
       pricing_mode: settings?.pricing_mode || 'hourly',
       recurrence_pattern: recurrence,
-      status: "pending",
+      status: "pending" as any,
+    }
+
+    const bookingsToInsert = []
+    let occurrences = 1
+    if (recurrence === 'weekly') occurrences = 4
+    if (recurrence === 'biweekly') occurrences = 4
+    if (recurrence === 'monthly') occurrences = 3
+
+    for (let i = 0; i < occurrences; i++) {
+      const scheduledAt = new Date(baseDate)
+      if (recurrence === 'weekly') scheduledAt.setDate(scheduledAt.getDate() + (i * 7))
+      if (recurrence === 'biweekly') scheduledAt.setDate(scheduledAt.getDate() + (i * 14))
+      if (recurrence === 'monthly') scheduledAt.setMonth(scheduledAt.getMonth() + i)
+      
+      bookingsToInsert.push({
+        ...baseBooking,
+        scheduled_at: scheduledAt.toISOString()
+      })
     }
 
     const { error: insertError } = await supabase
       .from("bookings")
-      .insert(bookingData)
+      .insert(bookingsToInsert)
 
     if (insertError) {
       setError(insertError.message)
@@ -164,8 +206,29 @@ export function BookingForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="location">{t('location')}</Label>
-            <Input id="location" required placeholder={t('locationPlaceholder')} />
+            <Label>{t('location')}</Label>
+            {savedAddresses.length > 0 && (
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={selectedAddressId}
+                onChange={(e) => setSelectedAddressId(e.target.value)}
+              >
+                {savedAddresses.map(addr => (
+                  <option key={addr.id} value={addr.id}>{addr.label} - {addr.address}</option>
+                ))}
+                <option value="new">New Address...</option>
+              </select>
+            )}
+            
+            {selectedAddressId === "new" && (
+              <Input 
+                id="location" 
+                value={newAddressText}
+                onChange={(e) => setNewAddressText(e.target.value)}
+                required={selectedAddressId === "new"} 
+                placeholder={t('locationPlaceholder')} 
+              />
+            )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

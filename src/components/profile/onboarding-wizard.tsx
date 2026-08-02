@@ -135,10 +135,10 @@ export function OnboardingWizard({
         ...(isTasker ? {
           cnic_url: frontUrl,
           cnic_back_url: backUrl,
-          cnic_status: 'pending', // trigger review
+          cnic_status: 'pending' as any, // trigger review
           certificate_url: certificateUrl
         } : {}),
-        updated_at: new Date()
+        updated_at: new Date().toISOString()
       }
 
       const { data: updatedProfile, error } = await supabase

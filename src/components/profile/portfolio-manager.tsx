@@ -28,7 +28,7 @@ export function PortfolioManager({ taskerId }: { taskerId: string }) {
       .eq("tasker_id", taskerId)
       .order("created_at", { ascending: false })
     
-    if (data) setItems(data)
+    if (data) setItems(data as any)
     setIsLoading(false)
   }, [supabase, taskerId])
 

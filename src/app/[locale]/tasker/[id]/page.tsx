@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const { data: profileData } = await supabase
       .from("public_profiles")
       .select("name, city")
-      .eq("id", tasker.profile_id)
+      .eq("id", tasker.profile_id!)
       .maybeSingle();
     profile = profileData || (tasker as any).profiles;
   }
@@ -54,7 +54,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
     const { data: profileData } = await supabase
       .from("public_profiles")
       .select("*")
-      .eq("id", rawTasker.profile_id)
+      .eq("id", rawTasker.profile_id!)
       .maybeSingle();
     profile = profileData;
   }
@@ -67,13 +67,13 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
   const { data: portfolioItems } = await supabase
     .from("portfolio_items")
     .select("*")
-    .eq("tasker_id", tasker?.profile_id)
+    .eq("tasker_id", tasker?.profile_id!)
     .order("created_at", { ascending: false });
 
   const { data: availabilityRows } = await supabase
     .from("tasker_availability")
     .select("*")
-    .eq("tasker_id", tasker?.profile_id);
+    .eq("tasker_id", tasker?.profile_id!);
 
   if (!tasker) {
     return (
@@ -119,12 +119,12 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                       ⭐ {t("elite")}
                     </span>
                   )}
-                  {tasker.badges?.map((badge: string) => (
+                  {(tasker as any).badges?.map((badge: string) => (
                     <span key={badge} className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-owl-violet-light/20 text-owl-violet-light border border-owl-violet-light/30">
                       <Shield className="h-3 w-3" /> {badge}
                     </span>
                   ))}
-                  <FavoriteButton taskerId={tasker.profile_id} className="ml-auto" />
+                  <FavoriteButton taskerId={tasker.profile_id!} className="ml-auto" />
                 </div>
                 <div className="flex items-center gap-1 text-white/60 text-sm mb-3">
                   <MapPin className="h-4 w-4" />
@@ -146,7 +146,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                     {tasker.completed_tasks || 0} {t("tasksDone")}
                   </div>
                   <div className="text-owl-amber-light font-bold text-lg">
-                    {formatRate(rate || 0, tasker.pricing_mode || settings.pricing_mode, locale)}
+                    {formatRate(rate || 0, (tasker.pricing_mode || settings.pricing_mode) as any, locale)}
                   </div>
                 </div>
               </div>
@@ -177,7 +177,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                 <h3 className="font-semibold text-sm mb-3">{t("skills")}</h3>
                 <div className="flex flex-wrap gap-2">
                   {(tasker.skills || ["General Tasks"]).map((skill: string) => {
-                    const isVerified = tasker.verified_skills?.includes(skill);
+                    const isVerified = (tasker as any).verified_skills?.includes(skill);
                     return (
                       <span
                         key={skill}
@@ -236,7 +236,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                 <h3 className="font-semibold mb-4 text-xl">
                   {t("reviewsTitle")}
                 </h3>
-                <ReviewList taskerId={tasker.profile_id} />
+                <ReviewList taskerId={tasker.profile_id!} />
               </div>
             </div>
           </div>

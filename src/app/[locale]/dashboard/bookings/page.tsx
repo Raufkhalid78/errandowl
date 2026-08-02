@@ -20,7 +20,7 @@ const statusColors: Record<string, string> = {
 async function updateBookingStatus(bookingId: string, status: string) {
   "use server";
   const supabase = await createClient();
-  await supabase.from("bookings").update({ status }).eq("id", bookingId);
+  await supabase.from("bookings").update({ status: status as any }).eq("id", bookingId);
 
   // Notify other party
   const { data: booking } = await supabase.from("bookings").select("client_id, tasker_id").eq("id", bookingId).single();
@@ -62,10 +62,10 @@ export default async function BookingsPage() {
   let bookings: any[] = [];
 
   if (isTasker) {
-    const { data } = await supabase.from("bookings").select("*").eq("tasker_id", profileId).order("created_at", { ascending: false });
+    const { data } = await supabase.from("bookings").select("*").eq("tasker_id", profileId!).order("created_at", { ascending: false });
     bookings = data || [];
   } else {
-    const { data } = await supabase.from("bookings").select("*").eq("client_id", profileId).order("created_at", { ascending: false });
+    const { data } = await supabase.from("bookings").select("*").eq("client_id", profileId!).order("created_at", { ascending: false });
     bookings = data || [];
   }
 

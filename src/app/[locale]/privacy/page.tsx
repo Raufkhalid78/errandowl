@@ -49,6 +49,16 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
                 <h2 className="text-lg font-semibold mb-2">{t("privacy.s6Title")}</h2>
                 <p className="text-muted-foreground leading-relaxed">{t("privacy.s6Text")} <a href="mailto:privacy@errandowl.com.pk" className="text-owl-violet hover:underline">privacy@errandowl.com.pk</a></p>
               </section>
+              <section className="mt-8 border-t border-border/50 pt-8">
+                <h3 className="font-medium text-foreground mb-2">Contact Us</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  If you have any questions about this Privacy Policy, please contact us:
+                  <br /><br />
+                  <strong>Phone:</strong> <a href="tel:+447517879333" className="text-owl-violet hover:underline">+447517879333</a><br />
+                  <strong>Email:</strong> <a href="mailto:hello@techydez.com" className="text-owl-violet hover:underline">hello@techydez.com</a><br />
+                  <strong>Address:</strong> TechyDez, Jhelum, Punjab, Pakistan
+                </p>
+              </section>
             </div>
           </div>
         </section>

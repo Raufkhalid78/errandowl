@@ -18,7 +18,7 @@ export default async function CommunityPage() {
 
   const { data: posts } = await supabase
     .from("forum_posts")
-    .select("*, author:author_id(name, avatar_url), comments:forum_comments(count)")
+    .select("*, author:author_id(name, avatar), comments:forum_comments(count)")
     .order("created_at", { ascending: false })
 
   return (
@@ -42,7 +42,7 @@ export default async function CommunityPage() {
                     </span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(post.created_at as string), { addSuffix: true })}
                     </span>
                   </div>
                   <h3 className="font-semibold text-lg mb-1">{post.title}</h3>
@@ -51,17 +51,17 @@ export default async function CommunityPage() {
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                        {post.author?.avatar_url ? (
+                        {post.author?.avatar ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={post.author.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                          <img src={post.author.avatar as string} alt="avatar" className="w-full h-full object-cover" />
                         ) : (
-                          post.author?.name?.[0]
+                          (post.author?.name as string)?.[0]
                         )}
                       </div>
-                      <span>{post.author?.name || "Anonymous"}</span>
+                      <span>{(post.author?.name as string) || "Anonymous"}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {post.likes_count}</span>
+                      <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> {post.likes}</span>
                       <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {post.comments?.[0]?.count || 0}</span>
                     </div>
                   </div>

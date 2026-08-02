@@ -46,7 +46,7 @@ export default async function WalletPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <WalletBalanceCard balance={profile.wallet_balance || 0} />
-        <ReferralCard profileId={profile.id} referralCode={referral?.code} totalUses={referral?.total_uses || 0} />
+        <ReferralCard profileId={profile.id} referralCode={referral?.code} totalUses={referral?.usage_count || 0} />
       </div>
 
       {isTasker && (
@@ -55,7 +55,7 @@ export default async function WalletPage() {
         </div>
       )}
       
-      <WalletTransactionsList transactions={transactions || []} />
+      <WalletTransactionsList transactions={(transactions as any) || []} />
     </div>
   )
 }

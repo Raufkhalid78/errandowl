@@ -71,7 +71,7 @@ export default function AdminDisputesPage() {
       // Update dispute status
       const { error } = await supabase
         .from("disputes")
-        .update({ status: resolution, admin_notes: notes.trim() })
+        .update({ status: resolution as any, admin_notes: notes.trim() })
         .eq("id", dispute.id)
         
       if (error) throw error;

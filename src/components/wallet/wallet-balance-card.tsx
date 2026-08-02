@@ -1,7 +1,9 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Wallet } from "lucide-react"
+import { Wallet, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Link } from "@/i18n/routing"
 
 export function WalletBalanceCard({ balance }: { balance: number }) {
   return (
@@ -15,8 +17,15 @@ export function WalletBalanceCard({ balance }: { balance: number }) {
         <CardDescription>Use your balance to pay for tasks.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="text-4xl font-bold text-foreground">
-          Rs {balance.toLocaleString()}
+        <div className="flex items-center justify-between">
+          <div className="text-4xl font-bold text-foreground">
+            Rs {balance.toLocaleString()}
+          </div>
+          <Link href="/dashboard/wallet/topup">
+            <Button size="sm" className="gap-2 bg-owl-violet hover:bg-owl-violet/90 text-white shadow-lg">
+              <Plus className="h-4 w-4" /> Top Up
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

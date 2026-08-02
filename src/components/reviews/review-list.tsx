@@ -21,11 +21,22 @@ export function ReviewList({ taskerId }: ReviewListProps) {
     const fetchReviews = async () => {
       const { data } = await supabaseClient
         .from("reviews")
-        .select("*, profiles!client_id(name, avatar_url)")
+        .select("*, profiles!reviewer_id(name, avatar)")
         .eq("tasker_id", taskerId)
         .order("created_at", { ascending: false });
 
-      if (data) setReviews(data);
+      if (data) {
+        const formattedReviews: Review[] = data.map((r: any) => ({
+          ...r,
+          text: r.comment || "",
+          rating_punctuality: r.reliability_rating || undefined,
+          rating_quality: r.quality_rating || undefined,
+          rating_communication: r.communication_rating || undefined,
+          tasker_reply: r.reply || undefined,
+          client_id: r.reviewer_id || "",
+        }));
+        setReviews(formattedReviews);
+      }
       setLoading(false);
     };
     fetchReviews();

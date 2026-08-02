@@ -36,7 +36,7 @@ export default function AdminUsersPage() {
   }, [supabase]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    const { error } = await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
+    const { error } = await supabase.from("profiles").update({ role: newRole as any }).eq("id", userId);
     if (!error) {
       setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u));
       toast.success("User role updated successfully");
@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
   };
 
   const handleStatusChange = async (userId: string, newStatus: string) => {
-    const { error } = await supabase.from("profiles").update({ status: newStatus }).eq("id", userId);
+    const { error } = await supabase.from("profiles").update({ status: newStatus as any }).eq("id", userId);
     if (!error) {
       setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
       toast.success("User status updated to " + newStatus);

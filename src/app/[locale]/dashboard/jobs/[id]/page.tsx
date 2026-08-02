@@ -20,7 +20,7 @@ export default async function JobDetailsPage({ params }: { params: Promise<{ id:
   // Fetch job
   const { data: job } = await supabase
     .from("bookings")
-    .select("*, profiles!client_id(name, avatar_url)")
+    .select("*, profiles!client_id(name, avatar)")
     .eq("id", id)
     .single()
 
@@ -31,7 +31,7 @@ export default async function JobDetailsPage({ params }: { params: Promise<{ id:
     .from("job_bids")
     .select("*")
     .eq("booking_id", id)
-    .eq("tasker_id", profileId)
+    .eq("tasker_id", profileId!)
     .single()
 
   return (
@@ -65,8 +65,8 @@ export default async function JobDetailsPage({ params }: { params: Promise<{ id:
           <div className="p-6 rounded-2xl border border-owl-emerald/30 bg-owl-emerald/5 text-center">
             <div className="text-2xl mb-2">✅</div>
             <h3 className="font-semibold text-lg text-owl-emerald">Bid Submitted</h3>
-            <p className="text-sm text-muted-foreground mt-1">You offered Rs {existingBid.proposed_amount.toLocaleString()}</p>
-            <p className="text-sm mt-3 border-t pt-3">{existingBid.proposal_text}</p>
+            <p className="text-sm text-muted-foreground mt-1">You offered Rs {existingBid.amount.toLocaleString()}</p>
+            <p className="text-sm mt-3 border-t pt-3">{existingBid.cover_letter}</p>
           </div>
         ) : !isVerified ? (
           <div className="p-6 rounded-2xl border border-yellow-500/30 bg-yellow-500/5 text-center space-y-3">

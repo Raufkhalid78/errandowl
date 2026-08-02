@@ -68,7 +68,7 @@ export default async function SubscriptionDashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">{t("nextPayment")}</p>
-                <p className="font-medium">{new Date(subscription.current_period_end).toLocaleDateString()}</p>
+                <p className="font-medium">{new Date(subscription.current_period_end as string).toLocaleDateString()}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">{t("paymentMethod")}</p>

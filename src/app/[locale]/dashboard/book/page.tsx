@@ -44,7 +44,7 @@ export default async function BookPage({
 
     if (data) {
       taskerDetails = {
-        name: data.name,
+        name: data.name || "",
         hourlyRate: Array.isArray(data.tasker_profiles) ? (data.tasker_profiles[0] as any)?.hourly_rate : (data.tasker_profiles as any)?.hourly_rate,
         isVerified: data.is_verified || data.cnic_status === 'approved'
       }

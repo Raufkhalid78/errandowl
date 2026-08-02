@@ -12,11 +12,11 @@ type Message = {
   id: string
   booking_id: string
   sender_id: string
-  content?: string
-  attachment_url?: string
-  read: boolean
+  content: string
+  attachment_url?: string | null
+  is_read: boolean | null
   created_at: string
-  profiles?: { name: string, avatar_url?: string }
+  profiles?: { name: string, avatar?: string }
 }
 
 interface ChatInterfaceProps {
@@ -43,12 +43,12 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
       setLoading(true)
       const { data, error } = await supabase
         .from("messages")
-        .select("*, profiles:sender_id(name, avatar_url)")
+        .select("*, profiles:sender_id(name, avatar)")
         .eq("booking_id", bookingId)
         .order("created_at", { ascending: true })
 
       if (!error && data) {
-        setMessages(data)
+        setMessages(data as any)
       }
       setLoading(false)
     }
@@ -71,11 +71,11 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
           // Fetch sender profile for the new message
           const { data: profile } = await supabase
             .from("profiles")
-            .select("name, avatar_url")
+            .select("name, avatar")
             .eq("id", newMsg.sender_id)
             .single()
           
-          setMessages((prev) => [...prev, { ...newMsg, profiles: profile || undefined }])
+          setMessages((prev) => [...prev, { ...newMsg, profiles: profile || undefined } as any])
         }
       )
       .subscribe()
@@ -102,7 +102,9 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
     const messageData = {
       booking_id: bookingId,
       sender_id: userId,
-      content: newMessage.trim() || null,
+      content: newMessage.trim(),
+      is_read: false as any,
+      created_at: new Date().toISOString() as any,
     }
 
     const { error } = await supabase
@@ -155,6 +157,9 @@ export function ChatInterface({ userId, bookingId }: ChatInterfaceProps) {
       booking_id: bookingId,
       sender_id: userId,
       attachment_url: fileName, // Save private relative path
+      content: "[Attachment]",
+      is_read: false as any,
+      created_at: new Date().toISOString() as any,
     }
 
     const { error } = await supabase.from('messages').insert(messageData)

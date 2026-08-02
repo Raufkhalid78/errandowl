@@ -19,7 +19,7 @@ export default async function JobsPage() {
   // In a real app, you might filter by tasker's skills/categories
   const { data: openJobsData } = await supabase
     .from("bookings")
-    .select("*, profiles!client_id(name, avatar_url)")
+    .select("*, profiles!client_id(name, avatar)")
     .eq("status", "pending")
     .is("tasker_id", null)
     .order("created_at", { ascending: false })
@@ -37,7 +37,7 @@ export default async function JobsPage() {
 
       <div className="grid gap-6">
         {openJobs.length > 0 ? (
-          <JobsList jobs={openJobs} />
+          <JobsList jobs={openJobs as any} />
         ) : (
           <div className="text-center py-16 border border-dashed rounded-2xl">
             <div className="text-4xl mb-4">🔍</div>

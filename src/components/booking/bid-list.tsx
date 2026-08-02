@@ -21,11 +21,11 @@ export function BidList({ bookingId }: { bookingId: string }) {
     const fetchBids = async () => {
       const { data } = await supabaseClient
         .from("job_bids")
-        .select("*, profiles!tasker_id(name, avatar_url)")
+        .select("*, profiles!tasker_id(name, avatar)")
         .eq("booking_id", bookingId)
         .order("amount", { ascending: true })
 
-      if (data) setBids(data)
+      if (data) setBids(data as any)
       setLoading(false)
     }
     fetchBids()
@@ -83,7 +83,7 @@ export function BidList({ bookingId }: { bookingId: string }) {
           <div key={bid.id} className="p-4 rounded-xl border border-border/50 bg-card/50 flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
             <div className="flex items-start sm:items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={bid.profiles?.avatar_url} />
+                <AvatarImage src={bid.profiles?.avatar} />
                 <AvatarFallback>{bid.profiles?.name?.[0]}</AvatarFallback>
               </Avatar>
               <div>

@@ -7,11 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bell, Shield, Palette, Briefcase, UploadCloud, Loader2, User } from "lucide-react";
+import { Bell, Shield, Palette, Briefcase, UploadCloud, Loader2, User, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
+import { SavedAddresses } from "@/components/dashboard/saved-addresses";
 
 export default function SettingsPage() {
   const supabase = createClient();
@@ -56,7 +57,7 @@ export default function SettingsPage() {
           
           let days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
           if (avail && avail.length > 0) {
-            days = avail.map(a => a.day_of_week.charAt(0).toUpperCase() + a.day_of_week.slice(1));
+            days = avail.map(a => a.day_of_week!.charAt(0).toUpperCase() + a.day_of_week!.slice(1));
           }
 
           setTaskerProfile({
@@ -160,6 +161,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: "account", label: t("tabs.account"), icon: User },
+    { id: "addresses", label: "Addresses", icon: MapPin },
     { id: "notifications", label: t("tabs.notifications"), icon: Bell },
     { id: "security", label: t("tabs.security"), icon: Shield },
     { id: "appearance", label: t("tabs.appearance"), icon: Palette },
@@ -229,6 +231,11 @@ export default function SettingsPage() {
                 <Button>{t("account.save")}</Button>
               </CardContent>
             </Card>
+          )}
+
+          {/* Addresses Tab */}
+          {activeTab === "addresses" && profile && (
+            <SavedAddresses profileId={profile.id} />
           )}
 
           {/* Tasker Profile Tab */}

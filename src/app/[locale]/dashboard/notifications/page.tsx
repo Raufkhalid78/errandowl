@@ -52,7 +52,7 @@ export default async function NotificationsPage() {
   // Get profile id — notifications reference profile.id, NOT auth.uid
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, language")
+    .select("id")
     .eq("auth_id", user.id)
     .single();
 
@@ -62,7 +62,7 @@ export default async function NotificationsPage() {
   const { data: notifData } = await supabase
     .from("notifications")
     .select("*")
-    .eq("user_id", profileId)
+    .eq("user_id", profileId!)
     .order("created_at", { ascending: false })
     .limit(50);
 

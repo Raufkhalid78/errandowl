@@ -51,7 +51,7 @@ export default function AdminBookingsPage() {
   };
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
-    const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", bookingId);
+    const { error } = await supabase.from("bookings").update({ status: newStatus as any }).eq("id", bookingId);
     if (!error) {
       setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
       toast.success("Booking status updated to " + newStatus.replace("_", " "));

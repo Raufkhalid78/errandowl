@@ -33,13 +33,13 @@ export default async function ServicesPage() {
                   <div className="flex items-center space-x-4">
                     <div className="text-4xl">{category.icon}</div>
                     <div>
-                      <CardTitle>{category.name}</CardTitle>
+                      <CardTitle>{category.name_en}</CardTitle>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-sm">
-                    {category.description}
+                    {category.description_en}
                   </CardDescription>
                 </CardContent>
               </Card>

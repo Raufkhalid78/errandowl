@@ -65,7 +65,7 @@ export default async function DashboardLayout({
               <ThemeSwitcher />
             </div>
             <NotificationBell userId={profile?.id || user.id} />
-            <UserNav user={{ name: profile?.name || fallbackName, email: user.email!, avatar: profile?.avatar }} />
+            <UserNav user={{ name: profile?.name || fallbackName, email: user.email!, avatar: profile?.avatar || undefined }} />
           </div>
         </div>
       </header>
