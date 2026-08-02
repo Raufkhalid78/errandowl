@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         profile_id: profileId,
         amount: amount,
         type: "top_up",
-        status: "completed",
+        reason: "wallet_topup",
         description: "Wallet top-up via Rapid Gateway",
       });
 

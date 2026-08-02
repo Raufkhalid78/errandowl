@@ -21,7 +21,7 @@ export default async function PerformancePage() {
 
   const { data: taskerProfile } = await supabase
     .from("tasker_profiles")
-    .select("rating, reviews_count")
+    .select("rating_avg, review_count")
     .eq("profile_id", profile.id)
     .single()
 
@@ -52,9 +52,9 @@ export default async function PerformancePage() {
             <Star className="h-4 w-4 text-owl-orange" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{taskerProfile?.rating?.toFixed(1) || "New"}</div>
+            <div className="text-2xl font-bold">{taskerProfile?.rating_avg?.toFixed(1) || "New"}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Based on {taskerProfile?.reviews_count || 0} reviews
+              Based on {taskerProfile?.review_count || 0} reviews
             </p>
           </CardContent>
         </Card>
