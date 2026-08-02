@@ -65,7 +65,7 @@ export default function RevenueDashboardPage() {
         tasker_id,
         amount,
         status,
-        payment_method,
+        method,
         account_details,
         admin_notes,
         created_at,
@@ -88,7 +88,7 @@ export default function RevenueDashboardPage() {
     const dataToExport = payouts.map(p => ({
       tasker: p.profiles?.name || "Unknown",
       email: p.profiles?.email || "",
-      method: p.payment_method || "",
+      method: p.method || "",
       details: p.account_details || "",
       amount: p.amount || 0,
       status: p.status || "",
@@ -135,7 +135,7 @@ export default function RevenueDashboardPage() {
         .update({
           status: newStatus,
           admin_notes: notes.trim() || (newStatus === "paid" ? "Paid by Admin" : null),
-          updated_at: new Date().toISOString()
+          resolved_at: new Date().toISOString()
         })
         .eq("id", payoutId);
 
@@ -304,7 +304,7 @@ export default function RevenueDashboardPage() {
                       
                       <div className="text-xs text-muted-foreground space-y-1">
                         <p><span className="font-semibold text-foreground">Tasker:</span> {payout.profiles?.name || "Unknown"} ({payout.profiles?.email})</p>
-                        <p><span className="font-semibold text-foreground">Method:</span> {getMethodLabel(payout.payment_method)}</p>
+                        <p><span className="font-semibold text-foreground">Method:</span> {getMethodLabel(payout.method)}</p>
                         <p className="whitespace-pre-line bg-muted/20 p-2 rounded border border-border/50 text-foreground text-[11px] font-mono mt-1">
                           {payout.account_details}
                         </p>
@@ -427,7 +427,7 @@ export default function RevenueDashboardPage() {
                         <div>{payout.profiles?.name || "Unknown"}</div>
                         <div className="text-[10px] text-muted-foreground">{payout.profiles?.email}</div>
                       </td>
-                      <td className="py-3 px-4">{getMethodLabel(payout.payment_method)}</td>
+                      <td className="py-3 px-4">{getMethodLabel(payout.method)}</td>
                       <td className="py-3 px-4 font-mono text-[10px] whitespace-pre-line max-w-[200px] truncate">{payout.account_details}</td>
                       <td className="py-3 px-4 font-bold">Rs {payout.amount.toLocaleString()}</td>
                       <td className="py-3 px-4">{getStatusBadge(payout.status)}</td>

@@ -62,6 +62,7 @@ export default function AdminDisputesPage() {
           profile_id: clientId,
           amount: amount,
           type: 'credit',
+          reason: 'refund',
           description: `Refund for disputed booking: ${dispute.booking.service_name}`
         }]);
         if (txError) throw txError;

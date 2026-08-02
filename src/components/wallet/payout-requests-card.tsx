@@ -20,7 +20,7 @@ interface PayoutRequest {
   id: string;
   amount: number;
   status: string;
-  payment_method: string;
+  method: string;
   account_details: string;
   admin_notes: string | null;
   created_at: string;
@@ -101,7 +101,7 @@ export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequests
         .insert({
           tasker_id: profileId,
           amount: amt,
-          payment_method: method,
+          method: method,
           account_details: accountDetails,
           status: "pending"
         });
@@ -302,7 +302,7 @@ export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequests
                   <div className="text-xs space-y-1 text-muted-foreground border-t pt-2 border-border/50">
                     <p>
                       <span className="font-semibold text-foreground">Method:</span>{" "}
-                      {getMethodLabel(payout.payment_method)}
+                      {getMethodLabel(payout.method)}
                     </p>
                     <p className="whitespace-pre-line">
                       <span className="font-semibold text-foreground">Details:</span>{" "}
