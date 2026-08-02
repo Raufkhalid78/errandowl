@@ -38,12 +38,7 @@ export default function WalletTopupPage() {
         
       if (!profile) throw new Error("Profile not found");
 
-      // SIMULATE RAPID GATEWAY API CALL
-      // In production, you would redirect to a Rapid Gateway checkout URL here,
-      // and their webhook would hit an API endpoint to update the balance.
-      // E.g.: const checkoutUrl = await createRapidGatewayCheckout(profile.id, amount)
-      
-      const res = await fetch("/api/wallet/topup", {
+      const res = await fetch("/api/wallet/topup-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -53,16 +48,14 @@ export default function WalletTopupPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Payment failed");
+      if (!res.ok || !data.checkoutUrl) throw new Error(data.error || "Failed to start checkout");
 
-      toast.success(`Successfully added Rs ${amount} to your wallet!`);
-      router.push("/dashboard/wallet");
-      router.refresh();
+      // Redirect to RapidGateway
+      window.location.href = data.checkoutUrl;
       
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Failed to process top-up");
-    } finally {
       setLoading(false);
     }
   };

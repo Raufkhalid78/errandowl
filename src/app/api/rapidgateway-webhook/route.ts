@@ -70,6 +70,51 @@ export async function POST(request: Request) {
       return new Response("Invalid signature", { status: 400 });
     }
 
+    // Handle wallet top-up transactions
+    if (bookingId.startsWith("TOPUP-")) {
+      const profileId = bookingId.split("-")[1]; // order_id format: TOPUP-profileId-timestamp
+
+      const transactionStatusTopup = (payload.status || payload.event || payload.transaction_status || "").toUpperCase();
+      const isSuccessTopup =
+        transactionStatusTopup === "SUCCEEDED" ||
+        transactionStatusTopup === "PAID" ||
+        transactionStatusTopup === "SUCCESS" ||
+        transactionStatusTopup === "PAYMENT.SUCCEEDED";
+
+      if (!isSuccessTopup) {
+        return new Response(JSON.stringify({ received: true, message: "Topup failed or pending" }), { status: 200 });
+      }
+
+      // Check if already processed to ensure idempotency
+      const { data: existingTx } = await supabase
+        .from("wallet_transactions")
+        .select("id")
+        .eq("description", `Wallet top-up via Rapid Gateway (Order: ${bookingId})`)
+        .maybeSingle();
+      
+      if (existingTx) {
+        return new Response(JSON.stringify({ received: true, message: "Duplicate topup event" }), { status: 200 });
+      }
+
+      const { data: profile } = await supabase.from("profiles").select("wallet_balance").eq("id", profileId).single();
+      if (!profile) return new Response("Profile not found", { status: 404 });
+
+      const newBalance = (profile.wallet_balance || 0) + grossAmount;
+      const { error: balanceError } = await supabase.from("profiles").update({ wallet_balance: newBalance }).eq("id", profileId);
+      if (balanceError) throw balanceError;
+
+      const { error: txError } = await supabase.from("wallet_transactions").insert({
+        profile_id: profileId,
+        amount: grossAmount,
+        type: "credit",
+        reason: "top_up",
+        description: `Wallet top-up via Rapid Gateway (Order: ${bookingId})`,
+      });
+      if (txError) throw txError;
+
+      return new Response(JSON.stringify({ received: true }), { status: 200 });
+    }
+
     // 2. Fetch booking and existing payment record
     const { data: booking, error: bFetchError } = await supabase
       .from("bookings")
