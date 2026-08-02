@@ -15,11 +15,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const supabase = await createClient();
   const { data: tasker } = await supabase
     .from("tasker_profiles")
-    .select("*, public_profiles!inner(name, city)")
+    .select("*")
     .or(`id.eq.${id},profile_id.eq.${id}`)
     .maybeSingle();
 
-  const profile = (tasker as any)?.public_profiles || (tasker as any)?.profiles;
+  let profile = null;
+  if (tasker) {
+    const { data: profileData } = await supabase
+      .from("public_profiles")
+      .select("name, city")
+      .eq("id", tasker.profile_id)
+      .maybeSingle();
+    profile = profileData || (tasker as any).profiles;
+  }
   const name = profile?.name || "Tasker";
   const city = profile?.city || "Pakistan";
 
@@ -37,13 +45,23 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
 
   const { data: rawTasker } = await supabase
     .from("tasker_profiles")
-    .select("*, public_profiles!inner(*)")
+    .select("*")
     .or(`id.eq.${id},profile_id.eq.${id}`)
     .maybeSingle();
 
+  let profile = null;
+  if (rawTasker) {
+    const { data: profileData } = await supabase
+      .from("public_profiles")
+      .select("*")
+      .eq("id", rawTasker.profile_id)
+      .maybeSingle();
+    profile = profileData;
+  }
+
   const tasker = rawTasker ? {
     ...rawTasker,
-    profiles: (rawTasker as any).public_profiles || (rawTasker as any).profiles
+    profiles: profile || (rawTasker as any).profiles
   } : null;
 
   const { data: portfolioItems } = await supabase

@@ -42,26 +42,42 @@ function SearchContent() {
       setLoading(true);
       
       const [taskersRes, categoriesRes] = await Promise.all([
-        supabase.from("tasker_profiles").select("*, public_profiles!inner(*)").eq("active", true).eq("public_profiles.cnic_status", "approved"),
+        supabase.from("tasker_profiles").select("*").eq("active", true),
         supabase.from("categories").select("*").eq("active", true).order("sort_order")
       ]);
+
+      let taskersList = taskersRes.data || [];
+
+      if (taskersList.length > 0) {
+        const profileIds = taskersList.map(t => t.profile_id);
+        const { data: profilesData } = await supabase
+          .from("public_profiles")
+          .select("*")
+          .in("id", profileIds)
+          .eq("cnic_status", "approved");
+
+        const profileMap = new Map((profilesData || []).map(p => [p.id, p]));
+        
+        taskersList = taskersList
+          .filter(t => profileMap.has(t.profile_id))
+          .map(t => {
+            const profile = profileMap.get(t.profile_id);
+            return {
+              ...t,
+              public_profiles: profile,
+              name: profile?.name,
+              verified: profile?.is_verified || profile?.cnic_status === 'approved',
+              location: t.city || profile?.city || profile?.location,
+              bio: profile?.bio
+            };
+          });
+      }
 
       if (categoriesRes.data) {
         setCategories(categoriesRes.data);
       }
 
-      if (taskersRes.data) {
-        setTaskers(taskersRes.data.map(t => {
-          const profile = t.public_profiles || t.profiles;
-          return {
-            ...t,
-            name: profile?.name,
-            verified: profile?.is_verified || profile?.cnic_status === 'approved',
-            location: t.city || profile?.city || profile?.location,
-            bio: profile?.bio
-          };
-        }));
-      }
+      setTaskers(taskersList);
       setLoading(false);
     };
     fetchData();
