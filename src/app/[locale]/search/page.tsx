@@ -94,7 +94,8 @@ function SearchContent() {
       if (cityFilter && t.location?.toLowerCase() !== cityFilter.toLowerCase()) return false;
       if (verifiedFilter && !t.verified) return false;
       
-      const rate = settings?.pricing_mode === 'hourly' ? t.hourly_rate : t.fixed_rate;
+      const rateMode = t.pricing_mode || settings?.pricing_mode;
+      const rate = rateMode === 'hourly' ? t.hourly_rate : t.fixed_rate;
       if (priceFilter && rate > parseInt(priceFilter)) return false;
       
       return true;
@@ -103,8 +104,10 @@ function SearchContent() {
       if (sortBy === "rating") return (b.rating_avg || 0) - (a.rating_avg || 0);
       if (sortBy === "reviews") return (b.review_count || 0) - (a.review_count || 0);
       
-      const rateA = settings?.pricing_mode === 'hourly' ? a.hourly_rate : a.fixed_rate;
-      const rateB = settings?.pricing_mode === 'hourly' ? b.hourly_rate : b.fixed_rate;
+      const rateModeA = a.pricing_mode || settings?.pricing_mode;
+      const rateA = rateModeA === 'hourly' ? a.hourly_rate : a.fixed_rate;
+      const rateModeB = b.pricing_mode || settings?.pricing_mode;
+      const rateB = rateModeB === 'hourly' ? b.hourly_rate : b.fixed_rate;
       
       if (sortBy === "price_low") return (rateA || 0) - (rateB || 0);
       if (sortBy === "price_high") return (rateB || 0) - (rateA || 0);
@@ -293,7 +296,8 @@ function SearchContent() {
             >
               {filtered.map((t_data, i) => {
                 const initials = t_data.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "T";
-                const rate = settings.pricing_mode === 'hourly' ? t_data.hourly_rate : t_data.fixed_rate;
+                const rateMode = t_data.pricing_mode || settings.pricing_mode;
+                const rate = rateMode === 'hourly' ? t_data.hourly_rate : t_data.fixed_rate;
                 
                 return (
                   <motion.div variants={{ hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0 } }} key={t_data.id}>
@@ -339,7 +343,7 @@ function SearchContent() {
                         </span>
                       </div>
                       <div className="font-semibold text-owl-violet">
-                        {formatRate(rate || 0, settings.pricing_mode, locale)}
+                        {formatRate(rate || 0, t_data.pricing_mode || settings.pricing_mode, locale)}
                       </div>
                     </div>
 

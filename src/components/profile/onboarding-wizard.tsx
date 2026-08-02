@@ -38,7 +38,9 @@ export function OnboardingWizard({
   const [certificateFile, setCertificateFile] = React.useState<File | null>(null)
   
   const [taskerData, setTaskerData] = React.useState({
+    pricingMode: "hourly",
     hourlyRate: 1000,
+    fixedRate: 1000,
     skills: "General Tasks, Delivery",
     categories: [] as string[],
     availabilityDays: ["Mon", "Tue", "Wed", "Thu", "Fri"] as string[],
@@ -160,7 +162,9 @@ export function OnboardingWizard({
             profile_id: profileId,
             city: formData.location,
             active: true,
+            pricing_mode: taskerData.pricingMode,
             hourly_rate: taskerData.hourlyRate,
+            fixed_rate: taskerData.fixedRate,
             skills: skillsArray,
             categories: taskerData.categories
           }, { onConflict: 'profile_id' })
@@ -380,16 +384,59 @@ export function OnboardingWizard({
 
       {step === 3 && isTasker && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+          <div className="space-y-3">
+            <Label>Pricing Preference</Label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="pricingMode" 
+                  value="hourly"
+                  checked={taskerData.pricingMode === "hourly"}
+                  onChange={() => setTaskerData(s => ({ ...s, pricingMode: "hourly" }))}
+                  disabled={isLoading}
+                  className="text-owl-violet focus:ring-owl-violet"
+                />
+                <span className="text-sm">Hourly Rate</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="pricingMode" 
+                  value="fixed"
+                  checked={taskerData.pricingMode === "fixed"}
+                  onChange={() => setTaskerData(s => ({ ...s, pricingMode: "fixed" }))}
+                  disabled={isLoading}
+                  className="text-owl-violet focus:ring-owl-violet"
+                />
+                <span className="text-sm">Flat Rate</span>
+              </label>
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="hourlyRate">{t("hourly_rate_label")}</Label>
-            <Input
-              id="hourlyRate"
-              type="number"
-              min="300"
-              value={taskerData.hourlyRate}
-              onChange={e => setTaskerData(s => ({ ...s, hourlyRate: parseInt(e.target.value) || 0 }))}
-              disabled={isLoading}
-            />
+            <Label htmlFor="rate">
+              {taskerData.pricingMode === "hourly" ? t("hourly_rate_label") : "Flat Rate (Rs) *"}
+            </Label>
+            {taskerData.pricingMode === "hourly" ? (
+              <Input
+                id="rate"
+                type="number"
+                min="300"
+                value={taskerData.hourlyRate}
+                onChange={e => setTaskerData(s => ({ ...s, hourlyRate: parseInt(e.target.value) || 0 }))}
+                disabled={isLoading}
+              />
+            ) : (
+              <Input
+                id="rate"
+                type="number"
+                min="300"
+                value={taskerData.fixedRate}
+                onChange={e => setTaskerData(s => ({ ...s, fixedRate: parseInt(e.target.value) || 0 }))}
+                disabled={isLoading}
+              />
+            )}
           </div>
 
           <div className="space-y-2">

@@ -82,7 +82,7 @@ export default function TaskerMapInner({ taskers }: TaskerMapInnerProps) {
               transition: transform 0.2s ease;
             ">
               <span>🦉</span>
-              <span>Rs ${tasker.hourly_rate || tasker.fixed_rate || 500}</span>
+              <span>Rs ${tasker.pricing_mode === 'hourly' ? tasker.hourly_rate : (tasker.fixed_rate || tasker.hourly_rate || 500)}</span>
             </div>
           `,
           iconSize: [110, 32],

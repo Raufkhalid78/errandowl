@@ -88,7 +88,8 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
 
   const settings = await getPricingSettings();
   const initials = tasker.profiles?.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "T";
-  const rate = settings.pricing_mode === 'hourly' ? tasker.hourly_rate : tasker.fixed_rate;
+  const rateMode = tasker.pricing_mode || settings.pricing_mode;
+  const rate = rateMode === 'hourly' ? tasker.hourly_rate : tasker.fixed_rate;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -145,7 +146,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                     {tasker.completed_tasks || 0} {t("tasksDone")}
                   </div>
                   <div className="text-owl-amber-light font-bold text-lg">
-                    {formatRate(rate || 0, settings.pricing_mode, locale)}
+                    {formatRate(rate || 0, tasker.pricing_mode || settings.pricing_mode, locale)}
                   </div>
                 </div>
               </div>

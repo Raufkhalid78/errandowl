@@ -69,7 +69,9 @@ export default function SettingsPage() {
           });
         } else {
           setTaskerProfile({
+            pricing_mode: "hourly",
             hourly_rate: 0,
+            fixed_rate: 0,
             skills: "",
             availability_days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
             categories: [],
@@ -102,7 +104,9 @@ export default function SettingsPage() {
       
       const { error } = await supabase.from("tasker_profiles").upsert({
         profile_id: profile.id,
-        hourly_rate: taskerProfile.hourly_rate,
+        pricing_mode: taskerProfile.pricing_mode || 'hourly',
+        hourly_rate: taskerProfile.hourly_rate || 0,
+        fixed_rate: taskerProfile.fixed_rate || 0,
         skills: skillsArray,
         categories: taskerProfile.categories
       }, { onConflict: 'profile_id' });
@@ -236,13 +240,51 @@ export default function SettingsPage() {
                   <CardDescription>{t("tasker.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    <Label>Pricing Preference</Label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name="settingsPricingMode" 
+                          value="hourly"
+                          checked={taskerProfile.pricing_mode === "hourly"}
+                          onChange={() => setTaskerProfile({...taskerProfile, pricing_mode: "hourly"})}
+                          className="text-owl-violet focus:ring-owl-violet"
+                        />
+                        <span className="text-sm">Hourly Rate</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name="settingsPricingMode" 
+                          value="fixed"
+                          checked={taskerProfile.pricing_mode === "fixed"}
+                          onChange={() => setTaskerProfile({...taskerProfile, pricing_mode: "fixed"})}
+                          className="text-owl-violet focus:ring-owl-violet"
+                        />
+                        <span className="text-sm">Flat Rate</span>
+                      </label>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label>{t("tasker.hourlyRate")}</Label>
-                    <Input 
-                      type="number" 
-                      value={taskerProfile.hourly_rate} 
-                      onChange={e => setTaskerProfile({...taskerProfile, hourly_rate: Number(e.target.value)})}
-                    />
+                    <Label>
+                      {taskerProfile.pricing_mode === "hourly" ? t("tasker.hourlyRate") : "Flat Rate (Rs) *"}
+                    </Label>
+                    {taskerProfile.pricing_mode === "hourly" ? (
+                      <Input 
+                        type="number" 
+                        value={taskerProfile.hourly_rate || 0} 
+                        onChange={e => setTaskerProfile({...taskerProfile, hourly_rate: Number(e.target.value)})}
+                      />
+                    ) : (
+                      <Input 
+                        type="number" 
+                        value={taskerProfile.fixed_rate || 0} 
+                        onChange={e => setTaskerProfile({...taskerProfile, fixed_rate: Number(e.target.value)})}
+                      />
+                    )}
                   </div>
                   
                   <div className="space-y-2">
