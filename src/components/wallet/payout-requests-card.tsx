@@ -23,7 +23,7 @@ interface PayoutRequest {
   method: string;
   account_details: string;
   admin_notes: string | null;
-  created_at: string;
+  requested_at: string;
 }
 
 export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequestsCardProps) {
@@ -47,7 +47,7 @@ export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequests
         .from("payouts")
         .select("*")
         .eq("tasker_id", profileId)
-        .order("created_at", { ascending: false });
+        .order("requested_at", { ascending: false });
 
       if (error) throw error;
       setPayouts(data || []);
@@ -288,7 +288,7 @@ export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequests
                     <div>
                       <p className="text-sm font-bold">Rs {payout.amount.toLocaleString()}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {new Date(payout.created_at).toLocaleDateString("en-PK", {
+                        {new Date(payout.requested_at).toLocaleDateString("en-PK", {
                           day: "numeric",
                           month: "short",
                           year: "numeric",

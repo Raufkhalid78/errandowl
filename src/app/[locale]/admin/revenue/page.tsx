@@ -68,13 +68,13 @@ export default function RevenueDashboardPage() {
         method,
         account_details,
         admin_notes,
-        created_at,
+        requested_at,
         profiles (
           name,
           email
         )
       `)
-      .order("created_at", { ascending: false });
+      .order("requested_at", { ascending: false });
 
     setPayouts(payoutsList || []);
     setLoading(false);
@@ -93,7 +93,7 @@ export default function RevenueDashboardPage() {
       amount: p.amount || 0,
       status: p.status || "",
       notes: p.admin_notes || "",
-      date: p.created_at ? new Date(p.created_at).toLocaleDateString() : ""
+      date: p.requested_at ? new Date(p.requested_at).toLocaleDateString() : ""
     }));
 
     const headersMap = {
@@ -309,7 +309,7 @@ export default function RevenueDashboardPage() {
                           {payout.account_details}
                         </p>
                         <p className="text-[10px] pt-1">
-                          Requested on {new Date(payout.created_at).toLocaleString("en-PK")}
+                          Requested on {new Date(payout.requested_at).toLocaleString("en-PK")}
                         </p>
                       </div>
                     </div>
@@ -433,7 +433,7 @@ export default function RevenueDashboardPage() {
                       <td className="py-3 px-4">{getStatusBadge(payout.status)}</td>
                       <td className="py-3 px-4 text-xs italic text-muted-foreground">{payout.admin_notes || "-"}</td>
                       <td className="py-3 px-4 text-xs">
-                        {new Date(payout.created_at).toLocaleDateString()}
+                        {new Date(payout.requested_at).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}
