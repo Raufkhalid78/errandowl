@@ -71,8 +71,11 @@ export async function POST(request: Request) {
     }
 
     // Handle wallet top-up transactions
-    if (bookingId.startsWith("TOPUP-")) {
-      const profileId = bookingId.split("-")[1]; // order_id format: TOPUP-profileId-timestamp
+    // orderId format: TOPUP_{profileUUID}_{timestamp} — underscores used so UUID hyphens don't conflict
+    if (bookingId.startsWith("TOPUP_")) {
+      const parts = bookingId.split("_");
+      // parts[0] = "TOPUP", parts[1] = full UUID (no underscores in UUIDs), parts[2] = timestamp
+      const profileId = parts[1];
 
       const transactionStatusTopup = (payload.status || payload.event || payload.transaction_status || "").toUpperCase();
       const isSuccessTopup =

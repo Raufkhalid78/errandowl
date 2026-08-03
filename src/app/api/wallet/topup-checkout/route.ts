@@ -26,7 +26,8 @@ export async function POST(request: Request) {
     const apiKey = process.env.RAPID_GATEWAY_API_KEY || "";
     const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-    const orderId = `TOPUP-${profileId}-${Date.now()}`;
+    // Use underscores as delimiter — UUIDs contain hyphens, so underscore is the only safe separator
+    const orderId = `TOPUP_${profileId}_${Date.now()}`;
 
     const payload = {
       order_id: orderId,
