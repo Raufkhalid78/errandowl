@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Loader2, Plus, Trash2, Image as ImageIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 
 interface PortfolioItem {
   id: string
@@ -12,29 +13,20 @@ interface PortfolioItem {
   description: string
 }
 
-export function PortfolioManager({ taskerId }: { taskerId: string }) {
-  const [items, setItems] = React.useState<PortfolioItem[]>([])
-  const [isLoading, setIsLoading] = React.useState(true)
+export function PortfolioManager({ taskerId, initialItems }: { taskerId: string, initialItems?: PortfolioItem[] }) {
+  const items = initialItems || []
+  const isLoading = false
   const [isUploading, setIsUploading] = React.useState(false)
+  const router = useRouter()
   const supabase = createClient()
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const t = useTranslations("PortfolioManager")
 
-  const fetchPortfolio = React.useCallback(async () => {
-    setIsLoading(true)
-    const { data } = await supabase
-      .from("portfolio_items")
-      .select("*")
-      .eq("tasker_id", taskerId)
-      .order("created_at", { ascending: false })
-    
-    if (data) setItems(data as any)
-    setIsLoading(false)
-  }, [supabase, taskerId])
+  const refreshData = () => {
+    router.refresh()
+  }
 
-  React.useEffect(() => {
-    fetchPortfolio()
-  }, [fetchPortfolio])
+  // Data is fetched via RSC
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -49,7 +41,7 @@ export function PortfolioManager({ taskerId }: { taskerId: string }) {
     }
     
     const fileExt = file.name.split('.').pop()
-    const fileName = `${taskerId}-${Math.random()}.${fileExt}`
+    const fileName = `${taskerId}-${crypto.randomUUID()}.${fileExt}`
     const filePath = `${user.id}/${fileName}`
 
     // Upload image
@@ -74,7 +66,7 @@ export function PortfolioManager({ taskerId }: { taskerId: string }) {
       description: "Portfolio Image"
     })
 
-    fetchPortfolio()
+    refreshData()
     setIsUploading(false)
   }
 
@@ -89,7 +81,7 @@ export function PortfolioManager({ taskerId }: { taskerId: string }) {
     }
 
     await supabase.from("portfolio_items").delete().eq("id", id)
-    fetchPortfolio()
+    refreshData()
   }
 
   return (

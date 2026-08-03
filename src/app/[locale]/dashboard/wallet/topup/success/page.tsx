@@ -9,13 +9,12 @@ import { createClient } from "@/lib/supabase/client";
 
 function TopupSuccessContent() {
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
+  const orderId = searchParams.get("order_id");
+  const [loading, setLoading] = useState(!!orderId);
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
-    const orderId = searchParams.get("order_id");
     if (!orderId) {
-      setLoading(false);
       return;
     }
 

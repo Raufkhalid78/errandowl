@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const { data: profileData } = await supabase
       .from("public_profiles")
       .select("name, city")
-      .eq("id", tasker.profile_id!)
+      .eq("id", tasker.profile_id ?? "")
       .maybeSingle();
     profile = profileData || (tasker as any).profiles;
   }
@@ -55,7 +55,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
     const { data: profileData } = await supabase
       .from("public_profiles")
       .select("*")
-      .eq("id", rawTasker.profile_id!)
+      .eq("id", rawTasker.profile_id ?? "")
       .maybeSingle();
     profile = profileData;
   }
@@ -65,16 +65,18 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
     profiles: profile || (rawTasker as any).profiles
   } : null;
 
+  const profileId = tasker?.profile_id ?? "";
+
   const { data: portfolioItems } = await supabase
     .from("portfolio_items")
     .select("*")
-    .eq("tasker_id", tasker?.profile_id!)
+    .eq("tasker_id", profileId)
     .order("created_at", { ascending: false });
 
   const { data: availabilityRows } = await supabase
     .from("tasker_availability")
     .select("*")
-    .eq("tasker_id", tasker?.profile_id!);
+    .eq("tasker_id", profileId);
 
   if (!tasker) {
     return (
@@ -158,7 +160,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                       <Shield className="h-3 w-3" /> {badge}
                     </span>
                   ))}
-                  <FavoriteButton taskerId={tasker.profile_id!} className="ml-auto" />
+                  <FavoriteButton taskerId={tasker.profile_id ?? ""} className="ml-auto" />
                 </div>
                 <div className="flex items-center gap-1 text-white/60 text-sm mb-3">
                   <MapPin className="h-4 w-4" />
@@ -235,7 +237,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                   <Calendar className="h-4 w-4" /> {t("availability")}
                 </h3>
                 <div className="grid grid-cols-7 gap-1 text-center text-xs">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => {
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => {
                     const isAvailable = availabilityRows?.some(row => row.day_of_week === day);
                     return (
                       <div
@@ -270,7 +272,7 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
                 <h3 className="font-semibold mb-4 text-xl">
                   {t("reviewsTitle")}
                 </h3>
-                <ReviewList taskerId={tasker.profile_id!} />
+                <ReviewList taskerId={tasker.profile_id ?? ""} />
               </div>
             </div>
           </div>

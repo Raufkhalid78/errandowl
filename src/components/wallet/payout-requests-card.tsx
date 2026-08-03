@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 interface PayoutRequestsCardProps {
   profileId: string;
   initialBalance: number;
+  initialPayouts: PayoutRequest[];
 }
 
 interface PayoutRequest {
@@ -26,13 +27,13 @@ interface PayoutRequest {
   requested_at: string;
 }
 
-export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequestsCardProps) {
+export function PayoutRequestsCard({ profileId, initialBalance, initialPayouts }: PayoutRequestsCardProps) {
   const supabase = createClient();
   const router = useRouter();
 
   const [balance, setBalance] = useState(initialBalance);
-  const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [payouts, setPayouts] = useState<PayoutRequest[]>(initialPayouts);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Form states
@@ -41,7 +42,6 @@ export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequests
   const [accountDetails, setAccountDetails] = useState("");
 
   const fetchPayoutHistory = useCallback(async () => {
-    setLoadingHistory(true);
     try {
       const { data, error } = await supabase
         .from("payouts")
@@ -52,22 +52,13 @@ export function PayoutRequestsCard({ profileId, initialBalance }: PayoutRequests
       if (error) throw error;
       setPayouts(data as any || []);
     } catch (err: any) {
-      console.error("Error fetching payouts:", {
-        message: err.message,
-        code: err.code,
-        details: err.details,
-        hint: err.hint,
-        error: err
-      });
+      console.error("Error fetching payouts:", err);
       toast.error("Failed to load payout history");
-    } finally {
-      setLoadingHistory(false);
     }
   }, [supabase, profileId]);
 
-  useEffect(() => {
-    fetchPayoutHistory();
-  }, [fetchPayoutHistory]);
+  // We don't fetch on mount anymore, just use initialPayouts
+  // We keep fetchPayoutHistory to refresh after submitting a new payout
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

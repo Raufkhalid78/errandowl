@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Plus, X, Pencil, Trash2 } from "lucide-react";
@@ -10,14 +10,15 @@ import { Button } from "@/components/ui/button";
 interface ManageServicesModalProps {
   categoryId: string;
   categoryName: string;
+  initialServices: any[];
   onClose: () => void;
   onUpdate: () => void;
 }
 
-export function ManageServicesModal({ categoryId, categoryName, onClose, onUpdate }: ManageServicesModalProps) {
+export function ManageServicesModal({ categoryId, categoryName, initialServices, onClose, onUpdate }: ManageServicesModalProps) {
   const supabase = createClient();
-  const [services, setServices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<any[]>(initialServices);
+  const [loading, setLoading] = useState(false);
   
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -25,7 +26,7 @@ export function ManageServicesModal({ categoryId, categoryName, onClose, onUpdat
 
   const fetchServices = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("services")
       .select("*")
       .eq("category_id", categoryId)
@@ -34,10 +35,8 @@ export function ManageServicesModal({ categoryId, categoryName, onClose, onUpdat
     if (data) setServices(data);
     setLoading(false);
   };
-
-  useEffect(() => {
-    fetchServices();
-  }, [categoryId]);
+  
+  // No initial fetch since we have initialServices
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

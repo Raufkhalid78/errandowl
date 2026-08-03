@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid, Cell } from "recharts";
 
@@ -22,37 +21,6 @@ interface AnalyticsChartsProps {
 const COLORS = ["#8b5cf6", "#10b981", "#3b82f6", "#f59e0b", "#ec4899", "#14b8a6", "#6366f1"];
 
 export function AnalyticsCharts({ revenueData, categoryData }: AnalyticsChartsProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="glass border-border/50">
-          <CardHeader>
-            <CardTitle className="text-base font-bold">Revenue History (Last 30 Days)</CardTitle>
-            <CardDescription>Daily gross platform volume transaction trend.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80 w-full mt-2 bg-muted/10 animate-pulse rounded-xl" />
-          </CardContent>
-        </Card>
-        <Card className="glass border-border/50">
-          <CardHeader>
-            <CardTitle className="text-base font-bold">Bookings by Category</CardTitle>
-            <CardDescription>Popular services sorted by completed & active orders.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80 w-full mt-2 bg-muted/10 animate-pulse rounded-xl" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {/* Revenue over 30 days */}

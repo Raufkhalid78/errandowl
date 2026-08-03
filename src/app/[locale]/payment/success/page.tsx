@@ -9,17 +9,14 @@ import { createClient } from "@/lib/supabase/client";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
+  const basketId = searchParams.get("basket_id") || searchParams.get("order_id");
+  const [loading, setLoading] = useState(!!basketId);
   const [confirmed, setConfirmed] = useState(false);
-  const [bookingId, setBookingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const basketId = searchParams.get("basket_id") || searchParams.get("order_id");
     if (!basketId) {
-      setLoading(false);
       return;
     }
-    setBookingId(basketId);
 
     const supabase = createClient();
     let attempts = 0;
@@ -55,9 +52,9 @@ function SuccessContent() {
         <Clock className="h-10 w-10 text-owl-amber mb-6" />
         <h1 className="text-3xl font-bold mb-2">Payment Processing</h1>
         <p className="text-muted-foreground max-w-md mb-8">
-          We're confirming your payment with the gateway. This can take a moment — check your booking status shortly.
+          We&apos;re confirming your payment with the gateway. This can take a moment — check your booking status shortly.
         </p>
-        <Button render={<Link href={`/dashboard/bookings/${bookingId}`}>View Booking Status</Link>} className="px-8 h-12 rounded-xl" />
+        <Button render={<Link href={`/dashboard/bookings/${basketId}`}>View Booking Status</Link>} className="px-8 h-12 rounded-xl" />
       </div>
     );
   }
@@ -73,7 +70,7 @@ function SuccessContent() {
       </p>
       <div className="flex flex-col sm:flex-row gap-4">
         <Button render={<Link href="/dashboard">Go to Dashboard</Link>} className="bg-owl-violet hover:bg-owl-violet-dark text-white px-8 h-12 rounded-xl" />
-        <Button render={<Link href={`/dashboard/bookings/${bookingId}`}>View Booking Details</Link>} variant="outline" className="px-8 h-12 rounded-xl" />
+        <Button render={<Link href={`/dashboard/bookings/${basketId}`}>View Booking Details</Link>} variant="outline" className="px-8 h-12 rounded-xl" />
       </div>
     </div>
   );

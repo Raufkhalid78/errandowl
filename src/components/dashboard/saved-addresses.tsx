@@ -18,10 +18,6 @@ export function SavedAddresses({ profileId }: { profileId: string }) {
   const [newAddress, setNewAddress] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchAddresses();
-  }, [profileId]);
-
   const fetchAddresses = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -35,6 +31,12 @@ export function SavedAddresses({ profileId }: { profileId: string }) {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchAddresses();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileId]);
 
   const handleAddAddress = async () => {
     if (!newLabel.trim() || !newAddress.trim()) {

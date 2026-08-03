@@ -22,6 +22,18 @@ export default async function ProfilePage() {
     .eq("auth_id", user.id)
     .maybeSingle()
 
+  let portfolioItems: any[] = []
+  if (profile?.role === "tasker") {
+    const { data } = await supabase
+      .from("portfolio_items")
+      .select("*")
+      .eq("tasker_id", profile.id)
+      .order("created_at", { ascending: false })
+    if (data) {
+      portfolioItems = data
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -35,7 +47,7 @@ export default async function ProfilePage() {
         
         {profile?.role === "tasker" && (
           <div className="mt-8 pt-8 border-t border-border">
-            <PortfolioManager taskerId={profile.id} />
+            <PortfolioManager taskerId={profile.id} initialItems={portfolioItems} />
           </div>
         )}
       </div>

@@ -20,8 +20,8 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            const cookieOptions = { ...options, secure: process.env.NODE_ENV === 'production' }
-            request.cookies.set(name, value)
+            // We ignore cookieOptions for request because set() signature differs, or we can just omit it
+            request.cookies.set({ name, value, ...options })
           })
           // Apply cookies to the response from intlMiddleware
           cookiesToSet.forEach(({ name, value, options }) => {

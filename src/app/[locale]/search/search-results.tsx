@@ -40,9 +40,9 @@ export function SearchResults({
   const [sortBy, setSortBy] = useState("rating");
   const [view, setView] = useState<"list" | "map">("list");
   
-  const [taskers, setTaskers] = useState<any[]>(initialTaskers);
-  const [categories, setCategories] = useState<any[]>(initialCategories);
-  const [settings, setSettings] = useState<PricingSettings>(initialSettings);
+  const taskers = initialTaskers;
+  const categories = initialCategories;
+  const settings = initialSettings;
 
   const filtered = taskers
     .filter((t) => {

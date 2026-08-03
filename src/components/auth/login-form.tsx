@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter, Link } from "@/i18n/routing"
+import { Link } from "@/i18n/routing"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,6 @@ export function LoginForm({
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const [error, setError] = React.useState<string | null>(null)
   const [showPassword, setShowPassword] = React.useState<boolean>(false)
-  const router = useRouter()
   const supabase = createClient()
   const t = useTranslations("Auth.login")
 

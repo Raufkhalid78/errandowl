@@ -67,7 +67,7 @@ export function AiBookingAssistant({ description, onApplyEstimate }: AiBookingAs
       {estimate && (
         <div className="p-4 rounded-xl border border-border bg-card/80 space-y-3 animate-in fade-in">
           <p className="text-xs text-muted-foreground leading-relaxed italic">
-            "{estimate.reasoning}"
+            &ldquo;{estimate.reasoning}&rdquo;
           </p>
 
           <div className="grid grid-cols-3 gap-2 text-xs">

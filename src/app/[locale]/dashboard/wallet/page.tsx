@@ -31,6 +31,16 @@ export default async function WalletPage() {
     .eq("profile_id", profile.id)
     .order("created_at", { ascending: false })
 
+  let payouts: any[] = []
+  if (profile.role === "tasker" || profile.role === "admin") {
+    const { data } = await supabase
+      .from("payouts")
+      .select("*")
+      .eq("tasker_id", profile.id)
+      .order("requested_at", { ascending: false })
+    payouts = data || []
+  }
+
   const isTasker = profile.role === "tasker" || profile.role === "admin"
 
   return (
@@ -51,7 +61,7 @@ export default async function WalletPage() {
 
       {isTasker && (
         <div className="pt-4 border-t border-border/50">
-          <PayoutRequestsCard profileId={profile.id} initialBalance={profile.wallet_balance || 0} />
+          <PayoutRequestsCard profileId={profile.id} initialBalance={profile.wallet_balance || 0} initialPayouts={payouts} />
         </div>
       )}
       
