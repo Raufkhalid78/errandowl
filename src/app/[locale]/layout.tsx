@@ -71,7 +71,7 @@ export default async function LocaleLayout({
     "@type": "LocalBusiness",
     name: "ErrandOwl",
     url: "https://www.errandowl.com.pk",
-    logo: "https://www.errandowl.com.pk/logo.png",
+    logo: "https://www.errandowl.com.pk/icons/icon-512.png",
     description: "Pakistan's trusted marketplace for local home services — cleaning, repairs, errands, and more.",
     address: {
       "@type": "PostalAddress",

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/routing";
-import { LayoutDashboard, Users, UserCheck, Grid3x3, Briefcase, Calendar, Settings, Tag, AlertTriangle, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, Grid3x3, Briefcase, Calendar, Settings, Tag, AlertTriangle, LogOut, Mail } from "lucide-react";
 
 const sidebarLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -13,6 +13,7 @@ const sidebarLinks = [
   { href: "/admin/bookings", label: "Bookings", icon: Calendar },
   { href: "/admin/disputes", label: "Disputes", icon: AlertTriangle },
   { href: "/admin/promo-codes", label: "Promo Codes", icon: Tag },
+  { href: "/admin/contact-messages", label: "Contact Messages", icon: Mail },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -63,6 +64,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                          link.label === "Revenue" ? "revenue" : 
                          link.label === "Promo Codes" ? "promoCodes" : 
                          link.label === "Disputes" ? "disputes" : 
+                         link.label === "Contact Messages" ? "contactMessages" :
                          link.label.toLowerCase();
             return (
               <Link
