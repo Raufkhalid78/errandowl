@@ -713,7 +713,7 @@
   },
   "Checkout": {
     "title": "Checkout",
-    "description": "Complete your payment securely with PayFast.",
+    "description": "Complete your payment securely with Rapid Gateway.",
     "summary_title": "Order Summary",
     "booking_id": "Booking ID: {id}",
     "total_due": "Total Amount Due",
@@ -744,7 +744,7 @@
       "clientQ3": "What if I am not satisfied?",
       "clientA3": "We have a Happiness Pledge. Contact our support team within 48 hours and we will work to make it right, including re-doing the task or providing a refund.",
       "clientQ4": "How do payments work?",
-      "clientA4": "Payments are processed securely via PayFast. We support JazzCash, EasyPaisa, and bank transfers. You are only charged when the task is completed.",
+      "clientA4": "Payments are processed securely via Rapid Gateway. We support JazzCash, EasyPaisa, and bank transfers. You are only charged when the task is completed.",
       "clientQ5": "Can I cancel a booking?",
       "clientA5": "Yes, you can cancel a booking up to 2 hours before the scheduled time at no charge. Late cancellations may incur a small fee.",
       "taskerQ1": "How do I become a tasker?",

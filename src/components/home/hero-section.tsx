@@ -20,14 +20,15 @@ function AnimatedCounter({
   decimal?: boolean;
   duration?: number;
 }) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(target);
   const ref = useRef<HTMLDivElement>(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasStarted) {
+        if (entry.isIntersecting && !hasStarted && !hasAnimated) {
           setHasStarted(true);
         }
       },
@@ -35,13 +36,17 @@ function AnimatedCounter({
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [hasStarted]);
+  }, [hasStarted, hasAnimated]);
 
   useEffect(() => {
-    if (!hasStarted) return;
+    if (!hasStarted || hasAnimated) return;
+    
+    setHasAnimated(true); // Ensure it only runs once
     const steps = 60;
     const increment = target / steps;
     let current = 0;
+    setCount(0); // Jump to 0 immediately before animating
+
     const timer = setInterval(() => {
       current += increment;
       if (current >= target) {
@@ -52,7 +57,7 @@ function AnimatedCounter({
       }
     }, duration / steps);
     return () => clearInterval(timer);
-  }, [hasStarted, target, duration]);
+  }, [hasStarted, target, duration, hasAnimated]);
 
   return (
     <div ref={ref}>
