@@ -8,6 +8,7 @@ import { routing } from '@/i18n/routing';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from 'sonner';
 import { NotificationManager } from '@/components/layout/notification-manager';
+import { JsonLd } from '@/components/seo/json-ld';
 
 const inter = Inter({
   variable: "--font-sans",
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     description: t("metaDescription"),
     keywords: t("metaKeywords").split(", "),
-    metadataBase: new URL("https://errandowl.com.pk"),
+    metadataBase: new URL("https://www.errandowl.com.pk"),
     openGraph: {
       title: `${t('title')} — ${t('tagline')}`,
       description: t("metaDescription"),
@@ -65,10 +66,44 @@ export default async function LocaleLayout({
   const messages = await getMessages();
   const isRtl = locale === 'ur';
 
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "ErrandOwl",
+    url: "https://www.errandowl.com.pk",
+    logo: "https://www.errandowl.com.pk/logo.png",
+    description: "Pakistan's trusted marketplace for local home services — cleaning, repairs, errands, and more.",
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "PK",
+      addressRegion: "Punjab",
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: "support@errandowl.com.pk",
+    },
+    sameAs: [],
+  };
+
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "ErrandOwl",
+    url: "https://www.errandowl.com.pk",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://www.errandowl.com.pk/en/search?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'} className={`${inter.variable} ${urduFont.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#7c3aed" />
+        <JsonLd schema={localBusinessSchema} />
+        <JsonLd schema={webSiteSchema} />
       </head>
       <body className={`min-h-full flex flex-col ${isRtl ? 'font-urdu' : 'font-sans'}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

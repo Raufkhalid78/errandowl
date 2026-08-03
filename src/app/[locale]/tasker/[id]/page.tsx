@@ -9,6 +9,7 @@ import { getPricingSettings, formatRate } from "@/lib/pricing";
 import { ReviewList } from "@/components/reviews/review-list";
 import { getTranslations } from "next-intl/server";
 import { FavoriteButton } from "@/components/taskers/favorite-button";
+import { JsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string, locale: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -91,8 +92,41 @@ export default async function TaskerProfilePage({ params }: { params: Promise<{ 
   const rateMode = tasker.pricing_mode || settings.pricing_mode;
   const rate = rateMode === 'hourly' ? tasker.hourly_rate : tasker.fixed_rate;
 
+  const taskerSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: tasker.profiles?.name || "Tasker",
+    jobTitle: "Service Provider",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: tasker.profiles?.city || tasker.city,
+      addressCountry: "PK",
+    },
+    ...(tasker.rating_avg && tasker.review_count ? {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: tasker.rating_avg,
+        reviewCount: tasker.review_count,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    } : {}),
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "PKR",
+      price: rate || 0,
+      priceSpecification: {
+        "@type": rateMode === 'hourly' ? "UnitPriceSpecification" : "PriceSpecification",
+        price: rate || 0,
+        priceCurrency: "PKR",
+        ...(rateMode === 'hourly' ? { unitCode: "HUR" } : {}),
+      },
+    },
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <JsonLd schema={taskerSchema} />
       <Navbar />
 
       <main className="flex-1 pt-24">

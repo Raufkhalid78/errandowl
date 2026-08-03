@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { ContactForm } from "@/components/help/contact-form";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -83,18 +84,7 @@ export default async function HelpPage({ params }: { params: Promise<{ locale: s
             ))}
 
             {/* Contact */}
-            <div className="glass-card rounded-2xl p-8 text-center">
-              <h2 className="text-lg font-bold mb-2">{t("stillNeedHelp")}</h2>
-              <p className="text-sm text-muted-foreground mb-4">{t("supportDesc")}</p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4 text-sm">
-                <a href="mailto:support@errandowl.com.pk" className="px-6 py-3 rounded-xl bg-owl-violet text-white hover:bg-owl-violet-dark transition-colors">
-                  {t("emailBtn")}
-                </a>
-                <a href="tel:+923001234567" className="px-6 py-3 rounded-xl border border-border hover:bg-muted transition-colors">
-                  {t("callBtn")}
-                </a>
-              </div>
-            </div>
+            <ContactForm />
           </div>
         </section>
       </main>
