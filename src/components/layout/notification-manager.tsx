@@ -66,7 +66,9 @@ export function NotificationManager() {
           })
           
           if (token) {
-            console.log("🔥 YOUR FCM TOKEN FOR TESTING:", token)
+            if (process.env.NODE_ENV !== "production") {
+              console.log("🔥 YOUR FCM TOKEN FOR TESTING:", token)
+            }
             await supabase.from("profiles").update({ fcm_token: token }).eq("auth_id", user.id)
           }
           

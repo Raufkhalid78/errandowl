@@ -2,32 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, UserCheck, Calendar, DollarSign, TrendingUp, Activity } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import dynamic from "next/dynamic";
-const AnalyticsCharts = dynamic(() => import("@/components/admin/analytics-charts").then(mod => mod.AnalyticsCharts), { 
-  ssr: false,
-  loading: () => (
-    <div className="grid gap-6 md:grid-cols-2">
-      <Card className="glass border-border/50">
-        <CardHeader>
-          <CardTitle className="text-base font-bold">Revenue History</CardTitle>
-          <CardDescription>Loading chart...</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 w-full mt-2 bg-muted/10 animate-pulse rounded-xl" />
-        </CardContent>
-      </Card>
-      <Card className="glass border-border/50">
-        <CardHeader>
-          <CardTitle className="text-base font-bold">Bookings by Category</CardTitle>
-          <CardDescription>Loading chart...</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 w-full mt-2 bg-muted/10 animate-pulse rounded-xl" />
-        </CardContent>
-      </Card>
-    </div>
-  )
-});
+import { AnalyticsCharts } from "@/components/admin/analytics-charts";
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const t = await getTranslations("AdminDashboard");

@@ -15,8 +15,6 @@ export function ImpersonateBanner({ name, email }: ImpersonateBannerProps) {
     } catch (e) {
       console.error("Failed to stop impersonation:", e);
     }
-    // Delete cookie on client side as fallback
-    document.cookie = "sb-impersonate-id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax;";
     window.location.href = "/admin/users";
   };
 

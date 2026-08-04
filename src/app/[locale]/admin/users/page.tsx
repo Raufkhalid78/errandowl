@@ -55,16 +55,23 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleImpersonate = (targetAuthId: string) => {
+  const handleImpersonate = async (targetAuthId: string) => {
     if (!targetAuthId) {
       toast.error("User does not have a valid auth session");
       return;
     }
-    document.cookie = `sb-impersonate-id=${targetAuthId}; path=/; max-age=3600; SameSite=Lax;`;
+    const res = await fetch("/api/admin/impersonate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ targetUserId: targetAuthId }),
+    });
+    if (!res.ok) {
+      const { error } = await res.json();
+      toast.error(error || "Failed to start impersonation");
+      return;
+    }
     toast.success("Impersonation active. Redirecting to dashboard...");
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 1000);
+    setTimeout(() => { window.location.href = "/dashboard"; }, 1000);
   };
 
   const handleExportCSV = () => {

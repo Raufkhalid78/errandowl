@@ -17,6 +17,20 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   const payment = booking.payments?.[0]
   const invoiceDate = payment?.created_at ? format(new Date(payment.created_at), "PPP") : format(new Date(), "PPP")
+  const { data: settings } = await supabase
+    .from('settings')
+    .select('platform_fee_percent')
+    .eq('id', 'global')
+    .single() as any;
+
+  const platformFeePercent = settings?.platform_fee_percent ?? 10; // Default to 10% if not found
+  const subtotal = booking.total_amount || 0;
+  const tipAmount = payment?.tip_amount || 0;
+  // If the fee is added to the client's bill, calculate it. 
+  // (In many marketplaces, the platform fee is deducted from tasker payout, but if it's shown here, we compute it)
+  // Assuming the platform fee is a client-side fee on top of subtotal:
+  const platformFee = (subtotal * platformFeePercent) / 100;
+  const totalPaid = subtotal + platformFee + tipAmount;
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white text-black min-h-screen">
@@ -58,13 +72,13 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
               <p className="text-xs text-gray-400 mt-1">Date: {booking.scheduled_at ? new Date(booking.scheduled_at).toLocaleDateString() : "TBD"}</p>
             </td>
             <td className="py-4 text-right font-medium text-gray-800">
-              Rs {booking.total_amount?.toLocaleString() || 0}
+              Rs {subtotal.toLocaleString()}
             </td>
           </tr>
-          {payment?.tip_amount > 0 && (
+          {tipAmount > 0 && (
             <tr className="border-b border-gray-100">
               <td className="py-4 text-gray-600">Tasker Tip</td>
-              <td className="py-4 text-right font-medium text-gray-800">Rs {payment.tip_amount.toLocaleString()}</td>
+              <td className="py-4 text-right font-medium text-gray-800">Rs {tipAmount.toLocaleString()}</td>
             </tr>
           )}
         </tbody>
@@ -74,15 +88,15 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         <div className="w-64 space-y-3">
           <div className="flex justify-between text-sm text-gray-600">
             <span>Subtotal</span>
-            <span>Rs {booking.total_amount?.toLocaleString() || 0}</span>
+            <span>Rs {subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600">
-            <span>Platform Fee (0%)</span>
-            <span>Rs 0</span>
+            <span>Platform Fee ({platformFeePercent}%)</span>
+            <span>Rs {platformFee.toLocaleString()}</span>
           </div>
           <div className="flex justify-between font-bold text-lg text-gray-800 border-t border-gray-200 pt-3">
             <span>Total Paid</span>
-            <span>Rs {((booking.total_amount || 0) + (payment?.tip_amount || 0)).toLocaleString()}</span>
+            <span>Rs {totalPaid.toLocaleString()}</span>
           </div>
           <p className="text-xs text-right text-gray-500 mt-1">Paid via {payment?.method || "RapidGateway"}</p>
         </div>

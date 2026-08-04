@@ -9,8 +9,16 @@ import { NextResponse } from "next/server"
 //   reasoning: "Deep cleaning a 2-bed apartment usually takes..."
 // }
 
+import { createClient } from "@/lib/supabase/server"
+
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { description } = await request.json()
 
     if (!description || description.length < 10) {
